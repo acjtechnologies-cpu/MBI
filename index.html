@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Ballast Mamba F3F</title>
+<style>
+  :root {
+    --bg:#05070a; --panel:#0d1117; --txt:#ffffff; --muted:#8b949e;
+    --plomb:#708090; --laiton:#ffd700; --spacer:#1a4225;
+    --blue:#1a73e8; --green:#3fb950; --red:#f85149; --purple:#a78bfa;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body {
+    height:100%; overflow:hidden;
+    background:var(--bg); color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    user-select:none; touch-action:pan-y;
+  }
+  .app {
+    display:flex; flex-direction:column;
+    height:100vh; max-width:420px;
+    margin:0 auto; padding:6px;
+  }
+
+  /* ── HEADER VENT ── */
+  .vent-header {
+    height:9vh;
+    background:linear-gradient(135deg,#0e4429,#1a5a3a);
+    border-radius:12px; text-align:center;
+    border:2px solid #238636;
+    display:flex; flex-direction:column; justify-content:center;
+    cursor:pointer; transition:all .3s;
+    box-shadow:0 4px 12px rgba(0,0,0,.4);
+    margin-bottom:6px;
+  }
+  .vent-header.active {
+    background:linear-gradient(135deg,var(--blue),#1557b0);
+    border-color:#fff; box-shadow:0 0 20px rgba(26,115,232,.7);
+    transform:scale(1.01);
+  }
+  .vent-value { font-size:36px; font-weight:900; text-shadow:0 3px 6px rgba(0,0,0,.4); line-height:1; }
+  .vent-label { font-size:11px; font-weight:700; opacity:.95; margin-top:2px; letter-spacing:1px; }
+
+  /* ── BAROGRAPHE ── */
+  .baro-zone {
+    flex-grow:1; display:flex; flex-direction:column;
+    justify-content:space-evenly; padding:4px 0; min-height:0;
+  }
+  .baro-row-wrap { display:flex; flex-direction:column; gap:2px; }
+  .baro-row-label {
+    font-size:10px; color:var(--muted); font-weight:700;
+    text-transform:uppercase; letter-spacing:.3px; padding-left:6px;
+  }
+  .baro-row { display:flex; justify-content:center; gap:5px; height:13vh; max-height:95px; }
+  .side {
+    display:flex; gap:2px; width:48%;
+    border:1px solid rgba(255,255,255,.08); border-radius:6px;
+    padding:2px; background:rgba(255,255,255,.02);
+    box-shadow:inset 0 1px 3px rgba(0,0,0,.3);
+  }
+  .side-l { flex-direction:row-reverse; }
+  .slot { flex:1; height:100%; border-radius:3px; transition:all .15s; }
+  .s { background:var(--spacer); opacity:.12; border:1px dashed rgba(255,255,255,.08); }
+  .p {
+    background:linear-gradient(135deg,var(--plomb),#556677);
+    box-shadow:inset 0 0 10px rgba(0,0,0,.7),0 1px 3px rgba(0,0,0,.4);
+    border:1px solid rgba(255,255,255,.25);
+  }
+  .l {
+    background:linear-gradient(135deg,var(--laiton),#ffeb3b);
+    box-shadow:inset 0 0 10px rgba(255,215,0,.5),0 1px 3px rgba(0,0,0,.4);
+    border:1px solid rgba(255,255,255,.3);
+  }
+
+  /* ── DONNÉES ── */
+  .data-bar {
+    height:9vh; min-height:65px;
+    display:flex; justify-content:space-around; align-items:center;
+    padding:0 12px;
+    background:linear-gradient(135deg,rgba(255,255,255,.05),rgba(255,255,255,.02));
+    border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,.3); margin:4px 0;
+  }
+  .data-box { text-align:center; }
+  .data-val { font-size:28px; font-weight:900; line-height:1; }
+  .data-lbl { font-size:10px; color:var(--muted); margin-top:3px; font-weight:600; }
+  .cg-box {
+    padding:8px 14px; border-radius:8px;
+    background:rgba(59,130,246,.2); border:1px solid rgba(59,130,246,.4);
+    transition:all .3s;
+  }
+  .cg-box.neutre  { background:rgba(74,222,128,.2);  border-color:rgba(74,222,128,.5); }
+  .cg-box.avant   { background:rgba(251,191,36,.2);  border-color:rgba(251,191,36,.5); }
+  .cg-box.arriere { background:rgba(248,113,113,.2); border-color:rgba(248,113,113,.5); }
+
+  /* ── BANDEAU ALTITUDE ── */
+  .alt-band {
+    display:none; align-items:center; justify-content:space-between;
+    background:rgba(167,139,250,.08);
+    border:1px solid rgba(167,139,250,.25);
+    border-radius:8px; padding:4px 12px; margin:2px 0;
+    min-height:28px;
+  }
+  .ab-item { text-align:center; flex:1; }
+  .ab-lbl { font-size:9px; color:var(--muted); font-weight:700; letter-spacing:.5px; display:block; }
+  .ab-val { font-size:14px; font-weight:900; color:var(--purple); }
+
+  /* ── CONTOURS SOUTES ── */
+  .baro-row-wrap.av .side { border:1.5px solid rgba(255,180,0,.45); }
+  .baro-row-wrap.av .baro-row-label { color:rgba(255,180,0,.9); }
+  .baro-row-wrap.c  .side { border:1.5px solid rgba(26,115,232,.5); }
+  .baro-row-wrap.c  .baro-row-label { color:rgba(100,170,255,.9); }
+  .baro-row-wrap.ar .side { border:1.5px solid rgba(63,185,80,.45); }
+  .baro-row-wrap.ar .baro-row-label { color:rgba(63,185,80,.9); }
+
+  /* ── CONTRÔLES ── */
+  .controls {
+    height:32vh; min-height:220px;
+    background:var(--panel); border-radius:12px;
+    padding:10px; border:1px solid #30363d;
+    display:flex; flex-direction:column; gap:8px;
+    box-shadow:0 4px 12px rgba(0,0,0,.4);
+  }
+  .ctrl-grid { display:grid; grid-template-columns:1fr 1.4fr; gap:10px; flex-grow:1; }
+  .ctrl-left  { display:grid; grid-template-rows:1fr 1fr; gap:6px; }
+  .ctrl-top2  { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+  .ctrl-arrows{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+
+  .mode-btn {
+    background:#1c2128; border:2px solid #30363d; border-radius:10px;
+    display:flex; flex-direction:column; justify-content:center; align-items:center;
+    cursor:pointer; transition:all .2s;
+  }
+  .mode-btn:active { transform:scale(.98); }
+  .mode-btn.active {
+    background:linear-gradient(135deg,var(--blue),#1557b0);
+    border-color:#fff; box-shadow:0 0 12px rgba(26,115,232,.6);
+  }
+  .mode-btn.active-alt {
+    background:linear-gradient(135deg,#6d28d9,#4c1d95);
+    border-color:var(--purple); box-shadow:0 0 12px rgba(167,139,250,.5);
+  }
+  .mode-val { font-size:20px; font-weight:900; line-height:1; }
+  .mode-lbl { font-size:9px; font-weight:700; opacity:.85; margin-top:4px; letter-spacing:.5px; }
+
+  .nav-btn {
+    background:linear-gradient(135deg,#21262d,#161b22);
+    border:2px solid #444c56; border-radius:12px;
+    color:#fff; font-size:60px; font-weight:900;
+    touch-action:none; cursor:pointer; transition:all .1s;
+    box-shadow:0 4px 10px rgba(0,0,0,.4);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .nav-btn:active { background:#30363d; transform:scale(.97); box-shadow:inset 0 2px 4px rgba(0,0,0,.6); }
+
+  .hint { text-align:center; font-size:9px; color:var(--muted); padding:3px; opacity:.65; }
+
+  /* ── BOUTON SHARE ── */
+  .share-btn {
+    position:fixed; bottom:14px; right:14px; z-index:50;
+    width:44px; height:44px; border-radius:50%;
+    background:linear-gradient(135deg,#238636,#1a5a3a);
+    border:2px solid #3fb950; color:#fff; font-size:20px;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; box-shadow:0 4px 16px rgba(63,185,80,.4);
+    transition:all .2s;
+  }
+  .share-btn:active { transform:scale(.93); }
+
+  /* ── MODAL SHARE ── */
+  .modal-overlay {
+    display:none; position:fixed; inset:0; z-index:100;
+    background:rgba(0,0,0,.75); backdrop-filter:blur(6px);
+    align-items:center; justify-content:center;
+  }
+  .modal-overlay.open { display:flex; }
+  .modal {
+    background:#0d1117; border:1px solid #30363d;
+    border-radius:16px; padding:20px; width:90%; max-width:360px;
+    box-shadow:0 20px 60px rgba(0,0,0,.7);
+    animation:popIn .25s cubic-bezier(.175,.885,.32,1.275);
+  }
+  @keyframes popIn {
+    from { opacity:0; transform:scale(.85); }
+    to   { opacity:1; transform:scale(1); }
+  }
+  .modal-title {
+    font-size:16px; font-weight:800; margin-bottom:16px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .modal-title span { font-size:20px; }
+  .share-row {
+    display:flex; gap:8px; margin-bottom:10px;
+  }
+  .share-action {
+    flex:1; background:#161b22; border:1px solid #30363d;
+    border-radius:10px; padding:12px 8px; cursor:pointer;
+    text-align:center; transition:all .2s; color:#fff;
+  }
+  .share-action:hover { border-color:#3fb950; background:#0e4429; }
+  .share-action:active { transform:scale(.97); }
+  .sa-icon { font-size:24px; display:block; margin-bottom:4px; }
+  .sa-lbl  { font-size:10px; font-weight:700; color:var(--muted); letter-spacing:.5px; }
+
+  .share-url-box {
+    background:#161b22; border:1px solid #30363d;
+    border-radius:8px; padding:10px; font-size:10px;
+    color:var(--muted); word-break:break-all;
+    margin-bottom:10px; line-height:1.5; display:none;
+  }
+
+  #qrContainer {
+    display:none; text-align:center; margin-bottom:10px;
+  }
+  #qrContainer canvas { border-radius:8px; border:3px solid #238636; }
+  #qrCaption { font-size:10px; color:var(--muted); margin-top:6px; }
+
+  .toast {
+    position:fixed; bottom:72px; left:50%; transform:translateX(-50%);
+    background:#238636; color:#fff; font-size:13px; font-weight:700;
+    padding:8px 20px; border-radius:20px; z-index:200;
+    opacity:0; transition:opacity .3s; pointer-events:none;
+    white-space:nowrap;
+  }
+  .toast.show { opacity:1; }
+
+  .modal-close {
+    width:100%; margin-top:4px; padding:10px;
+    background:#21262d; border:1px solid #30363d;
+    border-radius:8px; color:var(--muted); font-size:12px;
+    cursor:pointer; font-weight:700; letter-spacing:.5px;
+  }
+  .modal-close:hover { background:#30363d; color:#fff; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="vent-header" id="ventHeader" onclick="setMode('vent')">
+    <div class="vent-value" id="ventVal">8.0</div>
+    <div class="vent-label" id="ventLabel">VENT m/s</div>
+  </div>
+
+  <!-- BAROGRAPHE -->
+  <div class="baro-zone">
+    <div class="baro-row-wrap av">
+      <div class="baro-row-label">⬆️ AV 71g</div>
+      <div class="baro-row">
+        <div id="AV-L" class="side side-l"></div>
+        <div id="AV-R" class="side"></div>
+      </div>
+    </div>
+    <div class="baro-row-wrap c">
+      <div class="baro-row-label">🎯 C 88g</div>
+      <div class="baro-row">
+        <div id="C-L" class="side side-l"></div>
+        <div id="C-R" class="side"></div>
+      </div>
+    </div>
+    <div class="baro-row-wrap ar">
+      <div class="baro-row-label">⬇️ AR 71g</div>
+      <div class="baro-row">
+        <div id="AR-L" class="side side-l"></div>
+        <div id="AR-R" class="side"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DONNÉES -->
+  <div class="data-bar">
+    <div class="data-box">
+      <div class="data-val"><span id="massVal">3.078</span> kg</div>
+      <div class="data-lbl">MASSE</div>
+    </div>
+    <div class="data-box">
+      <div class="cg-box neutre" id="cgBox">
+        <div class="data-val"><span id="cgVal">102.0</span> mm</div>
+        <div class="data-lbl" id="cgLbl">✓ CG</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BANDEAU ALTITUDE simplifié : alt + déduit + masse finale -->
+  <div class="alt-band" id="altBand">
+    <div class="ab-item">
+      <span class="ab-lbl">ALTITUDE</span>
+      <span class="ab-val" id="ab0m">—</span>
+    </div>
+    <div class="ab-item">
+      <span class="ab-lbl">DÉDUIT</span>
+      <span class="ab-val" id="abCorr">—</span>
+    </div>
+    <div class="ab-item">
+      <span class="ab-lbl">MASSE FINALE</span>
+      <span class="ab-val" id="abFinal">—</span>
+    </div>
+  </div>
+
+  <!-- CONTRÔLES -->
+  <div class="controls">
+    <div class="ctrl-grid">
+      <div class="ctrl-left">
+        <div class="ctrl-top2">
+          <div class="mode-btn" id="modeKg" onclick="setMode('kg')">
+            <span class="mode-val" id="kgVal">3.078</span>
+            <span class="mode-lbl">KG</span>
+          </div>
+          <div class="mode-btn" id="modeAlt" onclick="setMode('alt')">
+            <span class="mode-val" id="altVal">0</span>
+            <span class="mode-lbl">ALT m</span>
+          </div>
+        </div>
+        <div class="mode-btn" id="modeOffset" onclick="setMode('offset')">
+          <span class="mode-val" id="offsetVal">0g</span>
+          <span class="mode-lbl" id="offsetLbl">OFFSET</span>
+        </div>
+      </div>
+      <div class="ctrl-arrows">
+        <button class="nav-btn" id="btnL">◀</button>
+        <button class="nav-btn" id="btnR">▶</button>
+      </div>
+    </div>
+    <div class="hint" id="hintText">Appui long = défilement rapide</div>
+  </div>
+</div>
+
+<!-- BOUTON SHARE -->
+<button class="share-btn" onclick="openShare()" title="Exporter / Partager">⬆️</button>
+
+<!-- MODAL SHARE -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeShareOnBg(event)">
+  <div class="modal">
+    <div class="modal-title"><span>📤</span> Exporter / Partager</div>
+
+    <div class="share-row">
+      <div class="share-action" onclick="copyLink()">
+        <span class="sa-icon">🔗</span>
+        <span class="sa-lbl">COPIER LIEN</span>
+      </div>
+      <div class="share-action" onclick="toggleQR()">
+        <span class="sa-icon">📱</span>
+        <span class="sa-lbl">QR CODE</span>
+      </div>
+      <div class="share-action" onclick="exportJSON()">
+        <span class="sa-icon">📥</span>
+        <span class="sa-lbl">JSON</span>
+      </div>
+    </div>
+
+    <div class="share-url-box" id="shareUrlBox"></div>
+    <div id="qrContainer">
+      <canvas id="qrCanvas"></canvas>
+      <div id="qrCaption">Scanner avec un autre téléphone 📲</div>
+    </div>
+
+    <div style="font-size:9px;color:var(--muted);margin-bottom:10px;line-height:1.6;">
+      📦 Config : <strong id="shareConfigSummary" style="color:#fff;"></strong>
+    </div>
+
+    <button class="modal-close" onclick="closeShare()">✕ FERMER</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+// ═══════════════════════════════════════════════════════
+// CONFIG MAMBA
+// ═══════════════════════════════════════════════════════
+const CFG = {
+  m_vide:  2550,   // g — masse planeur vide
+  cg_vide: 102,    // mm — CG vide
+  OFFSET:  -144,   // g — offset Mamba (calibré 12.5 m/s / 400m = 3.661 kg ✅)
+  AV: { cap:3, pos:80,  w:71, t:'l' },
+  C:  { cap:3, pos:102, w:88, t:'p' },
+  AR: { cap:4, pos:129, w:71, t:'l' },
+};
+
+// Table niveau mer — référence validée terrain
+const TABLES = {
+  vent:  [ 4.05, 4.23, 4.41, 4.61, 4.82, 5.04, 5.28, 5.53, 5.80,
+            6.10, 6.42, 6.78, 7.17, 7.61, 8.10, 8.65, 9.28, 9.99,
+           10.78,11.65,12.60,13.70,15.30 ],
+  masse: [ 2.300,2.385,2.470,2.555,2.640,2.725,2.810,2.895,2.980,
+            3.065,3.150,3.235,3.320,3.405,3.490,3.575,3.660,3.745,
+            3.830,3.915,4.000,4.085,4.170 ]
+};
+
+// ═══════════════════════════════════════════════════════
+// FORMULES
+// ═══════════════════════════════════════════════════════
+
+// 1. Interpolation linéaire table niveau mer
+function getMasse0m(vent) {
+  const T = TABLES;
+  if (vent <= T.vent[0])                  return T.masse[0];
+  if (vent >= T.vent[T.vent.length - 1]) return T.masse[T.masse.length - 1];
+  for (let i = 0; i < T.vent.length - 1; i++) {
+    if (vent >= T.vent[i] && vent <= T.vent[i+1]) {
+      const t = (vent - T.vent[i]) / (T.vent[i+1] - T.vent[i]);
+      return T.masse[i] + t * (T.masse[i+1] - T.masse[i]);
+    }
+  }
+  return T.masse[Math.floor(T.masse.length / 2)];
+}
+
+// 2. Correction barométrique (formule ISA exacte)
+function getMasseAlt(masse0m, altitude) {
+  if (altitude <= 0) return masse0m;
+  const fact = 1 - (0.0065 * altitude) / 288.15;
+  const rho  = Math.pow(fact, 5.25588);   // densité relative
+  return masse0m * rho;
+}
+
+// 3. Masse finale = baro - offset Mamba
+function getMasseFinale(vent, altitude) {
+  const m0   = getMasse0m(vent);                          // kg
+  const mAlt = getMasseAlt(m0, altitude);                 // kg
+  return (mAlt * 1000) + CFG.OFFSET;                     // grammes
+}
+
+// ═══════════════════════════════════════════════════════
+// ÉTAT
+// ═══════════════════════════════════════════════════════
+let st = {
+  mode:   'vent',
+  vent:   8.0,
+  kg:     3.346,   // synchro initiale (8 m/s, 0m)
+  alt:    0,       // m, pas de 50
+  offset: 0        // g, décalage manuel ±71g
+};
+
+// ═══════════════════════════════════════════════════════
+// SOLVEUR BALLAST
+// ═══════════════════════════════════════════════════════
+function solve(targetG) {
+  let r = targetG - CFG.m_vide;
+  const s = { 'AV-L':[], 'AV-R':[], 'C-L':[], 'C-R':[], 'AR-L':[], 'AR-R':[] };
+  for (let i = 0; i < CFG.C.cap; i++) {
+    if (r >= CFG.C.w) { s['C-L'].push('p'); r -= CFG.C.w; }
+    if (r >= CFG.C.w) { s['C-R'].push('p'); r -= CFG.C.w; }
+  }
+  for (let i = 0; i < Math.min(CFG.AV.cap, CFG.AR.cap); i++) {
+    const pp = CFG.AV.w + CFG.AR.w;
+    if (r >= pp) { s['AV-L'].push('l'); s['AR-L'].push('l'); r -= pp; }
+    if (r >= pp) { s['AV-R'].push('l'); s['AR-R'].push('l'); r -= pp; }
+  }
+  return s;
+}
+
+// ═══════════════════════════════════════════════════════
+// CHANGEMENT DE VALEUR
+// ═══════════════════════════════════════════════════════
+function change(d) {
+  switch (st.mode) {
+    case 'vent':
+      st.vent = Math.max(0, Math.min(20, +((st.vent + d * 0.1).toFixed(1))));
+      break;
+    case 'kg':
+      st.kg = Math.max(2.550, Math.min(6.0, +((st.kg + d * 0.010).toFixed(3))));
+      break;
+    case 'alt':
+      st.alt = Math.max(0, Math.min(3000, st.alt + d * 50));
+      break;
+    case 'offset':
+      st.offset = Math.max(-500, Math.min(500, st.offset + d * 71));
+      break;
+  }
+  render();
+}
+
+function setMode(m) { st.mode = m; render(); }
+
+// ═══════════════════════════════════════════════════════
+// RENDU
+// ═══════════════════════════════════════════════════════
+function render() {
+
+  // ── Calcul de la cible ──────────────────────────────
+  let targetG;
+  let m0kg, mAltkg;
+
+  if (st.mode === 'vent' || st.mode === 'alt') {
+    // Formule complète : table + baro + offset Mamba
+    m0kg    = getMasse0m(st.vent);
+    mAltkg  = getMasseAlt(m0kg, st.alt);
+    targetG = (mAltkg * 1000) + CFG.OFFSET + st.offset;
+    // Synchroniser KG sur la masse calculée
+    st.kg   = +((targetG / 1000).toFixed(3));
+  } else if (st.mode === 'kg') {
+    // Override manuel — recalculer les colonnes info seulement
+    m0kg    = getMasse0m(st.vent);
+    mAltkg  = getMasseAlt(m0kg, st.alt);
+    targetG = st.kg * 1000 + st.offset;
+  } else {
+    // mode offset
+    m0kg    = getMasse0m(st.vent);
+    mAltkg  = getMasseAlt(m0kg, st.alt);
+    targetG = (mAltkg * 1000) + CFG.OFFSET + st.offset;
+    st.kg   = +((targetG / 1000).toFixed(3));
+  }
+
+  targetG = Math.max(CFG.m_vide, Math.round(targetG));
+
+  // ── Remplissage barographe ───────────────────────────
+  const sol = solve(targetG);
+  let ballast = 0, mom = CFG.m_vide * CFG.cg_vide;
+  ['AV','C','AR'].forEach(sec => {
+    ['L','R'].forEach(side => {
+      const id = sec + '-' + side;
+      const w  = sol[id];
+      const m  = w.length * CFG[sec].w;
+      ballast += m; mom += m * CFG[sec].pos;
+      let h = '';
+      for (let i = 0; i < CFG[sec].cap; i++)
+        h += `<div class="slot ${w[i] ? CFG[sec].t : 's'}"></div>`;
+      document.getElementById(id).innerHTML = h;
+    });
+  });
+
+  const mFinal  = CFG.m_vide + ballast;
+  const cgFinal = mom / mFinal;
+  const cgDelta = cgFinal - CFG.cg_vide;
+
+  // ── Affichages valeurs ───────────────────────────────
+  document.getElementById('ventVal').innerText   = st.vent.toFixed(1);
+  document.getElementById('kgVal').innerText     = st.kg.toFixed(3);
+  document.getElementById('altVal').innerText    = st.alt;
+  document.getElementById('offsetVal').innerText = (st.offset >= 0 ? '+' : '') + st.offset + 'g';
+  document.getElementById('massVal').innerText   = (mFinal / 1000).toFixed(3);
+  document.getElementById('cgVal').innerText     = cgFinal.toFixed(1);
+
+  const nb = Math.round(st.offset / 71);
+  document.getElementById('offsetLbl').innerText = nb === 0 ? 'OFFSET' : `${nb > 0 ? '+' : ''}${nb} plomb`;
+
+  // ── Modes actifs ─────────────────────────────────────
+  document.getElementById('ventHeader').classList.toggle('active',    st.mode === 'vent');
+  document.getElementById('modeKg').className    = 'mode-btn' + (st.mode === 'kg'     ? ' active'     : '');
+  document.getElementById('modeAlt').className   = 'mode-btn' + (st.mode === 'alt'    ? ' active-alt' : '');
+  document.getElementById('modeOffset').className= 'mode-btn' + (st.mode === 'offset' ? ' active'     : '');
+
+  // ── Bandeau altitude ─────────────────────────────────
+  const altBand = document.getElementById('altBand');
+  if (st.alt > 0 && (st.mode === 'vent' || st.mode === 'alt' || st.mode === 'offset')) {
+    altBand.style.display = 'flex';
+    const corrG = Math.round((m0kg - mAltkg) * 1000);
+    document.getElementById('ab0m').innerText   = st.alt + ' m';
+    document.getElementById('abCorr').innerText  = '−' + (corrG + Math.abs(CFG.OFFSET)) + ' g';
+    document.getElementById('abFinal').innerText = (mFinal / 1000).toFixed(3) + ' kg';
+  } else {
+    altBand.style.display = 'none';
+  }
+
+  // ── Label VENT ───────────────────────────────────────
+  const ventLabel = document.getElementById('ventLabel');
+  if (st.alt > 0) {
+    const pct = ((1 - getMasseAlt(1, st.alt)) * 100).toFixed(1);
+    ventLabel.innerText = `VENT m/s — air −${pct}%`;
+  } else {
+    ventLabel.innerText = 'VENT m/s';
+  }
+
+  // ── CG ───────────────────────────────────────────────
+  const cgBox = document.getElementById('cgBox');
+  const cgLbl = document.getElementById('cgLbl');
+  cgBox.className = 'cg-box';
+  if      (Math.abs(cgDelta) < 0.5) { cgBox.classList.add('neutre');  cgLbl.textContent = '✓ CG'; }
+  else if (cgDelta < 0)              { cgBox.classList.add('avant');   cgLbl.textContent = cgDelta.toFixed(1) + 'mm'; }
+  else                               { cgBox.classList.add('arriere'); cgLbl.textContent = '+' + cgDelta.toFixed(1) + 'mm'; }
+
+  // ── Hint ─────────────────────────────────────────────
+  const hints = {
+    vent:   st.alt > 0
+              ? `Table 0m → Baro ${st.alt}m → Offset −144g → ${st.kg.toFixed(3)} kg`
+              : 'Appui long = défilement rapide',
+    kg:     'Masse manuelle — vent/alt gardés en référence',
+    alt:    (() => {
+              const c100 = Math.round((m0kg - getMasseAlt(m0kg, 100)) * 1000);
+              return `Pas 50m • correction ≈ −${c100}g / 100m à ${st.vent.toFixed(1)} m/s`;
+            })(),
+    offset: `Décalage ±71g par plomb • total offset: ${st.offset >= 0 ? '+' : ''}${st.offset}g`
+  };
+  document.getElementById('hintText').textContent = hints[st.mode] || '';
+}
+
+// ═══════════════════════════════════════════════════════
+// BOUTONS — appui long
+// ═══════════════════════════════════════════════════════
+let repeatTimer;
+function setupBtn(id, dir) {
+  const btn = document.getElementById(id);
+  const act = () => change(dir);
+  const start = e => { e && e.preventDefault(); act(); repeatTimer = setInterval(act, 90); };
+  const stop  = ()  => clearInterval(repeatTimer);
+  btn.addEventListener('touchstart',  start, { passive:false });
+  btn.addEventListener('mousedown',   start);
+  btn.addEventListener('touchend',    stop);
+  btn.addEventListener('mouseup',     stop);
+  btn.addEventListener('mouseleave',  stop);
+  btn.addEventListener('touchcancel', stop);
+}
+
+window.onload = () => {
+  setupBtn('btnL', -1);
+  setupBtn('btnR',  1);
+  // Charger config depuis URL si présente
+  loadFromURL();
+  render();
+};
+
+// ═══════════════════════════════════════════════════════
+// EXPORT / PARTAGE
+// ═══════════════════════════════════════════════════════
+
+function buildShareURL() {
+  const params = new URLSearchParams({
+    v: st.vent.toFixed(1),
+    k: st.kg.toFixed(3),
+    a: st.alt,
+    o: st.offset
+  });
+  return window.location.href.split('?')[0].split('#')[0] + '?' + params.toString();
+}
+
+function loadFromURL() {
+  const p = new URLSearchParams(window.location.search);
+  if (p.has('v')) st.vent   = parseFloat(p.get('v')) || st.vent;
+  if (p.has('k')) st.kg     = parseFloat(p.get('k')) || st.kg;
+  if (p.has('a')) st.alt    = parseInt(p.get('a'))   || st.alt;
+  if (p.has('o')) st.offset = parseInt(p.get('o'))   || st.offset;
+}
+
+function openShare() {
+  const url = buildShareURL();
+  document.getElementById('shareUrlBox').style.display = 'none';
+  document.getElementById('qrContainer').style.display = 'none';
+  document.getElementById('shareConfigSummary').textContent =
+    `Vent ${st.vent} m/s · ${st.kg.toFixed(3)} kg · Alt ${st.alt}m · Offset ${st.offset>0?'+':''}${st.offset}g`;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeShare() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+
+function closeShareOnBg(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeShare();
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+function copyLink() {
+  const url = buildShareURL();
+  const box = document.getElementById('shareUrlBox');
+  box.textContent = url;
+  box.style.display = 'block';
+  document.getElementById('qrContainer').style.display = 'none';
+  navigator.clipboard.writeText(url)
+    .then(() => showToast('✅ Lien copié !'))
+    .catch(() => showToast('📋 Copier le lien ci-dessus'));
+}
+
+let qrGenerated = false;
+function toggleQR() {
+  const qr = document.getElementById('qrContainer');
+  const url = buildShareURL();
+  document.getElementById('shareUrlBox').style.display = 'none';
+
+  if (qr.style.display === 'block') {
+    qr.style.display = 'none';
+    return;
+  }
+
+  qr.style.display = 'block';
+  const canvas = document.getElementById('qrCanvas');
+  canvas.width = 0; canvas.height = 0; // reset
+
+  // Utiliser QRCode.js si disponible, sinon API externe
+  if (typeof QRCode !== 'undefined') {
+    canvas.getContext && (canvas.getContext('2d').clearRect(0,0,200,200));
+    new QRCode(canvas, {
+      text: url, width: 200, height: 200,
+      colorDark:'#3fb950', colorLight:'#0d1117',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  } else {
+    // fallback image QR
+    const img = document.createElement('img');
+    img.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}&bgcolor=0d1117&color=3fb950`;
+    img.style = 'border-radius:8px;border:3px solid #238636;';
+    qr.insertBefore(img, canvas);
+    canvas.style.display = 'none';
+  }
+}
+
+function exportJSON() {
+  const data = {
+    app: 'Ballast Mamba F3F',
+    version: 'v11',
+    date: new Date().toISOString().slice(0,10),
+    config: {
+      vent_ms:   st.vent,
+      masse_kg:  st.kg,
+      altitude_m: st.alt,
+      offset_g:  st.offset
+    },
+    planeur: {
+      m_vide_g:  CFG.m_vide,
+      cg_vide_mm: CFG.cg_vide,
+      offset_mamba: CFG.OFFSET,
+      soutes: { AV: CFG.AV, C: CFG.C, AR: CFG.AR }
+    },
+    url: buildShareURL()
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `mamba-ballast-${st.vent}ms-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  showToast('📥 JSON exporté !');
+}
+</script>
+</body>
+</html>
