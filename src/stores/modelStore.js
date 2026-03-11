@@ -1,51 +1,51 @@
-import { create } from 'zustand'
+﻿import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 /**
- * STORE MODÈLES - Gestion des planeurs F3F
- * Inspiré de l'APK Ballast F3F
+ * STORE MODÃˆLES - Gestion des planeurs F3F
+ * InspirÃ© de l'APK Ballast F3F
  */
 
-// Modèle par défaut
+// ModÃ¨le par dÃ©faut
 const DEFAULT_MODEL = {
   id: 'mamba-s',
   nom: 'Mamba S',
-  drapeau: '🇫🇷',
+  drapeau: 'ðŸ‡«ðŸ‡·',
   masseVide: 2550,
   cgVide: 102,
   surface: 59,
   soutes: {
     'arriere-aile': {
       id: 'arriere-aile',
-      nom: 'Arrière Aile',
+      nom: 'ArriÃ¨re Aile',
       couleur: '#6b7280',
       distanceBA: 129,
-      capacite: 8,
+      capacite: 4,
       materiaux: [
-        { nom: 'Laiton', masse: 71, stock: 8 },
-        { nom: 'Lourd', masse: 200, stock: null },
-        { nom: 'Très lourd', masse: 300, stock: null }
+        { nom: 'Laiton', masse: 71, stock: 4 },
+        { nom: 'Lourd', masse: 200, stock: 0 },
+        { nom: 'Tres lourd', masse: 300, stock: 0 }
       ]
     },
     'centrale-cle': {
       id: 'centrale-cle',
-      nom: 'Centrale Clé',
+      nom: 'Centrale ClÃ©',
       couleur: '#3b82f6',
       distanceBA: 102,
-      capacite: 6,
+      capacite: 3,
       materiaux: [
-        { nom: 'Laiton', masse: 71, stock: 6 },
-        { nom: 'Plomb', masse: 92, stock: 6 }
+        { nom: 'Laiton', masse: 71, stock: 0 },
+        { nom: 'Plomb', masse: 88, stock: 3 }
       ]
     },
     'avant-cle': {
       id: 'avant-cle',
-      nom: 'Avant Clé',
+      nom: 'Avant ClÃ©',
       couleur: '#6b7280',
       distanceBA: 80,
-      capacite: 6,
+      capacite: 3,
       materiaux: [
-        { nom: 'Laiton', masse: 71, stock: 6 }
+        { nom: 'Laiton', masse: 71, stock: 3 }
       ]
     }
   }
@@ -54,14 +54,14 @@ const DEFAULT_MODEL = {
 const useModelStore = create(
   persist(
     (set, get) => ({
-      // État initial
+      // Ã‰tat initial
       models: {
         'mamba-s': DEFAULT_MODEL
       },
       activeModelId: 'mamba-s',
       _hasHydrated: false,
       
-      // Marquer comme hydraté
+      // Marquer comme hydratÃ©
       setHasHydrated: (state) => {
         set({ _hasHydrated: state })
       },
@@ -116,7 +116,7 @@ const useModelStore = create(
           const newModels = { ...state.models }
           delete newModels[modelId]
           
-          // Si on supprime le modèle actif, prendre le premier disponible
+          // Si on supprime le modÃ¨le actif, prendre le premier disponible
           let newActiveId = state.activeModelId
           if (modelId === state.activeModelId) {
             const modelIds = Object.keys(newModels)
@@ -284,8 +284,8 @@ const useModelStore = create(
           return posA - posB
         })
         
-        // Collecter TOUS les matériaux uniques de toutes les soutes
-        // NOUVEAU : Ignorer les matériaux avec masse = 0
+        // Collecter TOUS les matÃ©riaux uniques de toutes les soutes
+        // NOUVEAU : Ignorer les matÃ©riaux avec masse = 0
         const allMateriaux = []
         soutesSorted.forEach(soute => {
           if (soute.materiaux) {
@@ -314,15 +314,15 @@ const useModelStore = create(
           config[`cap_${key}`] = soute.capacite
         })
         
-        // Assigner les matériaux uniques trouvés (max 3)
+        // Assigner les matÃ©riaux uniques trouvÃ©s (max 3)
         const mats = ['W', 'L', 'B']
         allMateriaux.slice(0, 3).forEach((mat, i) => {
           config[`m_${mats[i]}`] = mat.masse
         })
         
-        // IMPORTANT : Ne PAS ajouter de matériaux par défaut
-        // Si l'utilisateur n'a configuré qu'un seul matériau, utiliser seulement celui-là
-        // Le solver doit gérer le cas où il y a moins de 3 matériaux
+        // IMPORTANT : Ne PAS ajouter de matÃ©riaux par dÃ©faut
+        // Si l'utilisateur n'a configurÃ© qu'un seul matÃ©riau, utiliser seulement celui-lÃ 
+        // Le solver doit gÃ©rer le cas oÃ¹ il y a moins de 3 matÃ©riaux
         
         return config
       }
@@ -334,11 +334,11 @@ const useModelStore = create(
         activeModelId: state.activeModelId
       }),
       onRehydrateStorage: () => (state) => {
-        // Appelé après la réhydratation du store
+        // AppelÃ© aprÃ¨s la rÃ©hydratation du store
         if (state) {
           state.setHasHydrated(true)
           
-          // Vérifier que les données sont valides
+          // VÃ©rifier que les donnÃ©es sont valides
           if (!state.models || Object.keys(state.models).length === 0) {
             state.models = { 'mamba-s': DEFAULT_MODEL }
             state.activeModelId = 'mamba-s'
@@ -351,3 +351,5 @@ const useModelStore = create(
 
 export default useModelStore
 export { useModelStore }
+
+

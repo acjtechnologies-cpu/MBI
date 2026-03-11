@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { ChevronLeft, ChevronRight, Save, ChevronDown } from 'lucide-react'
 import { useAppStore } from '../../stores/appStore'
 import { useSouteStore } from '../../stores/souteStore'
@@ -12,8 +12,8 @@ export default function DashboardPilote() {
     params, 
     incrementParam,
     decrementParam,
-    mv,          // Masse à vide DEPUIS CONFIG
-    surface,     // Surface en dm² DEPUIS CONFIG
+    mv,          // Masse Ã  vide DEPUIS CONFIG
+    surface,     // Surface en dmÂ² DEPUIS CONFIG
     offset, 
     incrementOffset, 
     decrementOffset, 
@@ -27,7 +27,7 @@ export default function DashboardPilote() {
   
   const vent = params.vent
   
-  // Calcul MÉTÉO (rho, rr)
+  // Calcul MÃ‰TÃ‰O (rho, rr)
   const meteo = calculerMeteo(
     params.pression,
     params.temperature,
@@ -38,38 +38,38 @@ export default function DashboardPilote() {
   // Calcul POLY4 (masse de base)
   const masseBase = calculerMasseOptimale(vent) // kg
   
-  // Masse CIBLE = Poly4 + Offset (pour l'instant, lissage météo à venir)
+  // Masse CIBLE = Poly4 + Offset (pour l'instant, lissage mÃ©tÃ©o Ã  venir)
   const masseCible = masseBase + (offset / 1000)
   const masseCibleGrammes = masseCible * 1000
   const masseVideGrammes = mv * 1000
   
-  // Résolution automatique soute
-  const config = activeModel?.soutes ? { cgVide: activeModel.cgVide, masseVide: masseVideGrammes, soutes: { av: activeModel.soutes['avant-cle'] ? { capacite: activeModel.soutes['avant-cle'].capacite, distanceBA: activeModel.soutes['avant-cle'].distanceBA, materiaux: activeModel.soutes['avant-cle'].materiaux.filter(m => m.masse > 0) } : null, c: activeModel.soutes['centrale-cle'] ? { capacite: activeModel.soutes['centrale-cle'].capacite, distanceBA: activeModel.soutes['centrale-cle'].distanceBA, materiaux: activeModel.soutes['centrale-cle'].materiaux.filter(m => m.masse > 0) } : null, ar: activeModel.soutes['arriere-aile'] ? { capacite: activeModel.soutes['arriere-aile'].capacite, distanceBA: activeModel.soutes['arriere-aile'].distanceBA, materiaux: activeModel.soutes['arriere-aile'].materiaux.filter(m => m.masse > 0) } : null } } : null
-  const solution = config ? resoudreSouteV2(masseCibleGrammes, masseVideGrammes, config) : { gauche: { av: [], c: [], ar: [] }, droite: { av: [], c: [], ar: [] } }
+  // RÃ©solution automatique soute
+  const config = activeModel?.soutes ? { cgVide: activeModel.cgVide, masseVide: masseVideGrammes, soutes: { av: activeModel.soutes['avant-cle'] ? { capacite: activeModel.soutes['avant-cle'].capacite, distanceBA: activeModel.soutes['avant-cle'].distanceBA, materiaux: activeModel.soutes['avant-cle'].materiaux } : null, c: activeModel.soutes['centrale-cle'] ? { capacite: activeModel.soutes['centrale-cle'].capacite, distanceBA: activeModel.soutes['centrale-cle'].distanceBA, materiaux: activeModel.soutes['centrale-cle'].materiaux } : null, ar: activeModel.soutes['arriere-aile'] ? { capacite: activeModel.soutes['arriere-aile'].capacite, distanceBA: activeModel.soutes['arriere-aile'].distanceBA, materiaux: activeModel.soutes['arriere-aile'].materiaux } : null } } : null
+  const solution = config ? resoudreSouteV2(masseCibleGrammes, masseVideGrammes, config, calculerCGCible(masseCible, surface)) : { gauche: { av: [], c: [], ar: [] }, droite: { av: [], c: [], ar: [] } }
   const stats = config ? calculerStatsSouteV2(solution, config) : { masseTotale: masseVideGrammes, cg: 0, cgDelta: 0 }
   
   // Masse ACTUELLE
   const masseActuelle = (stats.masseTotale > 0) ? parseFloat((stats.masseTotale / 1000).toFixed(3)) : mv
   
   // Charge alaire
-  const chargeAlaire = calculerChargeAlaire(masseActuelle, surface)
+  const chargeAlaire = calculerChargeAlaire(masseActuelle, surface) || 0
   const deltaGrammes = (masseActuelle - masseCible) * 1000
   
-  // CG - INVERSÉ POUR AFFICHAGE
-  const cgSoute = typeof stats.cgDelta === 'number' ? stats.cgDelta : 0  // ← MODIFIÉ : on inverse le signe
-  const cgCible = calculerCGCible(masseActuelle, surface)
-  const deltaCG = cgSoute - cgCible
+  // CG - INVERSÃ‰ POUR AFFICHAGE
+  const cgSoute = typeof stats.cgDelta === 'number' ? stats.cgDelta : 0  // â† MODIFIÃ‰ : on inverse le signe
+  const cgCible = calculerCGCible(masseCible, surface)
+  const deltaCG = (isNaN(cgSoute) || isNaN(cgCible)) ? 0 : cgSoute - cgCible
   
   const nomPlaneur = activeModel?.nom || 'F3F Pro'
   
-  // Mettre à jour le store soute quand vent/offset changent
+  // Mettre Ã  jour le store soute quand vent/offset changent
   useEffect(() => {
     setState(solution)
   }, [vent, offset])
   
   return (
     <div className="h-screen bg-gray-950 text-white flex flex-col overflow-hidden">
-      {/* Header avec météo */}
+      {/* Header avec mÃ©tÃ©o */}
       <div className="bg-gray-900 px-2 py-1 border-b border-gray-800">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
@@ -77,7 +77,7 @@ export default function DashboardPilote() {
             <div className="text-xs font-bold text-blue-400">{nomPlaneur}</div>
           </div>
           <div className="text-[8px] text-gray-400">
-            rho: {meteo.rr.toFixed(3)} ({meteo.qual})
+            rho: {isNaN(meteo.rr) ? 'N/A' : meteo.rr.toFixed(3)} ({meteo.qual || 'N/A'})
           </div>
         </div>
       </div>
@@ -101,7 +101,7 @@ export default function DashboardPilote() {
               {masseActuelle.toFixed(3)}
             </div>
             <div className="text-[8px] text-gray-400 leading-tight">
-              {chargeAlaire.toFixed(1)} g/dm²{' '}
+              {chargeAlaire.toFixed(1)} g/dmÂ²{' '}
               <span className={deltaGrammes >= 0 ? 'text-green-400' : 'text-red-400'}>
                 ({deltaGrammes >= 0 ? '+' : ''}{Math.round(deltaGrammes)}g)
               </span>
@@ -111,13 +111,13 @@ export default function DashboardPilote() {
           <div className="text-center">
             <div className="text-[8px] text-gray-500 leading-tight">CG (MM)</div>
             <div className="text-lg font-black text-green-400 leading-tight">
-              {cgSoute.toFixed(1)}
+              {isNaN(cgSoute) ? '0.0' : cgSoute.toFixed(1)}
             </div>
             <div className="text-[8px] text-gray-400 leading-tight">
-              {deltaCG.toFixed(1)}mm
+              {isNaN(deltaCG) ? '0.0' : deltaCG.toFixed(1)}mm
             </div>
             <div className="text-[7px] text-gray-600 leading-tight">
-              Cible {cgCible.toFixed(0)}mm
+              Cible {(cgCible || 0).toFixed(1)}mm
             </div>
           </div>
         </div>
@@ -142,7 +142,7 @@ export default function DashboardPilote() {
         })}
       </div>
 
-      {/* Contrôles */}
+      {/* ContrÃ´les */}
       <div className="bg-gray-900 p-1.5 border-t border-gray-800">
         <div className="grid grid-cols-[1fr_1.2fr] gap-2 h-20 mb-1.5">
           <div className="grid grid-rows-2 gap-1">
@@ -296,6 +296,15 @@ function Chrono() {
     </div>
   )
 }
+
+
+
+
+
+
+
+
+
 
 
 

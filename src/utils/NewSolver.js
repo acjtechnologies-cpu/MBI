@@ -1,208 +1,104 @@
-/**
- * SOLVER PROGRESSIF TERRAIN - v2 corrigé
- * 
- * Positions absolues / BA :
- * - AV:  80mm (pas -80)
- * - C:  102mm
- * - AR: 129mm
- */
-
+/** SOLVER V6 */
 export function calculerStatsSouteV2(result, config) {
-  if (!result || result === null) {
-    return { masseTotale: 0, cg: config?.cgVide || 0, cgDelta: 0, precision: 0 };
-  }
-
-  let masseTotale = 0;
-  let momentTotal = 0;
-  const masseVide = config.masseVide || 0;
-  const cgVide    = config.cgVide   || 0;
-
-  // Moment de l'avion vide
-  momentTotal += masseVide * cgVide;
-  masseTotale += masseVide;
-
-  ['av', 'c', 'ar'].forEach(soute => {
-    if (!config.soutes[soute]) return;
-
-    const souteCfg   = config.soutes[soute];
-    // ✅ FIX Bug 2 : utiliser Math.abs pour forcer position positive
-    const distanceBA = Math.abs(souteCfg.distanceBA);
-
-    const blocsGauche = result.gauche[soute] || [];
-    const blocsDroite = result.droite[soute] || [];
-
-    [...blocsGauche, ...blocsDroite].forEach(nomMat => {
-      const mat = souteCfg.materiaux.find(m => m.nom === nomMat);
-      if (mat) {
-        masseTotale += mat.masse;
-        momentTotal += mat.masse * distanceBA;
+  if (!result) { return { masseTotale: config ? config.masseVide : 0, cg: config ? config.cgVide : 0, cgDelta: 0, precision: 0 } }
+  var masseVide = config.masseVide || 0
+  var cgVide = config.cgVide || 0
+  var masseBallast = 0
+  var momentBallast = 0
+  var keys = ["av", "c", "ar"]
+  for (var ki = 0; ki < keys.length; ki++) {
+    var key = keys[ki]
+    var soute = config.soutes[key]
+    if (!soute) continue
+    var dist = soute.distanceBA
+    var blocs = (result.gauche[key] || []).concat(result.droite[key] || [])
+    for (var bi = 0; bi < blocs.length; bi++) {
+      for (var mi = 0; mi < soute.materiaux.length; mi++) {
+        if (soute.materiaux[mi].nom.toLowerCase() === blocs[bi].toLowerCase()) {
+          masseBallast += soute.materiaux[mi].masse
+          momentBallast += soute.materiaux[mi].masse * dist
+          break
+        }
       }
-    });
-  });
-
-  // ✅ CG absolu (mm/BA)
-  const cgAbsolu = masseTotale > 0 ? momentTotal / masseTotale : cgVide;
-  const cgDelta  = cgAbsolu - cgVide;
-
-  return {
-    masseTotale,
-    cg: cgAbsolu,        // mm/BA absolu
-    cgDelta,             // delta vs CG vide
-    precision: masseTotale > masseVide
-      ? ((masseTotale - masseVide) / (masseTotale - masseVide + 50)) * 100
-      : 0
-  };
+    }
+  }
+  var masseTotale = masseVide + masseBallast
+  var cgAbsolu = masseTotale > 0 ? (masseVide * cgVide + momentBallast) / masseTotale : cgVide
+  return { masseTotale: masseTotale, cg: cgAbsolu, cgDelta: cgAbsolu - cgVide, precision: masseBallast > 0 ? (masseBallast / (masseBallast + 50)) * 100 : 0 }
 }
-
-export function resoudreSouteV2(masseCible, masseVide, config) {
-  console.log('\n=== SOLVER TERRAIN PROGRESSIF ===');
-  console.log('Masse cible:', masseCible, 'g');
-  console.log('Masse vide:', masseVide, 'g');
-
-  if (!config || !config.soutes) {
-    console.error('Configuration invalide');
-    return null;
-  }
-
-  const ballastNecessaire = masseCible - masseVide;
-  console.log('Ballast necessaire:', ballastNecessaire, 'g');
-
-  if (ballastNecessaire <= 0) {
-    return {
-      gauche: { av: [], c: [], ar: [] },
-      droite: { av: [], c: [], ar: [] },
-      totalMasse: 0,
-      cg: config.cgVide,
-      cgDelta: 0,
-      iterations: 0
-    };
-  }
-
-  // Choix matériau (priorité au plus lourd avec stock)
-  const choisirMateriau = (materiaux) => {
-    if (!materiaux || materiaux.length === 0) return null;
-    const avecStock = materiaux.filter(m => m.stock === null || m.stock > 0);
-    const liste = avecStock.length > 0 ? avecStock : materiaux;
-    return liste.sort((a, b) => b.masse - a.masse)[0];
-  };
-
-  const matAV = choisirMateriau(config.soutes.av?.materiaux || []);
-  const matC  = choisirMateriau(config.soutes.c?.materiaux  || []);
-  const matAR = choisirMateriau(config.soutes.ar?.materiaux || []);
-
-  if (!matAV || !matC || !matAR) {
-    console.error('Materiaux manquants');
-    return null;
-  }
-
-  // ✅ FIX Bug 1 : capacité déjà par côté, pas de division
-  const capaciteAV = config.soutes.av?.capacite || 0;
-  const capaciteC  = config.soutes.c?.capacite  || 0;
-  const capaciteAR = config.soutes.ar?.capacite || 0;
-
-  // ✅ FIX Bug 2 : positions absolues (toujours positives)
-  const distanceAV = Math.abs(config.soutes.av?.distanceBA || 80);
-  const distanceC  = Math.abs(config.soutes.c?.distanceBA  || 102);
-  const distanceAR = Math.abs(config.soutes.ar?.distanceBA || 129);
-
-  console.log('\n=== CONFIG ===');
-  console.log('AV:', capaciteAV, 'blocs/cote,', matAV.nom, matAV.masse + 'g,', distanceAV, 'mm');
-  console.log('C: ', capaciteC,  'blocs/cote,', matC.nom,  matC.masse  + 'g,', distanceC,  'mm');
-  console.log('AR:', capaciteAR, 'blocs/cote,', matAR.nom, matAR.masse + 'g,', distanceAR, 'mm');
-
-  console.log('\n=== REMPLISSAGE PROGRESSIF TERRAIN ===');
-
-  let reste = ballastNecessaire;
-  const blocsG = { av: [], c: [], ar: [] };
-  const blocsD = { av: [], c: [], ar: [] };
-
-  // ÉTAPE 1 : Soute C (bloc par bloc, alternant G/D)
-  console.log('Etape 1: Soute C (priorite)...');
-  for (let i = 0; i < capaciteC; i++) {
-    if (reste >= matC.masse) {
-      blocsG.c.push(matC.nom);
-      reste -= matC.masse;
-      console.log('  -> C Gauche +1 (reste:', reste.toFixed(1), 'g)');
+export function resoudreSouteV2(masseCible, masseVide, config, cgCible) {
+  var cgCibleAbs = config.cgVide + (cgCible || 0)
+  console.log("=== SOLVER V6 ===")
+  console.log("CG absolu cible: " + cgCibleAbs.toFixed(2) + " mm")
+  console.log("Masse cible: " + masseCible.toFixed(1) + " g")
+  if (!config || !config.soutes) { return null }
+  var ballast = masseCible - masseVide
+  if (ballast <= 0) { return { gauche: {av:[],c:[],ar:[]}, droite: {av:[],c:[],ar:[]}, totalMasse: 0, cg: config.cgVide, cgDelta: 0, iterations: 0 } }
+  function matsDispos(soute) {
+    if (!soute || !soute.materiaux) return []
+    var res = []
+    for (var i = 0; i < soute.materiaux.length; i++) {
+      var m = soute.materiaux[i]
+      if (m.stock === null || m.stock === undefined || m.stock > 0) res.push(m)
     }
-    if (reste >= matC.masse) {
-      blocsD.c.push(matC.nom);
-      reste -= matC.masse;
-      console.log('  -> C Droite +1 (reste:', reste.toFixed(1), 'g)');
-    }
-    if (reste < matC.masse) break;
+    return res.sort(function(a, b) { return a.masse - b.masse })
   }
-
-  // ÉTAPE 2 : Paires AV+AR (équilibre CG)
-  console.log('Etape 2: Paires AV+AR (equilibre)...');
-  const nbPairesMax = Math.min(capaciteAV, capaciteAR);
-  for (let i = 0; i < nbPairesMax; i++) {
-    const poidsPaire = matAV.masse + matAR.masse;
-
-    if (reste >= poidsPaire) {
-      blocsG.av.push(matAV.nom);
-      blocsG.ar.push(matAR.nom);
-      reste -= poidsPaire;
-      console.log('  -> Paire Gauche AV+AR (reste:', reste.toFixed(1), 'g)');
-    }
-    if (reste >= poidsPaire) {
-      blocsD.av.push(matAV.nom);
-      blocsD.ar.push(matAR.nom);
-      reste -= poidsPaire;
-      console.log('  -> Paire Droite AV+AR (reste:', reste.toFixed(1), 'g)');
-    }
-    if (reste < matAV.masse && reste < matAR.masse) break;
-  }
-
-  // ÉTAPE 3 : AR seul si reste insuffisant pour une paire
-  console.log('Etape 3: AR supplementaire si besoin...');
-  if (reste >= matAR.masse && blocsG.ar.length < capaciteAR) {
-    blocsG.ar.push(matAR.nom);
-    reste -= matAR.masse;
-    console.log('  -> AR Gauche +1 supplementaire (reste:', reste.toFixed(1), 'g)');
-    if (reste >= matAR.masse && blocsD.ar.length < capaciteAR) {
-      blocsD.ar.push(matAR.nom);
-      reste -= matAR.masse;
-      console.log('  -> AR Droite +1 supplementaire (reste:', reste.toFixed(1), 'g)');
+  var matsAV = matsDispos(config.soutes.av)
+  var matsC = matsDispos(config.soutes.c)
+  var matsAR = matsDispos(config.soutes.ar)
+  var capAV = config.soutes.av ? config.soutes.av.capacite : 0
+  var capC = config.soutes.c ? config.soutes.c.capacite : 0
+  var capAR = config.soutes.ar ? config.soutes.ar.capacite : 0
+  var dAV = config.soutes.av ? config.soutes.av.distanceBA : 80
+  var dC = config.soutes.c ? config.soutes.c.distanceBA : 102
+  var dAR = config.soutes.ar ? config.soutes.ar.distanceBA : 129
+  if (!matsAV.length || !matsC.length || !matsAR.length) { console.error("Materiaux manquants"); return null }
+  var best = null
+  var bestScore = Infinity
+  var compteur = 0
+  for (var iAV = 0; iAV < matsAV.length; iAV++) {
+    var mAV = matsAV[iAV]
+    for (var iC = 0; iC < matsC.length; iC++) {
+      var mC = matsC[iC]
+      for (var iAR = 0; iAR < matsAR.length; iAR++) {
+        var mAR = matsAR[iAR]
+        for (var nAV = 0; nAV <= capAV; nAV++) {
+          for (var nC = 0; nC <= capC; nC++) {
+            for (var nAR = 0; nAR <= capAR; nAR++) {
+              for (var xAV = 0; xAV <= 1; xAV++) {
+                for (var xC = 0; xC <= 1; xC++) {
+                  for (var xAR = 0; xAR <= 1; xAR++) {
+                    if (nAV+xAV > capAV) continue
+                    if (nC+xC > capC) continue
+                    if (nAR+xAR > capAR) continue
+                    compteur++
+                    var tAV = (nAV+xAV)+nAV
+                    var tC = (nC+xC)+nC
+                    var tAR = (nAR+xAR)+nAR
+                    var mb = tAV*mAV.masse + tC*mC.masse + tAR*mAR.masse
+                    var mt = masseVide + mb
+                    var mom = masseVide*config.cgVide + tAV*mAV.masse*dAV + tC*mC.masse*dC + tAR*mAR.masse*dAR
+                    var cg = mt > 0 ? mom/mt : config.cgVide
+                    var score = Math.abs(mt-masseCible) + 50*Math.abs(cg-cgCibleAbs) + (xAV+xC+xAR)*0.5
+                    if (score < bestScore) {
+                      bestScore = score
+                      best = { nAV:nAV, nC:nC, nAR:nAR, xAV:xAV, xC:xC, xAR:xAR, mAV:mAV, mC:mC, mAR:mAR, mb:mb, mt:mt, cg:cg }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
-
-  // ✅ Calcul CG final ABSOLU
-  const masseAV = (blocsG.av.length + blocsD.av.length) * matAV.masse;
-  const masseC  = (blocsG.c.length  + blocsD.c.length)  * matC.masse;
-  const masseAR = (blocsG.ar.length + blocsD.ar.length) * matAR.masse;
-  const masseBallastTotal = masseAV + masseC + masseAR;
-
-  const momentTotal =
-    masseVide        * config.cgVide +
-    masseAV          * distanceAV +
-    masseC           * distanceC +
-    masseAR          * distanceAR;
-
-  const masseTotaleFinale = masseVide + masseBallastTotal;
-  const cgAbsolu = masseTotaleFinale > 0 ? momentTotal / masseTotaleFinale : config.cgVide;
-  const cgDelta  = cgAbsolu - config.cgVide;
-
-  console.log('\n=== RESULTAT TERRAIN ===');
-  console.log('AV:', blocsG.av.length, 'blocs/cote ->', masseAV, 'g @ ', distanceAV, 'mm');
-  console.log('C: ', blocsG.c.length,  'blocs/cote ->', masseC,  'g @ ', distanceC,  'mm');
-  console.log('AR:', blocsG.ar.length, 'blocs/cote ->', masseAR, 'g @ ', distanceAR, 'mm');
-  console.log('Masse ballast:', masseBallastTotal, 'g (demande:', ballastNecessaire.toFixed(1), 'g)');
-  console.log('Ecart:', Math.abs(masseBallastTotal - ballastNecessaire).toFixed(1), 'g');
-  console.log('CG absolu:', cgAbsolu.toFixed(2), 'mm/BA');
-  console.log('CG delta: ', cgDelta.toFixed(2), 'mm vs CG0');
-
-  console.log('\n=== SYMETRIE ===');
-  ['av', 'c', 'ar'].forEach(s => {
-    const g = blocsG[s].length, d = blocsD[s].length;
-    console.log(`${s.toUpperCase()}: ${g === d ? 'OK' : '⚠ ASYMETRIE'} - G:${g} D:${d}`);
-  });
-
+  if (!best) { return null }
+  var s = best
+  function mk(n, nom) { var a = []; for (var i = 0; i < n; i++) a.push(nom); return a }
   return {
-    gauche: blocsG,
-    droite: blocsD,
-    totalMasse: masseBallastTotal,
-    cg: cgAbsolu,    // ✅ CG absolu mm/BA
-    cgDelta,         // ✅ delta vs CG0
-    iterations: 1
-  };
+    gauche: { av: mk(s.nAV+s.xAV, s.mAV.nom), c: mk(s.nC+s.xC, s.mC.nom), ar: mk(s.nAR+s.xAR, s.mAR.nom) },
+    droite: { av: mk(s.nAV, s.mAV.nom), c: mk(s.nC, s.mC.nom), ar: mk(s.nAR, s.mAR.nom) },
+    totalMasse: s.mb, cg: s.cg, cgDelta: s.cg - config.cgVide, iterations: compteur
+  }
 }
