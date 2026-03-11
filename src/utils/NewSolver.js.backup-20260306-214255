@@ -1,0 +1,285 @@
+/**
+ * NewSolver V2 - Optimisation CG
+ * Résout le problème de ballast en respectant les matériaux par soute
+ * ET en optimisant le centre de gravité
+ */
+
+export function calculerStatsSouteV2(result, config) {
+  // Si pas de résultat (ballast non nécessaire), retourner valeurs par défaut
+  if (!result || result === null) {
+    return {
+      masseTotale: 0,
+      cg: 0,
+      precision: 0
+    };
+  }
+  
+  let masseTotale = 0;
+  let momentTotal = 0;
+  
+  const cgVide = config.cgVide;
+  
+  // Calculer pour chaque soute
+  ['av', 'c', 'ar'].forEach(soute => {
+    if (!config.soutes[soute]) return;
+    
+    const souteCfg = config.soutes[soute];
+    const blocsGauche = result.gauche[soute] || [];
+    const blocsDroite = result.droite[soute] || [];
+    
+    // Calculer la masse par bloc
+    blocsGauche.forEach(nomMat => {
+      const mat = souteCfg.materiaux.find(m => m.nom === nomMat);
+      if (mat) {
+        masseTotale += mat.masse;
+        momentTotal += mat.masse * (souteCfg.distanceBA - cgVide);
+      }
+    });
+    
+    blocsDroite.forEach(nomMat => {
+      const mat = souteCfg.materiaux.find(m => m.nom === nomMat);
+      if (mat) {
+        masseTotale += mat.masse;
+        momentTotal += mat.masse * (souteCfg.distanceBA - cgVide);
+      }
+    });
+  });
+  
+  const cg = masseTotale > 0 ? momentTotal / masseTotale : 0;
+  
+  return {
+    masseTotale,
+    cg,
+    precision: masseTotale > 0 ? (masseTotale / (masseTotale + 100)) * 100 : 0
+  };
+}
+
+export function resoudreSouteV2(masseCible, masseVide, config) {
+  console.log('=== SOLVER V4 - PANACHAGE INTELLIGENT ===');
+  console.log('Masse cible:', masseCible, 'g');
+  console.log('Masse vide:', masseVide, 'g');
+  console.log('Config:', config);
+  
+  // Validation
+  if (!config || !config.soutes) {
+    console.error('❌ Config invalide');
+    return null;
+  }
+  
+  const ballastNecessaire = masseCible - masseVide;
+  console.log('Ballast nécessaire:', ballastNecessaire, 'g');
+  
+  if (ballastNecessaire <= 0) {
+    console.log('❌ Pas de ballast nécessaire');
+    // Retourner un résultat vide au lieu de null
+    return {
+      gauche: { av: [], c: [], ar: [] },
+      droite: { av: [], c: [], ar: [] },
+      totalMasse: 0,
+      cg: 0,
+      iterations: 0
+    };
+  }
+  
+  // Initialiser le résultat
+  const result = {
+    gauche: { av: [], c: [], ar: [] },
+    droite: { av: [], c: [], ar: [] }
+  };
+  
+  // Préparer les matériaux par soute (triés par masse décroissante)
+  ['av', 'c', 'ar'].forEach(soute => {
+    if (config.soutes[soute] && config.soutes[soute].materiaux) {
+      config.soutes[soute].materiaux.sort((a, b) => b.masse - a.masse);
+    }
+  });
+  
+  console.log('\n=== MATÉRIAUX DISPONIBLES PAR SOUTE ===');
+  ['av', 'c', 'ar'].forEach(soute => {
+    if (config.soutes[soute]) {
+      console.log(`${soute.toUpperCase()}:`);
+      console.log('  Capacité:', config.soutes[soute].capacite, 'blocs');
+      console.log('  Position:', config.soutes[soute].distanceBA, 'mm');
+      console.log('  Matériaux:', config.soutes[soute].materiaux.map(m => `${m.nom} (${m.masse}g)`).join(', '));
+    }
+  });
+  
+  let reste = ballastNecessaire;
+  
+  console.log('\n=== ALGORITHME PANACHAGE INTELLIGENT (respect stock + CG optimal) ===');
+  
+  let iteration = 0;
+  const maxIterations = 100;
+  
+  // Fonction pour calculer le CG actuel
+  const calculerCGActuel = () => {
+    const stats = calculerStatsSouteV2(result, config);
+    return stats.cg;
+  };
+  
+  // Fonction pour vérifier si un matériau a du stock
+  const aStock = (materiau) => {
+    return materiau.stock === null || materiau.stock > 0;
+  };
+  
+  // Fonction pour vérifier la capacité restante d'une soute
+  const getCapaciteRestante = (soute) => {
+    if (!config.soutes[soute]) return { gauche: 0, droite: 0 };
+    return {
+      gauche: config.soutes[soute].capacite - result.gauche[soute].length,
+      droite: config.soutes[soute].capacite - result.droite[soute].length
+    };
+  };
+  
+  // Fonction pour simuler un ajout et calculer le CG résultant
+  const simulerAjout = (soute, cote, materiau) => {
+    // Créer une copie temporaire
+    const tempResult = {
+      gauche: { av: [...result.gauche.av], c: [...result.gauche.c], ar: [...result.gauche.ar] },
+      droite: { av: [...result.droite.av], c: [...result.droite.c], ar: [...result.droite.ar] }
+    };
+    
+    if (cote === 'pair') {
+      tempResult.gauche[soute].push(materiau.nom);
+      tempResult.droite[soute].push(materiau.nom);
+    } else if (cote === 'gauche') {
+      tempResult.gauche[soute].push(materiau.nom);
+    } else {
+      tempResult.droite[soute].push(materiau.nom);
+    }
+    
+    const stats = calculerStatsSouteV2(tempResult, config);
+    return {
+      cg: stats.cg,
+      masse: cote === 'pair' ? materiau.masse * 2 : materiau.masse
+    };
+  };
+  
+  // Boucle principale : PANACHAGE INTELLIGENT
+  while (reste > 0.1 && iteration < maxIterations) {
+    iteration++;
+    
+    const cgActuel = calculerCGActuel();
+    const toleranceMasse = Math.abs(cgActuel) > 2.0 ? 300 : 100;
+    
+    // Explorer TOUTES les options possibles
+    const options = [];
+    
+    for (const soute of ['av', 'c', 'ar']) {
+      if (!config.soutes[soute]) continue;
+      
+      const capaciteRestante = getCapaciteRestante(soute);
+      
+      // Option PAIR
+      if (capaciteRestante.gauche >= 1 && capaciteRestante.droite >= 1) {
+        for (const mat of config.soutes[soute].materiaux) {
+          if (!aStock(mat)) continue; // Ignorer si stock = 0
+          if (mat.masse * 2 > reste + toleranceMasse) continue;
+          
+          const sim = simulerAjout(soute, 'pair', mat);
+          options.push({
+            soute,
+            cote: 'pair',
+            materiau: mat,
+            cgResultant: sim.cg,
+            ecartCG: Math.abs(sim.cg), // Distance au CG idéal (0mm)
+            masse: sim.masse
+          });
+        }
+      }
+      
+      // Option GAUCHE
+      if (capaciteRestante.gauche >= 1) {
+        for (const mat of config.soutes[soute].materiaux) {
+          if (!aStock(mat)) continue;
+          if (mat.masse > reste + toleranceMasse) continue;
+          
+          const sim = simulerAjout(soute, 'gauche', mat);
+          options.push({
+            soute,
+            cote: 'gauche',
+            materiau: mat,
+            cgResultant: sim.cg,
+            ecartCG: Math.abs(sim.cg),
+            masse: sim.masse
+          });
+        }
+      }
+      
+      // Option DROITE
+      if (capaciteRestante.droite >= 1) {
+        for (const mat of config.soutes[soute].materiaux) {
+          if (!aStock(mat)) continue;
+          if (mat.masse > reste + toleranceMasse) continue;
+          
+          const sim = simulerAjout(soute, 'droite', mat);
+          options.push({
+            soute,
+            cote: 'droite',
+            materiau: mat,
+            cgResultant: sim.cg,
+            ecartCG: Math.abs(sim.cg),
+            masse: sim.masse
+          });
+        }
+      }
+    }
+    
+    // Si aucune option, arrêter
+    if (options.length === 0) {
+      console.log(`  [${iteration}] Aucun ajout possible, arrêt (CG final: ${cgActuel.toFixed(1)}mm)`);
+      break;
+    }
+    
+    // Trier les options : MEILLEUR CG d'abord, puis ajout PAIR prioritaire
+    options.sort((a, b) => {
+      const diffCG = a.ecartCG - b.ecartCG;
+      if (Math.abs(diffCG) < 0.5) {
+        // Si CG équivalent, préférer PAIR
+        if (a.cote === 'pair' && b.cote !== 'pair') return -1;
+        if (a.cote !== 'pair' && b.cote === 'pair') return 1;
+      }
+      return diffCG;
+    });
+    
+    // Choisir la MEILLEURE option
+    const meilleur = options[0];
+    
+    // Appliquer l'ajout
+    if (meilleur.cote === 'pair') {
+      result.gauche[meilleur.soute].push(meilleur.materiau.nom);
+      result.droite[meilleur.soute].push(meilleur.materiau.nom);
+    } else if (meilleur.cote === 'gauche') {
+      result.gauche[meilleur.soute].push(meilleur.materiau.nom);
+    } else {
+      result.droite[meilleur.soute].push(meilleur.materiau.nom);
+    }
+    
+    reste -= meilleur.masse;
+    
+    const coteLabel = meilleur.cote === 'pair' ? 'G+D' : meilleur.cote === 'gauche' ? 'G' : 'D';
+    console.log(`  [${iteration}] ${meilleur.soute.toUpperCase()} : +${meilleur.materiau.nom} ${coteLabel} (${meilleur.masse}g) → Reste: ${reste.toFixed(1)}g, CG: ${meilleur.cgResultant.toFixed(1)}mm`);
+  }
+  
+  // Calculs finaux
+  const stats = calculerStatsSouteV2(result, config);
+  const ballastTotal = stats.masseTotale;
+  const ballastRestant = ballastNecessaire - ballastTotal;
+  const precision = ballastNecessaire > 0 ? (ballastTotal / ballastNecessaire) * 100 : 0;
+  
+  console.log('\n=== RÉSULTAT FINAL ===');
+  console.log('Ballast total:', ballastTotal, 'g');
+  console.log('Ballast restant:', ballastRestant, 'g');
+  console.log('Précision:', precision.toFixed(1), '%');
+  console.log('CG:', stats.cg.toFixed(1), 'mm');
+  console.log('Itérations:', iteration);
+  console.log('Gauche:', result.gauche);
+  console.log('Droite:', result.droite);
+  
+  return {
+    ...result,
+    totalMasse: ballastTotal,
+    cg: stats.cg,
+    iterations: iteration
+  };
+}

@@ -1,0 +1,156 @@
+﻿/**
+ * NewSolver V4 - SYMETRIE CORRIGEE
+ */
+
+export function calculerStatsSouteV2(result, config) {
+  if (!result || result === null) {
+    return { masseTotale: 0, cg: 0, precision: 0 };
+  }
+  let masseTotale = 0;
+  let momentTotal = 0;
+  const cgVide = config.cgVide;
+  ['av', 'c', 'ar'].forEach(soute => {
+    if (!config.soutes[soute]) return;
+    const souteCfg = config.soutes[soute];
+    const blocsGauche = result.gauche[soute] || [];
+    const blocsDroite = result.droite[soute] || [];
+    blocsGauche.forEach(nomMat => {
+      const mat = souteCfg.materiaux.find(m => m.nom === nomMat);
+      if (mat) {
+        masseTotale += mat.masse;
+        momentTotal += mat.masse * (souteCfg.distanceBA - cgVide);
+      }
+    });
+    blocsDroite.forEach(nomMat => {
+      const mat = souteCfg.materiaux.find(m => m.nom === nomMat);
+      if (mat) {
+        masseTotale += mat.masse;
+        momentTotal += mat.masse * (souteCfg.distanceBA - cgVide);
+      }
+    });
+  });
+  const cg = masseTotale > 0 ? momentTotal / masseTotale : 0;
+  return { masseTotale, cg, precision: masseTotale > 0 ? (masseTotale / (masseTotale + 100)) * 100 : 0 };
+}
+
+export function resoudreSouteV2(masseCible, masseVide, config) {
+  console.log('=== SOLVER V4 - PANACHAGE INTELLIGENT + SYMETRIE ===');
+  console.log('Masse cible:', masseCible, 'g');
+  console.log('Masse vide:', masseVide, 'g');
+  console.log('Config:', config);
+  if (!config || !config.soutes) {
+    console.error('Config invalide');
+    return null;
+  }
+  const ballastNecessaire = masseCible - masseVide;
+  console.log('Ballast necessaire:', ballastNecessaire, 'g');
+  if (ballastNecessaire <= 0) {
+    console.log('Pas de ballast necessaire');
+    return { gauche: { av: [], c: [], ar: [] }, droite: { av: [], c: [], ar: [] }, totalMasse: 0, cg: 0, iterations: 0 };
+  }
+  const result = { gauche: { av: [], c: [], ar: [] }, droite: { av: [], c: [], ar: [] } };
+  ['av', 'c', 'ar'].forEach(soute => {
+    if (config.soutes[soute] && config.soutes[soute].materiaux) {
+      config.soutes[soute].materiaux.sort((a, b) => b.masse - a.masse);
+    }
+  });
+  console.log('\n=== MATERIAUX DISPONIBLES PAR SOUTE ===');
+  ['av', 'c', 'ar'].forEach(soute => {
+    if (config.soutes[soute]) {
+      console.log(`${soute.toUpperCase()}:`);
+      console.log('  Capacite:', config.soutes[soute].capacite, 'blocs');
+      console.log('  Position:', config.soutes[soute].distanceBA, 'mm');
+      console.log('  Materiaux:', config.soutes[soute].materiaux.map(m => `${m.nom} (${m.masse}g)`).join(', '));
+    }
+  });
+  let reste = ballastNecessaire;
+  console.log('\n=== ALGORITHME PANACHAGE INTELLIGENT (symetrie forcee) ===');
+  let iteration = 0;
+  const maxIterations = 100;
+  const calculerCGActuel = () => {
+    const stats = calculerStatsSouteV2(result, config);
+    return stats.cg;
+  };
+  const aStock = (materiau) => {
+    return materiau.stock === null || materiau.stock > 0;
+  };
+  const getCapaciteRestante = (soute) => {
+    if (!config.soutes[soute]) return { gauche: 0, droite: 0 };
+    return {
+      gauche: config.soutes[soute].capacite - result.gauche[soute].length,
+      droite: config.soutes[soute].capacite - result.droite[soute].length
+    };
+  };
+  const simulerAjout = (soute, cote, materiau) => {
+    const tempResult = {
+      gauche: { av: [...result.gauche.av], c: [...result.gauche.c], ar: [...result.gauche.ar] },
+      droite: { av: [...result.droite.av], c: [...result.droite.c], ar: [...result.droite.ar] }
+    };
+    if (cote === 'pair') {
+      tempResult.gauche[soute].push(materiau.nom);
+      tempResult.droite[soute].push(materiau.nom);
+    } else if (cote === 'gauche') {
+      tempResult.gauche[soute].push(materiau.nom);
+    } else {
+      tempResult.droite[soute].push(materiau.nom);
+    }
+    const stats = calculerStatsSouteV2(tempResult, config);
+    return { cg: stats.cg, masse: cote === 'pair' ? materiau.masse * 2 : materiau.masse };
+  };
+  while (reste > 0.1 && iteration < maxIterations) {
+    iteration++;
+    const cgActuel = calculerCGActuel();
+    const toleranceMasse = Math.abs(cgActuel) > 2.0 ? 300 : 100;
+    const options = [];
+    for (const soute of ['av', 'c', 'ar']) {
+      if (!config.soutes[soute]) continue;
+      const capaciteRestante = getCapaciteRestante(soute);
+      if (capaciteRestante.gauche >= 1 && capaciteRestante.droite >= 1) {
+        for (const mat of config.soutes[soute].materiaux) {
+          if (!aStock(mat)) continue;
+          if (mat.masse * 2 > reste + toleranceMasse) continue;
+          const sim = simulerAjout(soute, 'pair', mat);
+          options.push({
+            soute, cote: 'pair', materiau: mat, cgResultant: sim.cg, ecartCG: Math.abs(sim.cg), masse: sim.masse
+          });
+        }
+      }
+    }
+    if (options.length === 0) {
+      console.log(`  [${iteration}] Aucun ajout PAIR possible, arret (CG final: ${cgActuel.toFixed(1)}mm)`);
+      break;
+    }
+    options.sort((a, b) => a.ecartCG - b.ecartCG);
+    const meilleur = options[0];
+    result.gauche[meilleur.soute].push(meilleur.materiau.nom);
+    result.droite[meilleur.soute].push(meilleur.materiau.nom);
+    reste -= meilleur.masse;
+    console.log(`  [${iteration}] ${meilleur.soute.toUpperCase()} : +${meilleur.materiau.nom} G+D (${meilleur.masse}g) -> Reste: ${reste.toFixed(1)}g, CG: ${meilleur.cgResultant.toFixed(1)}mm`);
+  }
+  const stats = calculerStatsSouteV2(result, config);
+  const ballastTotal = stats.masseTotale;
+  const ballastRestant = ballastNecessaire - ballastTotal;
+  const precision = ballastNecessaire > 0 ? (ballastTotal / ballastNecessaire) * 100 : 0;
+  console.log('\n=== RESULTAT FINAL ===');
+  console.log('Ballast total:', ballastTotal, 'g');
+  console.log('Ballast restant:', ballastRestant, 'g');
+  console.log('Precision:', precision.toFixed(1), '%');
+  console.log('CG:', stats.cg.toFixed(1), 'mm');
+  console.log('Iterations:', iteration);
+  console.log('Gauche:', result.gauche);
+  console.log('Droite:', result.droite);
+  console.log('\n=== VERIFICATION SYMETRIE ===');
+  let symetrique = true;
+  ['av', 'c', 'ar'].forEach(soute => {
+    const nbG = result.gauche[soute].length;
+    const nbD = result.droite[soute].length;
+    if (nbG !== nbD) {
+      console.warn(`ATTENTION: ${soute.toUpperCase()} asymetrique - G:${nbG} D:${nbD}`);
+      symetrique = false;
+    }
+  });
+  if (symetrique) {
+    console.log('OK Symetrie parfaite verifiee');
+  }
+  return { ...result, totalMasse: ballastTotal, cg: stats.cg, iterations: iteration };
+}

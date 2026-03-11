@@ -1,0 +1,119 @@
+﻿/**
+ * SOLVER COMBINATOIRE - MAMBA F3F
+ * Exploration complete - Physique exacte
+ */
+
+export function calculerStatsSouteV2(result, config) {
+  if (!result || result === null) {
+    return { masseTotale: 0, cg: 0, precision: 0 };
+  }
+  let masseTotale = 0, momentTotal = 0;
+  const cgVide = config.cgVide;
+  ['av', 'c', 'ar'].forEach(soute => {
+    if (!config.soutes[soute]) return;
+    const souteCfg = config.soutes[soute];
+    const blocsGauche = result.gauche[soute] || [];
+    const blocsDroite = result.droite[soute] || [];
+    blocsGauche.forEach(nomMat => {
+      const mat = souteCfg.materiaux.find(m => m.nom === nomMat);
+      if (mat) {
+        masseTotale += mat.masse;
+        momentTotal += mat.masse * (souteCfg.distanceBA - cgVide);
+      }
+    });
+    blocsDroite.forEach(nomMat => {
+      const mat = souteCfg.materiaux.find(m => m.nom === nomMat);
+      if (mat) {
+        masseTotale += mat.masse;
+        momentTotal += mat.masse * (souteCfg.distanceBA - cgVide);
+      }
+    });
+  });
+  const cg = masseTotale > 0 ? momentTotal / masseTotale : 0;
+  return { masseTotale, cg, precision: masseTotale > 0 ? (masseTotale / (masseTotale + 100)) * 100 : 0 };
+}
+
+export function resoudreSouteV2(masseCible, masseVide, config) {
+  console.log('\n=== SOLVER COMBINATOIRE - MAMBA F3F ===');
+  console.log('Masse cible:', masseCible, 'g');
+  console.log('Ballast necessaire:', (masseCible - masseVide), 'g');
+  if (!config || !config.soutes) {
+    console.error('Configuration invalide');
+    return null;
+  }
+  const ballastNecessaire = masseCible - masseVide;
+  if (ballastNecessaire <= 0) {
+    return { gauche: { av: [], c: [], ar: [] }, droite: { av: [], c: [], ar: [] }, totalMasse: 0, cg: 0, iterations: 0 };
+  }
+  const materiauxAV = config.soutes.av?.materiaux || [];
+  const materiauxC = config.soutes.c?.materiaux || [];
+  const materiauxAR = config.soutes.ar?.materiaux || [];
+  const capaciteAV = config.soutes.av?.capacite || 0;
+  const capaciteC = config.soutes.c?.capacite || 0;
+  const capaciteAR = config.soutes.ar?.capacite || 0;
+  const distanceAV = config.soutes.av?.distanceBA || 0;
+  const distanceC = config.soutes.c?.distanceBA || 0;
+  const distanceAR = config.soutes.ar?.distanceBA || 0;
+  console.log('=== CONFIG ===');
+  console.log('AV:', capaciteAV, 'blocs,', distanceAV, 'mm');
+  console.log('C: ', capaciteC, 'blocs,', distanceC, 'mm');
+  console.log('AR:', capaciteAR, 'blocs,', distanceAR, 'mm');
+  const matAV = materiauxAV[0] || { nom: 'Laiton', masse: 71 };
+  const matC = materiauxC[0] || { nom: 'Plomb', masse: 88 };
+  const matAR = materiauxAR[0] || { nom: 'Laiton', masse: 71 };
+  console.log('Materiaux: AV=', matAV.nom, matAV.masse + 'g, C=', matC.nom, matC.masse + 'g, AR=', matAR.nom, matAR.masse + 'g');
+  const solutions = [];
+  let compteur = 0;
+  for (let nbAV = 0; nbAV <= capaciteAV; nbAV++) {
+    for (let nbC = 0; nbC <= capaciteC; nbC++) {
+      for (let nbAR = 0; nbAR <= capaciteAR; nbAR++) {
+        compteur++;
+        const masseAV = nbAV * matAV.masse * 2;
+        const masseC = nbC * matC.masse * 2;
+        const masseAR = nbAR * matAR.masse * 2;
+        const masseTotale = masseAV + masseC + masseAR;
+        const momentAV = masseAV * (distanceAV - config.cgVide);
+        const momentC = masseC * (distanceC - config.cgVide);
+        const momentAR = masseAR * (distanceAR - config.cgVide);
+        const momentTotal = momentAV + momentC + momentAR;
+        const cgResultant = masseTotale > 0 ? momentTotal / masseTotale : 0;
+        const ecartMasse = Math.abs(masseTotale - ballastNecessaire);
+        const ecartCG = Math.abs(cgResultant);
+        const score = ecartMasse + ecartCG * 5;
+        solutions.push({ nbAV, nbC, nbAR, masseAV, masseC, masseAR, masseTotale, cgResultant, ecartMasse, ecartCG, score });
+      }
+    }
+  }
+  console.log('Combinaisons explorees:', compteur);
+  solutions.sort((a, b) => a.score - b.score);
+  console.log('\n=== TOP 5 ===');
+  solutions.slice(0, 5).forEach((sol, idx) => {
+    console.log(`[${idx + 1}] AV:${sol.nbAV} C:${sol.nbC} AR:${sol.nbAR} -> Masse:${sol.masseTotale}g, CG:${sol.cgResultant.toFixed(1)}mm, Score:${sol.score.toFixed(1)}`);
+  });
+  const meilleure = solutions[0];
+  console.log('\n=== SOLUTION ===');
+  console.log('AV:', meilleure.nbAV, 'blocs/cote ->', meilleure.masseAV, 'g');
+  console.log('C: ', meilleure.nbC, 'blocs/cote ->', meilleure.masseC, 'g');
+  console.log('AR:', meilleure.nbAR, 'blocs/cote ->', meilleure.masseAR, 'g');
+  console.log('Masse:', meilleure.masseTotale, 'g');
+  console.log('CG:', meilleure.cgResultant.toFixed(1), 'mm');
+  console.log('Precision:', ((meilleure.masseTotale / ballastNecessaire) * 100).toFixed(1), '%');
+  const result = {
+    gauche: {
+      av: Array(meilleure.nbAV).fill(matAV.nom),
+      c: Array(meilleure.nbC).fill(matC.nom),
+      ar: Array(meilleure.nbAR).fill(matAR.nom)
+    },
+    droite: {
+      av: Array(meilleure.nbAV).fill(matAV.nom),
+      c: Array(meilleure.nbC).fill(matC.nom),
+      ar: Array(meilleure.nbAR).fill(matAR.nom)
+    }
+  };
+  console.log('\n=== SYMETRIE ===');
+  ['av', 'c', 'ar'].forEach(s => {
+    const g = result.gauche[s].length, d = result.droite[s].length;
+    console.log(`${s.toUpperCase()}: ${g === d ? 'OK' : 'ERREUR'} - ${g} blocs/cote`);
+  });
+  return { ...result, totalMasse: meilleure.masseTotale, cg: meilleure.cgResultant, iterations: compteur };
+}
