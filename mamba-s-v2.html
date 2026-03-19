@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Ballast Mamba S — v2</title>
+<style>
+  :root {
+    --bg:#05070a; --panel:#0d1117; --txt:#ffffff; --muted:#8b949e;
+    --plomb:#708090; --laiton:#ffd700; --spacer:#1a4225;
+    --l-plomb:#556677; --l-laiton:#ffeb3b;
+    --blue:#1a73e8; --green:#3fb950; --red:#f85149; --purple:#a78bfa;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { height:100dvh; overflow:hidden; background:var(--bg); color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    user-select:none; touch-action:pan-y; }
+
+  /* ── TABS ── */
+  .tabs { display:flex; gap:4px; padding:6px 6px 0; height:42px; }
+  .tab { flex:1; padding:8px 0; border-radius:8px 8px 0 0; border:none; cursor:pointer;
+    font-size:13px; font-weight:700; background:#1a1f2a; color:var(--muted); transition:all .2s; }
+  .tab.on { background:#161b22; color:#fff; border-bottom:2px solid var(--green); }
+
+  /* ══ PAGE CALCULATEUR ══ */
+  #pageCalc { display:flex; flex-direction:column; height:calc(100dvh - 42px);
+    max-width:420px; margin:0 auto; padding:6px; }
+
+  .vent-header { height:9vh; flex-shrink:0;
+    background:linear-gradient(135deg,#0e4429,#1a5a3a);
+    border-radius:12px; text-align:center; border:2px solid #238636;
+    display:flex; flex-direction:column; justify-content:center; position:relative;
+    cursor:pointer; transition:all .3s; box-shadow:0 4px 12px rgba(0,0,0,.4); margin-bottom:6px; }
+  .vent-header.active { background:linear-gradient(135deg,var(--blue),#1557b0);
+    border-color:#fff; box-shadow:0 0 20px rgba(26,115,232,.7); }
+  .vent-value { font-size:36px; font-weight:900; text-shadow:0 3px 6px rgba(0,0,0,.4); line-height:1; }
+  .vent-label { font-size:11px; font-weight:700; opacity:.95; margin-top:2px; letter-spacing:1px; }
+
+  .baro-zone { flex-grow:1; display:flex; flex-direction:column;
+    justify-content:space-evenly; padding:4px 0; min-height:0; }
+  .baro-row-wrap { display:flex; flex-direction:column; gap:2px; }
+  .baro-row-label { font-size:10px; color:var(--muted); font-weight:700;
+    text-transform:uppercase; letter-spacing:.3px; padding-left:6px; }
+  .baro-row { display:flex; justify-content:center; gap:5px; height:13vh; max-height:95px; }
+  .side { display:flex; gap:2px; width:48%; border:1px solid rgba(255,255,255,.08);
+    border-radius:6px; padding:2px; background:rgba(255,255,255,.02);
+    box-shadow:inset 0 1px 3px rgba(0,0,0,.3); }
+  .side-l { flex-direction:row-reverse; }
+  .slot { flex:1; height:100%; border-radius:3px; transition:all .15s; }
+  .s { background:var(--spacer); opacity:.12; border:1px dashed rgba(255,255,255,.08); }
+  .p { background:linear-gradient(135deg,var(--plomb),var(--l-plomb));
+       box-shadow:inset 0 0 10px rgba(0,0,0,.7),0 1px 3px rgba(0,0,0,.4);
+       border:1px solid rgba(255,255,255,.25); }
+  .l { background:linear-gradient(135deg,var(--laiton),var(--l-laiton));
+       box-shadow:inset 0 0 10px rgba(255,215,0,.5),0 1px 3px rgba(0,0,0,.4);
+       border:1px solid rgba(255,255,255,.3); }
+
+  /* Couleurs contours soutes */
+  .baro-row-wrap.av .side { border-color:rgba(255,215,0,.4); }
+  .baro-row-wrap.av .baro-row-label { color:rgba(255,215,0,.9); }
+  .baro-row-wrap.c  .side { border-color:rgba(26,115,232,.45); }
+  .baro-row-wrap.c  .baro-row-label { color:rgba(100,170,255,.9); }
+  .baro-row-wrap.ar .side { border-color:rgba(63,185,80,.4); }
+  .baro-row-wrap.ar .baro-row-label { color:rgba(63,185,80,.9); }
+
+  .data-bar { height:9vh; min-height:65px; flex-shrink:0;
+    display:flex; justify-content:space-around; align-items:center; padding:0 12px;
+    background:linear-gradient(135deg,rgba(255,255,255,.05),rgba(255,255,255,.02));
+    border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,.3); margin:4px 0; }
+  .data-box { text-align:center; }
+  .data-val { font-size:28px; font-weight:900; line-height:1; }
+  .data-lbl { font-size:10px; color:var(--muted); margin-top:3px; font-weight:600; }
+  .cg-box { padding:8px 14px; border-radius:8px;
+    background:rgba(59,130,246,.2); border:1px solid rgba(59,130,246,.4); transition:all .3s; }
+  .cg-box.neutre  { background:rgba(74,222,128,.2);  border-color:rgba(74,222,128,.5); }
+  .cg-box.avant   { background:rgba(251,191,36,.2);  border-color:rgba(251,191,36,.5); }
+  .cg-box.arriere { background:rgba(248,113,113,.2); border-color:rgba(248,113,113,.5); }
+
+  .alt-band { display:none; align-items:center; justify-content:space-between; flex-shrink:0;
+    background:rgba(167,139,250,.08); border:1px solid rgba(167,139,250,.25);
+    border-radius:8px; padding:4px 12px; margin:2px 0; min-height:28px; }
+  .ab-item { text-align:center; flex:1; }
+  .ab-lbl { font-size:9px; color:var(--muted); font-weight:700; letter-spacing:.5px; display:block; }
+  .ab-val { font-size:14px; font-weight:900; color:var(--purple); }
+
+  .controls { height:32vh; min-height:220px; flex-shrink:0;
+    background:var(--panel); border-radius:12px; padding:10px; border:1px solid #30363d;
+    display:flex; flex-direction:column; gap:8px; box-shadow:0 4px 12px rgba(0,0,0,.4); }
+  .ctrl-grid  { display:grid; grid-template-columns:1fr 1.4fr; gap:10px; flex-grow:1; }
+  .ctrl-left  { display:grid; grid-template-rows:1fr 1fr; gap:6px; }
+  .ctrl-top2  { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+  .ctrl-arrows{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .mode-btn { background:#1c2128; border:2px solid #30363d; border-radius:10px;
+    display:flex; flex-direction:column; justify-content:center; align-items:center;
+    cursor:pointer; transition:all .2s; }
+  .mode-btn:active { transform:scale(.98); }
+  .mode-btn.active     { background:linear-gradient(135deg,var(--blue),#1557b0); border-color:#fff; box-shadow:0 0 12px rgba(26,115,232,.6); }
+  .mode-btn.active-alt { background:linear-gradient(135deg,#6d28d9,#4c1d95); border-color:var(--purple); box-shadow:0 0 12px rgba(167,139,250,.5); }
+  .mode-val { font-size:20px; font-weight:900; line-height:1; }
+  .mode-lbl { font-size:9px; font-weight:700; opacity:.85; margin-top:4px; letter-spacing:.5px; }
+  .nav-btn { background:linear-gradient(135deg,#21262d,#161b22); border:2px solid #444c56;
+    border-radius:12px; color:#fff; font-size:60px; font-weight:900;
+    touch-action:none; cursor:pointer; transition:all .1s; box-shadow:0 4px 10px rgba(0,0,0,.4);
+    display:flex; align-items:center; justify-content:center; }
+  .nav-btn:active { background:#30363d; transform:scale(.97); }
+  .hint { text-align:center; font-size:9px; color:var(--muted); padding:3px; opacity:.65; }
+
+  /* ══ PAGE MATRICE ══ */
+  #pageMatrix { display:none; flex-direction:column; height:calc(100dvh - 42px);
+    max-width:480px; margin:0 auto; padding:5px 6px 4px; gap:4px; }
+
+  .m-hdr { background:linear-gradient(135deg,#0d1a2e,#1a2a4a); border-radius:10px;
+    padding:7px 12px; border:1px solid var(--blue); flex-shrink:0;
+    display:flex; justify-content:space-between; align-items:center; }
+  .m-hdr-title { font-size:13px; font-weight:800; }
+  .m-hdr-sub   { font-size:9px; color:var(--muted); margin-top:1px; }
+  .m-hdr-m     { font-size:14px; font-weight:900; color:var(--green); }
+  .m-hdr-delta { font-size:9px; color:var(--muted); }
+
+  .sg { display:grid; grid-template-columns:repeat(10,1fr); gap:2px; flex-shrink:0; }
+  .rb { padding:5px 2px; background:#161b22; border-radius:5px; text-align:center;
+    font-size:10px; font-weight:700; cursor:pointer; border:1px solid #21262d; color:var(--muted);
+    display:flex; align-items:center; justify-content:center; }
+  .rb.sel { background:#1a2744; border-color:var(--blue); color:#fff; }
+
+  .m-soutes { flex:1; display:flex; flex-direction:column; gap:2px; min-height:0; }
+  .m-soute-wrap { flex:1; display:flex; flex-direction:column; gap:2px; }
+  .m-soute-lbl { font-size:9px; font-weight:700; letter-spacing:.5px; padding-left:4px; flex-shrink:0; }
+  .lbl-av { color:rgba(255,215,0,.9); }
+  .lbl-c  { color:rgba(100,170,255,.9); }
+  .lbl-ar { color:rgba(63,185,80,.9); }
+  .m-soute-row { flex:1; display:flex; gap:5px; min-height:0; }
+  .m-side { flex:1; display:flex; gap:2px; border-radius:6px; padding:3px;
+    background:rgba(255,255,255,.02); border:1px solid rgba(255,255,255,.06); }
+  .m-side.av-l,.m-side.av-r { border-color:rgba(255,215,0,.3); }
+  .m-side.c-l,.m-side.c-r   { border-color:rgba(26,115,232,.3); }
+  .m-side.ar-l,.m-side.ar-r { border-color:rgba(63,185,80,.3); }
+  .m-side.av-l,.m-side.c-l,.m-side.ar-l { flex-direction:row-reverse; }
+  .m-sep-av { width:3px; background:#1a4225; border-radius:2px; flex-shrink:0; }
+  .m-sep-c  { width:3px; background:#1a2744; border-radius:2px; flex-shrink:0; }
+  .m-sep-ar { width:3px; background:#1a3020; border-radius:2px; flex-shrink:0; }
+
+  .mc { flex:1; border-radius:4px; background:rgba(255,255,255,.03);
+    border:1px solid #1e2530; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; min-height:0; }
+  .mc.ml { background:linear-gradient(135deg,var(--laiton),var(--l-laiton)); border-color:transparent; }
+  .mc.mp { background:linear-gradient(135deg,var(--plomb),var(--l-plomb));   border-color:transparent; }
+  .mc-w { font-size:7px; font-weight:800; line-height:1; color:rgba(0,0,0,.65); }
+  .mc-t { font-size:6px; line-height:1.2; color:rgba(0,0,0,.5); }
+  .mc.mp .mc-w,.mc.mp .mc-t { color:rgba(255,255,255,.8); }
+
+  .m-info { background:#161b22; border-radius:8px; padding:5px 10px; flex-shrink:0;
+    border:1px solid #21262d; display:flex; gap:8px; align-items:center; }
+  .m-info-val  { font-size:15px; font-weight:900; color:var(--green); }
+  .m-info-lbl  { font-size:8px; color:var(--muted); }
+  .m-info-dlt  { font-size:9px; margin-top:1px; }
+  .m-info-slots { font-size:9px; color:var(--muted); flex:2; line-height:1.4; }
+  .m-info-slots span { color:#fff; font-weight:700; }
+
+  .m-leg { display:flex; gap:6px; justify-content:center; flex-wrap:wrap; flex-shrink:0; }
+  .m-li  { display:flex; align-items:center; gap:2px; font-size:8px; color:var(--muted); }
+  .m-ls  { width:9px; height:9px; border-radius:2px; }
+  .m-ph  { display:flex; align-items:center; justify-content:center; flex:1;
+    color:var(--muted); font-size:13px; }
+</style>
+</head>
+<body>
+
+<div class="tabs">
+  <button class="tab on" id="tabCalc"   onclick="switchTab('calc')">⚖ CALCULATEUR</button>
+  <button class="tab"    id="tabMatrix" onclick="switchTab('matrix')">📋 MATRICE</button>
+</div>
+
+<!-- ══ CALCULATEUR ══ -->
+<div id="pageCalc">
+  <div class="vent-header" id="ventHeader" onclick="setMode('vent')" style="position:relative;">
+    <div class="vent-value" id="ventVal">8.0</div>
+    <div class="vent-label" id="ventLabel">VENT m/s — Mamba S</div>
+    <button id="btnGPS" onclick="event.stopPropagation();openGPS()" style="
+      position:absolute;right:10px;top:50%;transform:translateY(-50%);
+      width:38px;height:38px;border-radius:50%;
+      background:#065f46;border:2px solid #34d399;color:#fff;font-size:18px;
+      cursor:pointer;display:flex;align-items:center;justify-content:center;
+      box-shadow:0 2px 8px rgba(52,211,153,.4);">📍</button>
+  </div>
+
+  <div class="baro-zone">
+    <div class="baro-row-wrap av">
+      <div class="baro-row-label">⬆ AV 71g — laiton</div>
+      <div class="baro-row">
+        <div id="AV-L" class="side side-l"></div>
+        <div id="AV-R" class="side"></div>
+      </div>
+    </div>
+    <div class="baro-row-wrap c">
+      <div class="baro-row-label">🎯 C 88g — plomb</div>
+      <div class="baro-row">
+        <div id="C-L" class="side side-l"></div>
+        <div id="C-R" class="side"></div>
+      </div>
+    </div>
+    <div class="baro-row-wrap ar">
+      <div class="baro-row-label">⬇ AR 71g — laiton</div>
+      <div class="baro-row">
+        <div id="AR-L" class="side side-l"></div>
+        <div id="AR-R" class="side"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="data-bar">
+    <div class="data-box">
+      <div class="data-val"><span id="massVal">3.202</span> kg</div>
+      <div class="data-lbl">MASSE</div>
+    </div>
+    <div class="data-box">
+      <div class="cg-box neutre" id="cgBox">
+        <div class="data-val"><span id="cgVal">102.0</span> mm</div>
+        <div class="data-lbl" id="cgLbl">✓ CG</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="alt-band" id="altBand">
+    <div class="ab-item"><span class="ab-lbl">ALTITUDE</span><span class="ab-val" id="ab0m">—</span></div>
+    <div class="ab-item"><span class="ab-lbl">DÉDUIT</span><span class="ab-val" id="abCorr">—</span></div>
+    <div class="ab-item"><span class="ab-lbl">FINALE</span><span class="ab-val" id="abFinal">—</span></div>
+  </div>
+
+  <div class="controls">
+    <div class="ctrl-grid">
+      <div class="ctrl-left">
+        <div class="ctrl-top2">
+          <div class="mode-btn" id="modeKg" onclick="setMode('kg')">
+            <span class="mode-val" id="kgVal">3.202</span>
+            <span class="mode-lbl">KG</span>
+          </div>
+          <div class="mode-btn" id="modeAlt" onclick="setMode('alt')">
+            <span class="mode-val" id="altVal">0</span>
+            <span class="mode-lbl">ALT m</span>
+          </div>
+        </div>
+        <div class="mode-btn" id="modeOffset" onclick="setMode('offset')">
+          <span class="mode-val" id="offsetVal">+0g</span>
+          <span class="mode-lbl" id="offsetLbl">OFFSET</span>
+        </div>
+      </div>
+      <div class="ctrl-arrows">
+        <button class="nav-btn" id="btnL">◀</button>
+        <button class="nav-btn" id="btnR">▶</button>
+      </div>
+    </div>
+    <div class="hint" id="hintText">Appui long = défilement rapide</div>
+  </div>
+</div>
+
+<!-- ══ MATRICE ══ -->
+<div id="pageMatrix">
+  <div class="m-hdr">
+    <div>
+      <div class="m-hdr-title">🦅 Mamba S — Matrice</div>
+      <div class="m-hdr-sub" id="mHdrSub">Sélectionner une configuration</div>
+    </div>
+    <div style="text-align:right">
+      <div class="m-hdr-m"  id="mHdrM">—</div>
+      <div class="m-hdr-delta" id="mHdrDelta">—</div>
+    </div>
+  </div>
+  <div class="sg" id="sg"></div>
+  <div class="m-ph" id="mPh">← Choisir une configuration</div>
+  <div class="m-soutes" id="mSoutes" style="display:none;">
+    <div class="m-soute-wrap">
+      <div class="m-soute-lbl lbl-av">⬆ AV — Laiton 71g</div>
+      <div class="m-soute-row">
+        <div id="mAvL" class="m-side av-l"></div>
+        <div class="m-sep-av"></div>
+        <div id="mAvR" class="m-side av-r"></div>
+      </div>
+    </div>
+    <div class="m-soute-wrap">
+      <div class="m-soute-lbl lbl-c">🎯 C — Plomb 88g</div>
+      <div class="m-soute-row">
+        <div id="mCL" class="m-side c-l"></div>
+        <div class="m-sep-c"></div>
+        <div id="mCR" class="m-side c-r"></div>
+      </div>
+    </div>
+    <div class="m-soute-wrap">
+      <div class="m-soute-lbl lbl-ar">⬇ AR — Laiton 71g</div>
+      <div class="m-soute-row">
+        <div id="mArL" class="m-side ar-l"></div>
+        <div class="m-sep-ar"></div>
+        <div id="mArR" class="m-side ar-r"></div>
+      </div>
+    </div>
+  </div>
+  <div class="m-info" id="mInfo" style="display:none;">
+    <div>
+      <div class="m-info-val" id="mInfoM">—</div>
+      <div class="m-info-lbl">MASSE CALCULÉE</div>
+      <div class="m-info-dlt" id="mInfoDlt"></div>
+    </div>
+    <div class="m-info-slots" id="mInfoSlots"></div>
+  </div>
+  <div class="m-leg">
+    <div class="m-li"><div class="m-ls" style="background:var(--laiton)"></div>71g laiton (AV·AR)</div>
+    <div class="m-li"><div class="m-ls" style="background:var(--plomb)"></div>88g plomb (C)</div>
+    <div class="m-li"><div class="m-ls" style="background:rgba(255,255,255,.04);border:1px solid #1e2530"></div>Vide</div>
+  </div>
+</div>
+
+<!-- ══ GPS LOG ══ -->
+<div id="gpsOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;align-items:flex-end;justify-content:center;">
+  <div style="width:100%;max-width:420px;background:#0d1117;border-radius:16px 16px 0 0;border:1px solid #30363d;padding:16px;max-height:90vh;overflow-y:auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <div><div style="font-size:16px;font-weight:800;">📍 GPS Log — Mamba S</div>
+        <div style="font-size:10px;color:#8b949e;" id="ghStatus">Non connecté</div></div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="connectGitHub()" id="btnGhConnect" style="background:#161b22;border:1px solid #30363d;color:#fff;border-radius:8px;padding:6px 10px;cursor:pointer;font-size:11px;">🔑 GitHub</button>
+        <button onclick="closeGPS()" style="background:#21262d;border:1px solid #30363d;color:#fff;border-radius:8px;padding:6px 10px;cursor:pointer;">✕</button>
+      </div>
+    </div>
+    <div style="background:#161b22;border-radius:10px;padding:10px;border:1px solid #21262d;margin-bottom:10px;">
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+        <button onclick="captureGPS()" id="btnCapture" style="flex:1;background:linear-gradient(135deg,#065f46,#047857);border:1px solid #34d399;color:#fff;border-radius:8px;padding:8px;cursor:pointer;font-size:13px;font-weight:700;">📡 Capturer position</button>
+        <div style="text-align:center;min-width:50px;"><div style="font-size:10px;color:#8b949e;">PRÉCISION</div>
+          <div style="font-size:12px;font-weight:700;color:#34d399;" id="gpsAccuracy">—</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
+        <div style="background:#0d1117;border-radius:6px;padding:6px;text-align:center;border:1px solid #21262d;">
+          <div style="font-size:9px;color:#8b949e;">ALTITUDE</div>
+          <div style="font-size:16px;font-weight:900;color:#34d399;" id="gpsAlt">— m</div></div>
+        <div style="background:#0d1117;border-radius:6px;padding:6px;text-align:center;border:1px solid #21262d;">
+          <div style="font-size:9px;color:#8b949e;">LAT</div>
+          <div style="font-size:11px;font-weight:700;color:#8b949e;" id="gpsLat">—</div></div>
+        <div style="background:#0d1117;border-radius:6px;padding:6px;text-align:center;border:1px solid #21262d;">
+          <div style="font-size:9px;color:#8b949e;">LON</div>
+          <div style="font-size:11px;font-weight:700;color:#8b949e;" id="gpsLon">—</div></div>
+      </div>
+      <button onclick="useAltitude()" id="btnUseAlt" style="width:100%;margin-top:8px;background:#1a2744;border:1px solid #1a73e8;color:#fff;border-radius:8px;padding:7px;cursor:pointer;font-size:12px;font-weight:700;display:none;">⬆ Utiliser cette altitude</button>
+    </div>
+    <div style="background:#161b22;border-radius:10px;padding:10px;border:1px solid #21262d;margin-bottom:10px;">
+      <div style="font-size:11px;color:#8b949e;font-weight:700;margin-bottom:8px;">ENREGISTRER SESSION</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">
+        <div><div style="font-size:9px;color:#8b949e;margin-bottom:2px;">SITE</div>
+          <input id="logSite" placeholder="Nom du site" style="width:100%;background:#0d1117;border:1px solid #30363d;color:#fff;border-radius:6px;padding:6px 8px;font-size:12px;"/></div>
+        <div><div style="font-size:9px;color:#8b949e;margin-bottom:2px;">CONDITIONS</div>
+          <input id="logNote" placeholder="Notes libres" style="width:100%;background:#0d1117;border:1px solid #30363d;color:#fff;border-radius:6px;padding:6px 8px;font-size:12px;"/></div>
+      </div>
+      <div style="background:#0d1117;border-radius:6px;padding:8px;border:1px solid #21262d;margin-bottom:8px;font-size:10px;">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;text-align:center;">
+          <div><span style="color:#8b949e;display:block;">VENT</span><span id="logVent" style="color:#fff;font-weight:700;">—</span></div>
+          <div><span style="color:#8b949e;display:block;">ALT</span><span id="logAlt2" style="color:#fff;font-weight:700;">—</span></div>
+          <div><span style="color:#8b949e;display:block;">MASSE</span><span id="logMasse" style="color:#fff;font-weight:700;">—</span></div>
+          <div><span style="color:#8b949e;display:block;">CONFIG</span><span id="logCfg" style="color:#fff;font-weight:700;">—</span></div>
+        </div>
+      </div>
+      <button onclick="saveLog()" style="width:100%;background:linear-gradient(135deg,#1a3a8f,#1a73e8);border:1px solid #1a73e8;color:#fff;border-radius:8px;padding:8px;cursor:pointer;font-size:13px;font-weight:700;">💾 Enregistrer sur GitHub Gist</button>
+      <div id="saveStatus" style="text-align:center;font-size:10px;color:#8b949e;margin-top:4px;"></div>
+    </div>
+    <div style="background:#161b22;border-radius:10px;padding:10px;border:1px solid #21262d;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <div style="font-size:11px;color:#8b949e;font-weight:700;">HISTORIQUE</div>
+        <button onclick="loadLogs()" style="background:#21262d;border:1px solid #30363d;color:#8b949e;border-radius:6px;padding:3px 8px;cursor:pointer;font-size:10px;">↻</button>
+      </div>
+      <div id="logList" style="font-size:10px;color:#8b949e;">Connectez-vous à GitHub.</div>
+    </div>
+  </div>
+</div>
+
+<div id="ghPopup" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:300;align-items:center;justify-content:center;">
+  <div style="width:90%;max-width:360px;background:#161b22;border-radius:16px;border:1px solid #30363d;padding:20px;">
+    <div style="font-size:15px;font-weight:800;margin-bottom:4px;">🔑 Connexion GitHub</div>
+    <div style="font-size:10px;color:#8b949e;margin-bottom:14px;">Token avec permission <strong>gist</strong><br>
+      <a href="https://github.com/settings/tokens/new?scopes=gist&description=MambaS+GPS+Log+MBI" target="_blank" style="color:#1a73e8;">Créer un token →</a></div>
+    <input id="ghTokenInput" type="password" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" style="width:100%;background:#0d1117;border:1px solid #30363d;color:#fff;border-radius:8px;padding:8px 10px;font-size:12px;margin-bottom:10px;font-family:monospace;"/>
+    <div style="display:flex;gap:8px;">
+      <button onclick="closeGhPopup()" style="flex:1;background:#21262d;border:1px solid #30363d;color:#8b949e;border-radius:8px;padding:8px;cursor:pointer;">Annuler</button>
+      <button onclick="validateToken()" style="flex:2;background:linear-gradient(135deg,#1a3a8f,#1a73e8);border:1px solid #1a73e8;color:#fff;border-radius:8px;padding:8px;cursor:pointer;font-weight:700;">✓ Connecter</button>
+    </div>
+    <div id="ghTokenError" style="color:#f85149;font-size:10px;margin-top:6px;text-align:center;"></div>
+  </div>
+</div>
+
+<script>
+// ══ TABS ══
+function switchTab(t){
+  document.getElementById('pageCalc').style.display   = t==='calc'   ? 'flex':'none';
+  document.getElementById('pageMatrix').style.display = t==='matrix' ? 'flex':'none';
+  document.getElementById('tabCalc').classList.toggle('on',   t==='calc');
+  document.getElementById('tabMatrix').classList.toggle('on', t==='matrix');
+}
+
+// ══ CONFIG MAMBA S ══
+const CFG={
+  m_vide:2550, cg_vide:102, OFFSET:-144,
+  AV:{cap:3,pos:80, w:71,t:'l'},
+  C: {cap:3,pos:102,w:88,t:'p'},
+  AR:{cap:4,pos:129,w:71,t:'l'},
+};
+const TABLES={
+  vent: [4.05,4.23,4.41,4.61,4.82,5.04,5.28,5.53,5.80,6.10,6.42,6.78,7.17,7.61,8.10,8.65,9.28,9.99,10.78,11.65,12.60,13.70,15.30],
+  masse:[2.300,2.385,2.470,2.555,2.640,2.725,2.810,2.895,2.980,3.065,3.150,3.235,3.320,3.405,3.490,3.575,3.660,3.745,3.830,3.915,4.000,4.085,4.170]
+};
+function getMasse0m(v){
+  const T=TABLES;
+  if(v<=T.vent[0])return T.masse[0];
+  if(v>=T.vent[T.vent.length-1])return T.masse[T.masse.length-1];
+  for(let i=0;i<T.vent.length-1;i++){
+    if(v>=T.vent[i]&&v<=T.vent[i+1]){const t=(v-T.vent[i])/(T.vent[i+1]-T.vent[i]);return T.masse[i]+t*(T.masse[i+1]-T.masse[i]);}
+  }
+}
+function getMasseAlt(m0,alt){if(alt<=0)return m0;return m0*Math.pow(1-(0.0065*alt)/288.15,5.25588);}
+
+let st={mode:'vent',vent:8.0,kg:3.202,alt:0,offset:0};
+
+function solve(tg){
+  let r=tg-CFG.m_vide;
+  const s={'AV-L':[],'AV-R':[],'C-L':[],'C-R':[],'AR-L':[],'AR-R':[]};
+  for(let i=0;i<CFG.C.cap;i++){
+    if(r>=CFG.C.w){s['C-L'].push('p');r-=CFG.C.w;}
+    if(r>=CFG.C.w){s['C-R'].push('p');r-=CFG.C.w;}
+  }
+  for(let i=0;i<Math.min(CFG.AV.cap,CFG.AR.cap);i++){
+    const pp=CFG.AV.w+CFG.AR.w;
+    if(r>=pp){s['AV-L'].push('l');s['AR-L'].push('l');r-=pp;}
+    if(r>=pp){s['AV-R'].push('l');s['AR-R'].push('l');r-=pp;}
+  }
+  return s;
+}
+function change(d){
+  switch(st.mode){
+    case 'vent':   st.vent=Math.max(0,Math.min(20,+((st.vent+d*.1).toFixed(1)))); break;
+    case 'kg':     st.kg=Math.max(2.550,Math.min(6.0,+((st.kg+d*.010).toFixed(3)))); break;
+    case 'alt':    st.alt=Math.max(0,Math.min(3000,st.alt+d*50)); break;
+    case 'offset': st.offset=Math.max(-500,Math.min(500,st.offset+d*71)); break;
+  }
+  render();
+}
+function setMode(m){st.mode=m;render();}
+
+function render(){
+  let tg,m0kg,mAltkg;
+  if(st.mode==='vent'||st.mode==='alt'){
+    m0kg=getMasse0m(st.vent);mAltkg=getMasseAlt(m0kg,st.alt);
+    tg=(mAltkg*1000)+CFG.OFFSET+st.offset;st.kg=+((tg/1000).toFixed(3));
+  }else if(st.mode==='kg'){
+    m0kg=getMasse0m(st.vent);mAltkg=getMasseAlt(m0kg,st.alt);tg=st.kg*1000+st.offset;
+  }else{
+    m0kg=getMasse0m(st.vent);mAltkg=getMasseAlt(m0kg,st.alt);
+    tg=(mAltkg*1000)+CFG.OFFSET+st.offset;st.kg=+((tg/1000).toFixed(3));
+  }
+  tg=Math.max(CFG.m_vide,Math.round(tg));
+  const sol=solve(tg);
+  let ballast=0,mom=CFG.m_vide*CFG.cg_vide;
+  ['AV','C','AR'].forEach(sec=>{
+    ['L','R'].forEach(side=>{
+      const id=sec+'-'+side,w=sol[id],m=w.length*CFG[sec].w;
+      ballast+=m;mom+=m*CFG[sec].pos;
+      let h='';
+      for(let i=0;i<CFG[sec].cap;i++) h+=`<div class="slot ${w[i]?CFG[sec].t:'s'}"></div>`;
+      document.getElementById(id).innerHTML=h;
+    });
+  });
+  const mF=CFG.m_vide+ballast,cgF=mom/mF,cgD=cgF-CFG.cg_vide;
+  document.getElementById('ventVal').innerText   =st.vent.toFixed(1);
+  document.getElementById('kgVal').innerText     =st.kg.toFixed(3);
+  document.getElementById('altVal').innerText    =st.alt;
+  document.getElementById('offsetVal').innerText =(st.offset>=0?'+':'')+st.offset+'g';
+  document.getElementById('massVal').innerText   =(mF/1000).toFixed(3);
+  document.getElementById('cgVal').innerText     =cgF.toFixed(1);
+  const nb=Math.round(st.offset/71);
+  document.getElementById('offsetLbl').innerText=nb===0?'OFFSET':`${nb>0?'+':''}${nb} plomb`;
+  const vl=document.getElementById('ventLabel');
+  if(st.alt>0) vl.innerText=`VENT m/s — air −${((1-getMasseAlt(1,st.alt))*100).toFixed(1)}%`;
+  else vl.innerText='VENT m/s — Mamba S';
+  document.getElementById('ventHeader').classList.toggle('active',st.mode==='vent');
+  document.getElementById('modeKg').className    ='mode-btn'+(st.mode==='kg'?' active':'');
+  document.getElementById('modeAlt').className   ='mode-btn'+(st.mode==='alt'?' active-alt':'');
+  document.getElementById('modeOffset').className='mode-btn'+(st.mode==='offset'?' active':'');
+  const ab=document.getElementById('altBand');
+  if(st.alt>0&&st.mode!=='kg'){
+    ab.style.display='flex';
+    const cg=Math.round((m0kg-mAltkg)*1000);
+    document.getElementById('ab0m').innerText  =st.alt+' m';
+    document.getElementById('abCorr').innerText='−'+(cg+Math.abs(CFG.OFFSET))+' g';
+    document.getElementById('abFinal').innerText=(mF/1000).toFixed(3)+' kg';
+  }else ab.style.display='none';
+  const cb=document.getElementById('cgBox'),cl=document.getElementById('cgLbl');
+  cb.className='cg-box';
+  if(Math.abs(cgD)<0.5){cb.classList.add('neutre');cl.textContent='✓ CG';}
+  else if(cgD<0){cb.classList.add('avant');cl.textContent=cgD.toFixed(1)+'mm';}
+  else{cb.classList.add('arriere');cl.textContent='+'+cgD.toFixed(1)+'mm';}
+  const hints={
+    vent: st.alt>0?`Table 0m → Baro ${st.alt}m → Offset −144g → ${st.kg.toFixed(3)} kg`:'Appui long = défilement rapide',
+    kg:   'Masse manuelle — vent/alt gardés en référence',
+    alt:  (()=>{const c=Math.round((m0kg-getMasseAlt(m0kg,100))*1000);return`Pas 50m • ≈ −${c}g/100m à ${st.vent.toFixed(1)} m/s`;})(),
+    offset:`Décalage ±71g par plomb • total: ${st.offset>=0?'+':''}${st.offset}g`,
+  };
+  document.getElementById('hintText').textContent=hints[st.mode]||'';
+}
+
+// ══ MATRICE ══
+const REFS=[
+  {n:1, av:0,c:2,ar:0,m:2730,cg:'102.2',lbl:'C×2'},
+  {n:2, av:0,c:3,ar:0,m:2818,cg:'102.2',lbl:'C×3'},
+  {n:3, av:0,c:4,ar:0,m:2911,cg:null,   lbl:'C×4'},
+  {n:4, av:0,c:5,ar:0,m:2999,cg:'102.4',lbl:'C×5'},
+  {n:5, av:0,c:6,ar:0,m:3097,cg:'102.4',lbl:'C×6'},
+  {n:6, av:1,c:6,ar:0,m:3168,cg:null,   lbl:'AV1·C6'},
+  {n:7, av:1,c:6,ar:1,m:3225,cg:'102.7',lbl:'AV1·C6·AR1'},
+  {n:8, av:2,c:6,ar:1,m:3296,cg:'102.8',lbl:'AV2·C6·AR1'},
+  {n:9, av:2,c:6,ar:2,m:3519,cg:'102.8',lbl:'AV2·C6·AR2'},
+  {n:10,av:3,c:6,ar:2,m:3526,cg:'102.8',lbl:'AV3·C6·AR2'},
+  {n:11,av:3,c:6,ar:3,m:3597,cg:'102.8',lbl:'AV3·C6·AR3'},
+  {n:12,av:3,c:6,ar:4,m:3668,cg:'102.8',lbl:'AV3·C6·AR4'},
+  {n:13,av:4,c:6,ar:4,m:3641,cg:'103.1',lbl:'AV4·C6·AR4'},
+  {n:14,av:5,c:6,ar:4,m:3712,cg:'103.1',lbl:'AV5·C6·AR4'},
+  {n:15,av:6,c:6,ar:4,m:3788,cg:'102.3',lbl:'AV6·C6·AR4'},
+  {n:16,av:6,c:6,ar:5,m:3873,cg:'102.3',lbl:'AV6·C6·AR5'},
+  {n:17,av:6,c:6,ar:6,m:3943,cg:'103.2',lbl:'AV6·C6·AR6'},
+  {n:18,av:6,c:6,ar:7,m:4016,cg:'104.0',lbl:'AV6·C6·AR7'},
+  {n:19,av:6,c:6,ar:8,m:4087,cg:'102.8',lbl:'AV6·C6·AR8',avp:true,cp:true},
+  {n:20,av:6,c:6,ar:8,m:4072,cg:'102.8',lbl:'AV6·C6·AR8'},
+];
+const COLS={
+  'AV-L':['D','C','B'],  'AV-R':['E','F','G'],
+  'C-L': ['D','C','B'],  'C-R': ['E','F','G'],
+  'AR-L':['D','C','B','A'],'AR-R':['E','F','G','H'],
+};
+const MV_M=2550,CGV_M=102;
+function calcMCGRef(ref){
+  const avW=ref.avp?88:71,cW=ref.cp?71:88;
+  const m=MV_M+ref.av*avW+ref.c*cW+ref.ar*71;
+  const mom=MV_M*CGV_M+ref.av*avW*80+ref.c*cW*102+ref.ar*71*127;
+  return{m,cg:parseFloat((mom/m).toFixed(1))};
+}
+function buildMSide(elId,sec,row,total,side,ref,maxN){
+  const cols=COLS[`${sec}-${side}`];
+  const prio=(sec==='AR')?(ref.av%2===1?'L':'R'):'R';
+  const n=side===prio?Math.ceil(total/2):Math.floor(total/2);
+  const isAVp=(sec==='AV'&&ref.avp),isCL=(sec==='C'&&ref.cp);
+  const type=(isAVp||(sec==='C'&&!isCL))?'mp':'ml';
+  const w=type==='mp'?88:71;
+  const el=document.getElementById(elId);el.innerHTML='';
+  const full=cols.map((col,i)=>({filled:i<n,type,w,coord:`${row}${col}`}));
+  while(full.length<maxN)full.push(null);
+  full.forEach(cell=>{
+    const div=document.createElement('div');
+    if(!cell){div.className='mc';}else{
+      div.className='mc '+(cell.filled?cell.type:'');
+      if(cell.filled){
+        const cw=document.createElement('div');cw.className='mc-w';cw.textContent=cell.w+'g';
+        const ct=document.createElement('div');ct.className='mc-t';ct.textContent=cell.coord;
+        div.appendChild(cw);div.appendChild(ct);
+      }
+    }
+    el.appendChild(div);
+  });
+}
+const MAX_AV=3,MAX_C=3,MAX_AR=4;
+function showMatrix(idx){
+  const ref=REFS[idx];
+  const rowAV=ref.n*4,rowC=ref.n*4+1,rowAR=ref.n*4+2;
+  const {m,cg}=calcMCGRef(ref),dm=m-ref.m;
+  document.getElementById('mHdrSub').textContent=`Config #${ref.n} — ${ref.lbl}`;
+  document.getElementById('mHdrM').textContent=ref.m+' g ref';
+  document.getElementById('mHdrDelta').textContent=`calc ${m}g (${dm>0?'+':''}${dm}g)`;
+  buildMSide('mAvL','AV',rowAV,ref.av,'L',ref,MAX_AV);buildMSide('mAvR','AV',rowAV,ref.av,'R',ref,MAX_AV);
+  buildMSide('mCL', 'C', rowC, ref.c, 'L',ref,MAX_C); buildMSide('mCR', 'C', rowC, ref.c, 'R',ref,MAX_C);
+  buildMSide('mArL','AR',rowAR,ref.ar,'L',ref,MAX_AR);buildMSide('mArR','AR',rowAR,ref.ar,'R',ref,MAX_AR);
+  const avT=ref.av*71,cT=ref.c*(ref.cp?71:88),arT=ref.ar*71;
+  document.getElementById('mInfoM').textContent=m+' g';
+  const dEl=document.getElementById('mInfoDlt');
+  dEl.textContent=dm===0?'= ref':(dm>0?'+':'')+dm+'g vs ref';
+  dEl.style.color=Math.abs(dm)<=15?'#3fb950':'#f0a500';
+  document.getElementById('mInfoSlots').innerHTML=
+    `AV <span>${avT}g</span> (×${ref.av}) · C <span>${cT}g</span> (×${ref.c})<br>`+
+    `AR <span>${arT}g</span> (×${ref.ar}) · Ballast <span>${avT+cT+arT}g</span>`;
+  document.getElementById('mPh').style.display='none';
+  document.getElementById('mSoutes').style.display='flex';
+  document.getElementById('mInfo').style.display='flex';
+  document.querySelectorAll('.rb').forEach((b,i)=>b.classList.toggle('sel',i===idx));
+}
+
+// ══ GPS LOG ══
+const GPS_KEY='mambas';
+let gpsState={token:localStorage.getItem(GPS_KEY+'_tok')||null,login:localStorage.getItem(GPS_KEY+'_login')||null,gistId:localStorage.getItem(GPS_KEY+'_gist')||null,lat:null,lon:null,alt:null};
+function openGPS(){
+  document.getElementById('logVent').textContent=st.vent.toFixed(1)+' m/s';
+  document.getElementById('logAlt2').textContent=st.alt+' m';
+  document.getElementById('logMasse').textContent=st.kg.toFixed(3)+' kg';
+  let tg=Math.max(CFG.m_vide,Math.round((getMasseAlt(getMasse0m(st.vent),st.alt)*1000)+CFG.OFFSET+st.offset));
+  let best=REFS[0];let bd=Infinity;
+  REFS.forEach(r=>{const d=Math.abs(calcMCGRef(r).m-tg);if(d<bd){bd=d;best=r;}});
+  document.getElementById('logCfg').textContent='#'+best.n;
+  updateGhStatus();document.getElementById('gpsOverlay').style.display='flex';
+}
+function closeGPS(){document.getElementById('gpsOverlay').style.display='none';}
+function connectGitHub(){document.getElementById('ghTokenError').textContent='';document.getElementById('ghTokenInput').value=gpsState.token||'';document.getElementById('ghPopup').style.display='flex';}
+function closeGhPopup(){document.getElementById('ghPopup').style.display='none';}
+async function validateToken(){
+  const tok=document.getElementById('ghTokenInput').value.trim();if(!tok)return;
+  document.getElementById('ghTokenError').textContent='Vérification…';
+  try{
+    const r=await fetch('https://api.github.com/user',{headers:{'Authorization':'token '+tok}});
+    if(!r.ok)throw new Error('Token invalide');
+    const u=await r.json();gpsState.token=tok;gpsState.login=u.login;
+    localStorage.setItem(GPS_KEY+'_tok',tok);localStorage.setItem(GPS_KEY+'_login',u.login);
+    closeGhPopup();updateGhStatus();loadLogs();
+  }catch(e){document.getElementById('ghTokenError').textContent='✗ '+e.message;}
+}
+function updateGhStatus(){
+  const el=document.getElementById('ghStatus'),btn=document.getElementById('btnGhConnect');
+  if(gpsState.token&&gpsState.login){el.textContent='✓ '+gpsState.login;el.style.color='#34d399';btn.textContent='⟳ Changer';}
+  else{el.textContent='Non connecté';el.style.color='#8b949e';btn.textContent='🔑 GitHub';}
+}
+function captureGPS(){
+  const btn=document.getElementById('btnCapture');btn.textContent='⌛ Localisation…';
+  if(!navigator.geolocation){btn.textContent='✗ GPS indisponible';return;}
+  navigator.geolocation.getCurrentPosition(
+    pos=>{
+      const{latitude:lat,longitude:lon,altitude:alt,accuracy}=pos.coords;
+      gpsState.lat=lat;gpsState.lon=lon;gpsState.alt=alt;
+      document.getElementById('gpsLat').textContent=lat.toFixed(5)+'°';
+      document.getElementById('gpsLon').textContent=lon.toFixed(5)+'°';
+      document.getElementById('gpsAlt').textContent=alt!==null?Math.round(alt)+' m':'— m';
+      document.getElementById('gpsAccuracy').textContent=Math.round(accuracy)+' m';
+      btn.textContent='✓ Position capturée';
+      if(alt!==null){document.getElementById('btnUseAlt').style.display='block';document.getElementById('btnUseAlt').textContent='⬆ Utiliser '+Math.round(alt)+' m';}
+    },
+    err=>{btn.textContent='✗ '+err.message;},{enableHighAccuracy:true,timeout:15000,maximumAge:0}
+  );
+}
+function useAltitude(){if(gpsState.alt===null)return;st.alt=Math.round(gpsState.alt/50)*50;st.mode='alt';render();closeGPS();}
+async function saveLog(){
+  if(!gpsState.token){connectGitHub();return;}
+  const status=document.getElementById('saveStatus');status.textContent='Enregistrement…';
+  const ts=new Date().toISOString();
+  let tg=Math.max(CFG.m_vide,Math.round((getMasseAlt(getMasse0m(st.vent),st.alt)*1000)+CFG.OFFSET+st.offset));
+  let best=REFS[0];let bd=Infinity;REFS.forEach(r=>{const d=Math.abs(calcMCGRef(r).m-tg);if(d<bd){bd=d;best=r;}});
+  const entry={timestamp:ts,site:document.getElementById('logSite').value||'',note:document.getElementById('logNote').value||'',vent:st.vent,altitude:st.alt,gps:gpsState.alt!==null?{lat:gpsState.lat,lon:gpsState.lon,alt:Math.round(gpsState.alt)}:null,masse:st.kg,config:best.n,lbl:best.lbl};
+  try{
+    let entries=[];
+    if(gpsState.gistId){const r=await fetch('https://api.github.com/gists/'+gpsState.gistId,{headers:{'Authorization':'token '+gpsState.token}});if(r.ok){const g=await r.json();const raw=g.files['mambas_log.json']?.content;if(raw)entries=JSON.parse(raw);}}
+    entries.unshift(entry);
+    const body={description:'Mamba S GPS Log',public:false,files:{'mambas_log.json':{content:JSON.stringify(entries,null,2)}}};
+    const res=await fetch('https://api.github.com/gists'+(gpsState.gistId?'/'+gpsState.gistId:''),{method:gpsState.gistId?'PATCH':'POST',headers:{'Authorization':'token '+gpsState.token,'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const saved=await res.json();gpsState.gistId=saved.id;localStorage.setItem(GPS_KEY+'_gist',saved.id);
+    status.textContent='✓ Sauvegardé';status.style.color='#34d399';
+    document.getElementById('logSite').value='';document.getElementById('logNote').value='';loadLogs();
+  }catch(e){status.textContent='✗ '+e.message;status.style.color='#f85149';}
+}
+async function loadLogs(){
+  const el=document.getElementById('logList');
+  if(!gpsState.token){el.textContent='Connectez-vous à GitHub.';return;}
+  if(!gpsState.gistId){el.textContent='Aucun log.';return;}
+  try{
+    const r=await fetch('https://api.github.com/gists/'+gpsState.gistId,{headers:{'Authorization':'token '+gpsState.token}});
+    if(!r.ok)throw new Error();
+    const g=await r.json();const raw=g.files['mambas_log.json']?.content;
+    if(!raw){el.textContent='Aucune entrée.';return;}
+    const entries=JSON.parse(raw);
+    el.innerHTML=entries.slice(0,10).map(e=>{
+      const d=new Date(e.timestamp);
+      const dt=d.toLocaleDateString('fr-FR')+' '+d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+      return`<div style="padding:6px 0;border-bottom:1px solid #21262d;display:flex;justify-content:space-between;">
+        <div><span style="color:#fff;font-weight:700;">${e.site||'—'}</span>
+        <span style="color:#8b949e;"> · ${e.vent}m/s · alt${e.altitude}m${e.gps?' · GPS'+e.gps.alt+'m':''}</span><br>
+        <span style="color:#3fb950;">cfg #${e.config} ${e.lbl||''} · ${e.masse.toFixed(3)}kg</span></div>
+        <span style="color:#8b949e;font-size:9px;">${dt}</span></div>`;
+    }).join('');
+  }catch(e){el.textContent='Erreur chargement.';}
+}
+
+// ══ INIT ══
+let repeatTimer;
+function setupBtn(id,dir){
+  const btn=document.getElementById(id),act=()=>change(dir);
+  const start=e=>{e&&e.preventDefault();act();repeatTimer=setInterval(act,90);};
+  const stop=()=>clearInterval(repeatTimer);
+  btn.addEventListener('touchstart',start,{passive:false});
+  btn.addEventListener('mousedown',start);
+  ['touchend','mouseup','mouseleave','touchcancel'].forEach(ev=>btn.addEventListener(ev,stop));
+}
+window.onload=()=>{
+  setupBtn('btnL',-1);setupBtn('btnR',1);render();
+  updateGhStatus();if(gpsState.token)loadLogs();
+  const g=document.getElementById('sg');
+  REFS.forEach((r,i)=>{
+    const b=document.createElement('div');b.className='rb';b.textContent=r.n;
+    b.title=r.lbl+' — '+r.m+'g';
+    b.addEventListener('click',()=>showMatrix(i));g.appendChild(b);
+  });
+};
+</script>
+</body>
+</html>
