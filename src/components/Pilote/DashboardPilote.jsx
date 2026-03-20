@@ -41,7 +41,7 @@ export default function DashboardPilote() {
   // Masse CIBLE = Poly4 + Offset (pour l'instant, lissage mÃ©tÃ©o Ã  venir)
   const masseCible = masseBase + (offset / 1000)
   const masseCibleGrammes = masseCible * 1000
-  const masseVideGrammes = mv * 1000
+  const masseVideGrammes = activeModel ? activeModel.masseVide : mv * 1000
   
   // RÃ©solution automatique soute
   const config = activeModel?.soutes ? { cgVide: activeModel.cgVide, masseVide: masseVideGrammes, soutes: { av: activeModel.soutes['avant-cle'] ? { capacite: activeModel.soutes['avant-cle'].capacite, distanceBA: activeModel.soutes['avant-cle'].distanceBA, materiaux: activeModel.soutes['avant-cle'].materiaux } : null, c: activeModel.soutes['centrale-cle'] ? { capacite: activeModel.soutes['centrale-cle'].capacite, distanceBA: activeModel.soutes['centrale-cle'].distanceBA, materiaux: activeModel.soutes['centrale-cle'].materiaux } : null, ar: activeModel.soutes['arriere-aile'] ? { capacite: activeModel.soutes['arriere-aile'].capacite, distanceBA: activeModel.soutes['arriere-aile'].distanceBA, materiaux: activeModel.soutes['arriere-aile'].materiaux } : null } } : null
@@ -61,6 +61,10 @@ export default function DashboardPilote() {
   const deltaCG = (isNaN(cgSoute) || isNaN(cgCible)) ? 0 : cgSoute - cgCible
   
   const nomPlaneur = activeModel?.nom || 'F3F Pro'
+
+  if (!activeModel) return <div className="h-screen bg-gray-950 text-white flex items-center justify-center">Chargement...</div>
+
+  if (!activeModel) return <div className="h-screen bg-gray-950 text-white flex items-center justify-center">Chargement...</div>
   
   // Mettre Ã  jour le store soute quand vent/offset changent
   useEffect(() => {
@@ -296,6 +300,9 @@ function Chrono() {
     </div>
   )
 }
+
+
+
 
 
 
