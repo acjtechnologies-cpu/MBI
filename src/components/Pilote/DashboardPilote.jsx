@@ -44,7 +44,7 @@ export default function DashboardPilote() {
   const masseVideGrammes = activeModel ? activeModel.masseVide : mv * 1000
   
   // RÃ©solution automatique soute
-  const config = activeModel?.soutes ? { cgVide: activeModel.cgVide, masseVide: masseVideGrammes, soutes: { av: activeModel.soutes['avant-cle'] ? { capacite: activeModel.soutes['avant-cle'].capacite, distanceBA: activeModel.soutes['avant-cle'].distanceBA, materiaux: activeModel.soutes['avant-cle'].materiaux } : null, c: activeModel.soutes['centrale-cle'] ? { capacite: activeModel.soutes['centrale-cle'].capacite, distanceBA: activeModel.soutes['centrale-cle'].distanceBA, materiaux: activeModel.soutes['centrale-cle'].materiaux } : null, ar: activeModel.soutes['arriere-aile'] ? { capacite: activeModel.soutes['arriere-aile'].capacite, distanceBA: activeModel.soutes['arriere-aile'].distanceBA, materiaux: activeModel.soutes['arriere-aile'].materiaux } : null } } : null
+  const config = activeModel?.soutes ? { nom: activeModel.nom, id: activeModel.id, cgVide: activeModel.cgVide, masseVide: masseVideGrammes, matrix: activeModel.matrix || [], soutes: { av: activeModel.soutes['avant-cle'] ? { capacite: activeModel.soutes['avant-cle'].capacite, distanceBA: activeModel.soutes['avant-cle'].distanceBA, materiaux: activeModel.soutes['avant-cle'].materiaux } : null, c: activeModel.soutes['centrale-cle'] ? { capacite: activeModel.soutes['centrale-cle'].capacite, distanceBA: activeModel.soutes['centrale-cle'].distanceBA, materiaux: activeModel.soutes['centrale-cle'].materiaux } : null, ar: activeModel.soutes['arriere-aile'] ? { capacite: activeModel.soutes['arriere-aile'].capacite, distanceBA: activeModel.soutes['arriere-aile'].distanceBA, materiaux: activeModel.soutes['arriere-aile'].materiaux } : null } } : null
   const solution = config ? resoudreSouteV2(masseCibleGrammes, masseVideGrammes, config, calculerCGCible(masseCible, surface)) : { gauche: { av: [], c: [], ar: [] }, droite: { av: [], c: [], ar: [] } }
   const stats = config ? calculerStatsSouteV2(solution, config) : { masseTotale: masseVideGrammes, cg: 0, cgDelta: 0 }
   
@@ -300,6 +300,7 @@ function Chrono() {
     </div>
   )
 }
+
 
 
 
