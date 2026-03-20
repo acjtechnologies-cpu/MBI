@@ -1,5 +1,5 @@
-﻿import { useState, useEffect } from 'react'
-import { ChevronLeft, ChevronRight, Save, ChevronDown } from 'lucide-react'
+﻿import { useEffect } from 'react'
+import { ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react'
 import { useAppStore } from '../../stores/appStore'
 import { useSouteStore } from '../../stores/souteStore'
 import { calculerMasseOptimale, calculerChargeAlaire, calculerMeteo } from '../../utils/poly4'
@@ -8,309 +8,288 @@ import { calculerCGCible } from '../../utils/ballast'
 import { resoudreSouteV2, calculerStatsSouteV2 } from '../../utils/NewSolver'
 
 export default function DashboardPilote() {
-  const { 
-    params, 
-    incrementParam,
-    decrementParam,
-    mv,          // Masse Ã  vide DEPUIS CONFIG
-    surface,     // Surface en dmÂ² DEPUIS CONFIG
-    offset, 
-    incrementOffset, 
-    decrementOffset, 
-    selectedParam, 
-    selectParam 
-  } = useAppStore()
-  
+  const {
+    params, incrementParam, decrementParam,
+    mv, surface, offset, incrementOffset, decrementOffset,
+    selectedParam, selectParam, k_up, alpha, altitude } = useAppStore()
+
   const { setState } = useSouteStore()
   const { getActiveModel } = useModelStore()
   const activeModel = getActiveModel()
-  
   const vent = params.vent
-  
-  // Calcul MÃ‰TÃ‰O (rho, rr)
-  const meteo = calculerMeteo(
-    params.pression,
-    params.temperature,
-    params.rosee,
-    params.altitude
-  )
-  
-  // Calcul POLY4 (masse de base)
-  const masseBase = calculerMasseOptimale(vent) // kg
-  
-  // Masse CIBLE = Poly4 + Offset (pour l'instant, lissage mÃ©tÃ©o Ã  venir)
-  const masseCible = masseBase + (offset / 1000)
+
+  // Météo
+  const meteo = calculerMeteo(params.pression, params.temperature, params.rosee, params.altitude)
+
+  // Masse cible
+  const masseBase = calculerMasseOptimale(vent)
+  const rr = isNaN(meteo.rr) ? 1.0 : meteo.rr
+  const masseCible = masseBase * rr * (k_up || 1.0) * (alpha || 1.0) + (offset / 1000)
   const masseCibleGrammes = masseCible * 1000
   const masseVideGrammes = activeModel ? activeModel.masseVide : mv * 1000
-  
-  // RÃ©solution automatique soute
-  const config = activeModel?.soutes ? { nom: activeModel.nom, id: activeModel.id, cgVide: activeModel.cgVide, masseVide: masseVideGrammes, matrix: activeModel.matrix || [], soutes: { av: activeModel.soutes['avant-cle'] ? { capacite: activeModel.soutes['avant-cle'].capacite, distanceBA: activeModel.soutes['avant-cle'].distanceBA, materiaux: activeModel.soutes['avant-cle'].materiaux } : null, c: activeModel.soutes['centrale-cle'] ? { capacite: activeModel.soutes['centrale-cle'].capacite, distanceBA: activeModel.soutes['centrale-cle'].distanceBA, materiaux: activeModel.soutes['centrale-cle'].materiaux } : null, ar: activeModel.soutes['arriere-aile'] ? { capacite: activeModel.soutes['arriere-aile'].capacite, distanceBA: activeModel.soutes['arriere-aile'].distanceBA, materiaux: activeModel.soutes['arriere-aile'].materiaux } : null } } : null
-  const solution = config ? resoudreSouteV2(masseCibleGrammes, masseVideGrammes, config, calculerCGCible(masseCible, surface)) : { gauche: { av: [], c: [], ar: [] }, droite: { av: [], c: [], ar: [] } }
-  const stats = config ? calculerStatsSouteV2(solution, config) : { masseTotale: masseVideGrammes, cg: 0, cgDelta: 0 }
-  
-  // Masse ACTUELLE
-  const masseActuelle = (stats.masseTotale > 0) ? parseFloat((stats.masseTotale / 1000).toFixed(3)) : mv
-  
-  // Charge alaire
-  const chargeAlaire = calculerChargeAlaire(masseActuelle, surface) || 0
-  const deltaGrammes = (masseActuelle - masseCible) * 1000
-  
-  // CG - INVERSÃ‰ POUR AFFICHAGE
-  const cgSoute = typeof stats.cgDelta === 'number' ? stats.cgDelta : 0  // â† MODIFIÃ‰ : on inverse le signe
-  const cgCible = calculerCGCible(masseCible, surface)
-  const deltaCG = (isNaN(cgSoute) || isNaN(cgCible)) ? 0 : cgSoute - cgCible
-  
-  const nomPlaneur = activeModel?.nom || 'F3F Pro'
 
-  if (!activeModel) return <div className="h-screen bg-gray-950 text-white flex items-center justify-center">Chargement...</div>
+  // Config solver — dynamique selon soutes du modèle
+  const config = activeModel?.soutes ? {
+    id:        activeModel.id,
+    nom:       activeModel.nom,
+    cgVide:    activeModel.cgVide,
+    masseVide: masseVideGrammes,
+    matrix:    activeModel.matrix || null,
+    soutes: {
+      av: activeModel.soutes['avant-cle'] ? {
+        distanceBA: activeModel.soutes['avant-cle'].distanceBA,
+        capacite:   activeModel.soutes['avant-cle'].capacite,
+        materiaux:  activeModel.soutes['avant-cle'].materiaux
+      } : null,
+      c: activeModel.soutes['centrale-cle'] ? {
+        distanceBA: activeModel.soutes['centrale-cle'].distanceBA,
+        capacite:   activeModel.soutes['centrale-cle'].capacite,
+        materiaux:  activeModel.soutes['centrale-cle'].materiaux
+      } : null,
+      ar: activeModel.soutes['arriere-aile'] ? {
+        distanceBA: activeModel.soutes['arriere-aile'].distanceBA,
+        capacite:   activeModel.soutes['arriere-aile'].capacite,
+        materiaux:  activeModel.soutes['arriere-aile'].materiaux
+      } : null
+    }
+  } : null
 
-  if (!activeModel) return <div className="h-screen bg-gray-950 text-white flex items-center justify-center">Chargement...</div>
-  
-  // Mettre Ã  jour le store soute quand vent/offset changent
+  // Résolution
+  const solution = config
+    ? resoudreSouteV2(masseCibleGrammes, masseVideGrammes, config, calculerCGCible(masseCible, activeModel?.surface || surface))
+    : { gauche: {av:[], c:[], ar:[]}, droite: {av:[], c:[], ar:[]} }
+
+  const stats = config
+    ? calculerStatsSouteV2(solution, config)
+    : { masseTotale: masseVideGrammes, cg: activeModel?.cgVide || 0, cgDelta: 0, precision: 0 }
+
+  const masseActuelle = stats.masseTotale > 0 ? parseFloat((stats.masseTotale / 1000).toFixed(3)) : mv
+  const chargeAlaire  = calculerChargeAlaire(masseActuelle, activeModel?.surface || surface)
+  const deltaGrammes  = (masseActuelle - masseCible) * 1000
+  const cgSoute = isNaN(stats.cgDelta) ? 0 : (stats.cgDelta || 0)
+  const cgCible = calculerCGCible(masseCible, activeModel?.surface || surface)
+  const deltaCG = isNaN(cgSoute - cgCible) ? 0 : cgSoute - cgCible
+  const nomPlaneur = activeModel?.nom || 'F3F'
+
+  // Soutes triées AV → AR pour barographe
+  const soutesSorted = activeModel?.soutes
+    ? Object.values(activeModel.soutes).sort((a, b) => a.distanceBA - b.distanceBA)
+    : []
+
+  const souteKeys = ['av', 'c', 'ar']
+
   useEffect(() => {
     setState(solution)
   }, [vent, offset])
-  
+
+  if (!activeModel) {
+    return (
+      <div className="h-screen flex items-center justify-center" style={{background:'#05070a',color:'#8b949e'}}>
+        Chargement...
+      </div>
+    )
+  }
+
   return (
-    <div className="h-screen bg-gray-950 text-white flex flex-col overflow-hidden">
-      {/* Header avec mÃ©tÃ©o */}
-      <div className="bg-gray-900 px-2 py-1 border-b border-gray-800">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
-            <ChevronDown size={14} className="text-blue-400" />
-            <div className="text-xs font-bold text-blue-400">{nomPlaneur}</div>
+    <div className="h-screen flex flex-col overflow-hidden" style={{background:'#05070a'}} translate="no">
+
+      {/* ── HEADER ── */}
+      <div style={{background:'#0d1117', borderBottom:'1px solid #21262d', padding:'4px 8px', flexShrink:0}}>
+        <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+          <div style={{display:'flex', alignItems:'center', gap:4}}>
+            <ChevronDown size={13} color="#58a6ff" />
+            <span style={{fontSize:12, fontWeight:800, color:'#58a6ff'}}>{nomPlaneur}</span>
           </div>
-          <div className="text-[8px] text-gray-400">
+          <span style={{fontSize:9, color:'#8b949e'}}>
             rho: {isNaN(meteo.rr) ? 'N/A' : meteo.rr.toFixed(3)} ({meteo.qual || 'N/A'})
-          </div>
+          </span>
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="bg-gray-900 px-2 py-1.5 border-b border-gray-800">
-        <div className="grid grid-cols-3 gap-1.5">
-          <div className="text-center">
-            <div className="text-[8px] text-gray-500 leading-tight">CIBLE</div>
-            <div className="text-lg font-black text-gray-400 leading-tight">
-              {masseCible.toFixed(3)}
-            </div>
-            <div className="text-[7px] text-gray-500 leading-tight">
-              Poly4 {masseBase.toFixed(3)}
-            </div>
+      {/* ── STATS ── */}
+      <div style={{background:'#0d1117', borderBottom:'1px solid #21262d', padding:'6px 8px', flexShrink:0}}>
+        <div style={{display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:4, textAlign:'center'}}>
+
+          <div>
+            <div style={{fontSize:9, color:'#8b949e', fontWeight:700}}>CIBLE</div>
+            <div style={{fontSize:22, fontWeight:900, color:'#8b949e', lineHeight:1}}>{masseCible.toFixed(3)}</div>
+            <div style={{fontSize:8, color:'#8b949e'}}>Poly4 {masseBase.toFixed(3)}</div>
           </div>
-          
-          <div className="text-center">
-            <div className="text-[8px] text-gray-500 leading-tight">ACTUEL</div>
-            <div className="text-2xl font-black text-green-400 leading-tight">
-              {masseActuelle.toFixed(3)}
-            </div>
-            <div className="text-[8px] text-gray-400 leading-tight">
-              {chargeAlaire.toFixed(1)} g/dmÂ²{' '}
-              <span className={deltaGrammes >= 0 ? 'text-green-400' : 'text-red-400'}>
+
+          <div>
+            <div style={{fontSize:9, color:'#8b949e', fontWeight:700}}>ACTUEL</div>
+            <div style={{fontSize:22, fontWeight:900, color:'#3fb950', lineHeight:1}}>{masseActuelle.toFixed(3)}</div>
+            <div style={{fontSize:8, color:'#8b949e'}}>
+              {chargeAlaire.toFixed(1)} g/dm²{' '}
+              <span style={{color: deltaGrammes >= 0 ? '#3fb950' : '#f85149'}}>
                 ({deltaGrammes >= 0 ? '+' : ''}{Math.round(deltaGrammes)}g)
               </span>
             </div>
           </div>
-          
-          <div className="text-center">
-            <div className="text-[8px] text-gray-500 leading-tight">CG (MM)</div>
-            <div className="text-lg font-black text-green-400 leading-tight">
-              {isNaN(cgSoute) ? '0.0' : cgSoute.toFixed(1)}
+
+          <div>
+            <div style={{fontSize:9, color:'#8b949e', fontWeight:700}}>CG (MM)</div>
+            <div style={{fontSize:22, fontWeight:900, color:'#3fb950', lineHeight:1}}>
+              {cgSoute.toFixed(1)}
             </div>
-            <div className="text-[8px] text-gray-400 leading-tight">
-              {isNaN(deltaCG) ? '0.0' : deltaCG.toFixed(1)}mm
-            </div>
-            <div className="text-[7px] text-gray-600 leading-tight">
-              Cible {(cgCible || 0).toFixed(1)}mm
-            </div>
+            <div style={{fontSize:8, color:'#8b949e'}}>{deltaCG.toFixed(1)}mm</div>
+            <div style={{fontSize:7, color:'#555'}}>Cible {(cgCible||0).toFixed(1)}mm</div>
           </div>
+
         </div>
       </div>
 
-      {/* Barographe */}
-      <div className="flex-1 flex flex-col justify-evenly py-0.5 min-h-0 gap-0.5">
-        {['av', 'c', 'ar'].map((pack) => {
-          const gaucheData = solution.gauche[pack] || []
-          const droiteData = solution.droite[pack] || []
-          
+      {/* ── BAROGRAPHE ── */}
+      <div style={{flex:1, display:'flex', flexDirection:'column', justifyContent:'space-evenly', padding:'4px 0', minHeight:0}}>
+        {soutesSorted.map((soute, idx) => {
+          const key = souteKeys[idx] || 'ar'
+          const gaucheData = solution?.gauche?.[key] || []
+          const droiteData = solution?.droite?.[key] || []
+          const cap = config?.soutes?.[key]?.capacite || soute.capacite || 3
+
+          // Couleur de bordure selon soute
+          const borderColor = idx === 0
+            ? 'rgba(255,180,0,.45)'
+            : idx === 1
+              ? 'rgba(26,115,232,.5)'
+              : 'rgba(63,185,80,.45)'
+          const labelColor = idx === 0
+            ? 'rgba(255,200,80,.9)'
+            : idx === 1
+              ? 'rgba(100,170,255,.9)'
+              : 'rgba(63,185,80,.9)'
+
+          // Label matériau
+          const mats = soute.materiaux?.filter(m => m.stock === null || m.stock === undefined || m.stock > 0)
+          const matLabel = mats?.map(m => `${m.nom} ${m.masse}g`).join(' · ') || ''
+
           return (
-            <div key={pack} className="flex justify-center gap-0.5 items-center">
-              <div className="flex gap-0.5 w-[48%] h-20 flex-row-reverse">
-                {renderSlots(gaucheData, config?.soutes?.[pack]?.capacite || 6)}
+            <div key={key} style={{display:'flex', flexDirection:'column', gap:2}}>
+              <div style={{fontSize:9, color:labelColor, fontWeight:700, paddingLeft:6}}>
+                {soute.nom} · {matLabel}
               </div>
-              <div className="flex gap-0.5 w-[48%] h-20">
-                {renderSlots(droiteData, config?.soutes?.[pack]?.capacite || 6)}
+              <div style={{display:'flex', justifyContent:'center', gap:5, height:'13vh', maxHeight:90}}>
+                {/* Gauche — innermost à droite */}
+                <div style={{
+                  display:'flex', flexDirection:'row-reverse', gap:2,
+                  width:'48%', border:`1.5px solid ${borderColor}`,
+                  borderRadius:6, padding:2, background:'rgba(255,255,255,.02)'
+                }}>
+                  {renderSlots(gaucheData, cap)}
+                </div>
+                {/* Droite — innermost à gauche */}
+                <div style={{
+                  display:'flex', gap:2,
+                  width:'48%', border:`1.5px solid ${borderColor}`,
+                  borderRadius:6, padding:2, background:'rgba(255,255,255,.02)'
+                }}>
+                  {renderSlots(droiteData, cap)}
+                </div>
               </div>
             </div>
           )
         })}
       </div>
 
-      {/* ContrÃ´les */}
-      <div className="bg-gray-900 p-1.5 border-t border-gray-800">
-        <div className="grid grid-cols-[1fr_1.2fr] gap-2 h-20 mb-1.5">
-          <div className="grid grid-rows-2 gap-1">
+      {/* ── CONTRÔLES ── */}
+      <div style={{background:'#0d1117', border:'1px solid #30363d', borderRadius:12, margin:'0 6px 6px', padding:8, flexShrink:0}}>
+        <div style={{display:'grid', gridTemplateColumns:'1fr 1.4fr', gap:8, height:100, marginBottom:6}}>
+
+          <div style={{display:'grid', gridTemplateRows:'1fr 1fr', gap:4}}>
             <button
               onClick={() => selectParam('vent')}
-              className={`
-                rounded border flex flex-col items-center justify-center
-                ${selectedParam === 'vent' 
-                  ? 'bg-blue-900 border-blue-500' 
-                  : 'bg-gray-800 border-gray-700'
-                }
-              `}
+              style={{
+                background: selectedParam === 'vent' ? 'linear-gradient(135deg,#1a73e8,#1557b0)' : '#1c2128',
+                border: selectedParam === 'vent' ? '2px solid #fff' : '2px solid #30363d',
+                borderRadius:10, display:'flex', flexDirection:'column',
+                alignItems:'center', justifyContent:'center', cursor:'pointer'
+              }}
             >
-              <div className="text-lg font-black">{vent.toFixed(1)}</div>
-              <div className="text-[7px] text-gray-400 uppercase">Vent</div>
+              <div style={{fontSize:18, fontWeight:900}}>{vent.toFixed(1)}</div>
+              <div style={{fontSize:8, opacity:.85, fontWeight:700, letterSpacing:.5}}>VENT m/s</div>
             </button>
-            
+
             <button
               onClick={() => selectParam('offset')}
-              className={`
-                rounded border flex flex-col items-center justify-center
-                ${selectedParam === 'offset' 
-                  ? 'bg-blue-900 border-blue-500' 
-                  : 'bg-gray-800 border-gray-700'
-                }
-              `}
+              style={{
+                background: selectedParam === 'offset' ? 'linear-gradient(135deg,#1a73e8,#1557b0)' : '#1c2128',
+                border: selectedParam === 'offset' ? '2px solid #fff' : '2px solid #30363d',
+                borderRadius:10, display:'flex', flexDirection:'column',
+                alignItems:'center', justifyContent:'center', cursor:'pointer'
+              }}
             >
-              <div className="text-lg font-black">{offset}</div>
-              <div className="text-[7px] text-gray-400 uppercase">Offset</div>
+              <div style={{fontSize:18, fontWeight:900}}>{offset}</div>
+              <div style={{fontSize:8, opacity:.85, fontWeight:700, letterSpacing:.5}}>DÉCALAGE</div>
             </button>
           </div>
 
-          <div className="grid grid-cols-2 gap-1.5">
+          <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:8}}>
             <button
               onClick={handleDecrement}
-              className="bg-gray-800 border border-gray-700 rounded-lg flex items-center justify-center active:bg-blue-600"
-            >
-              <ChevronLeft size={40} strokeWidth={3} />
-            </button>
-            
+              style={{
+                background:'linear-gradient(135deg,#21262d,#161b22)',
+                border:'2px solid #444c56', borderRadius:12,
+                color:'#fff', fontSize:50, fontWeight:900,
+                display:'flex', alignItems:'center', justifyContent:'center',
+                cursor:'pointer'
+              }}
+            >◀</button>
             <button
               onClick={handleIncrement}
-              className="bg-gray-800 border border-gray-700 rounded-lg flex items-center justify-center active:bg-blue-600"
-            >
-              <ChevronRight size={40} strokeWidth={3} />
-            </button>
+              style={{
+                background:'linear-gradient(135deg,#21262d,#161b22)',
+                border:'2px solid #444c56', borderRadius:12,
+                color:'#fff', fontSize:50, fontWeight:900,
+                display:'flex', alignItems:'center', justifyContent:'center',
+                cursor:'pointer'
+              }}
+            >▶</button>
           </div>
         </div>
-
-        <Chrono />
       </div>
     </div>
   )
-  
+
   function handleIncrement() {
-    if (selectedParam === 'vent') {
-      incrementParam('vent')
-    } else if (selectedParam === 'offset') {
-      incrementOffset()
-    }
+    if (selectedParam === 'vent') incrementParam('vent')
+    else incrementOffset()
   }
-  
   function handleDecrement() {
-    if (selectedParam === 'vent') {
-      decrementParam('vent')
-    } else if (selectedParam === 'offset') {
-      decrementOffset()
-    }
+    if (selectedParam === 'vent') decrementParam('vent')
+    else decrementOffset()
   }
 }
 
+// ── Rendu slots barographe ──
 function renderSlots(materials, capacite) {
-  const capacity = capacite
-  const slots = []
-  
-  for (let i = 0; i < capacity; i++) {
-    const material = materials[i]
-    
-    const nom = material ? material.toLowerCase() : ''
-    let bgClass = 'bg-green-900 opacity-20'
-    if (nom.includes('tungst'))      bgClass = 'bg-[#cd7f32]'
-    else if (nom.includes('plomb'))  bgClass = 'bg-[#c0c0c0]'
-    else if (nom.includes('laiton')) bgClass = 'bg-[#ffd700]'
-    else if (nom.includes('lourd'))  bgClass = 'bg-[#cd7f32]'
-    else if (material)               bgClass = 'bg-[#8b949e]'
-    
-    slots.push(
-      <div
-        key={i}
-        className={`
-          flex-1 rounded border border-white/10
-          ${bgClass}
-          ${material && 'shadow-[inset_0_0_10px_rgba(0,0,0,0.5)]'}
-        `}
-      />
-    )
-  }
-  
-  return slots
-}
+  return Array.from({ length: capacite }).map((_, i) => {
+    const mat = materials[i]
+    const nom = mat ? mat.toLowerCase() : ''
+    let bg = 'rgba(255,255,255,.04)'
+    let border = '1px dashed rgba(255,255,255,.08)'
+    let shadow = 'none'
+    let opacity = 0.3
 
-function Chrono() {
-  const [time, setTime] = useState(0)
-  const [running, setRunning] = useState(false)
-
-  useEffect(() => {
-    let interval
-    if (running) {
-      const start = Date.now() - time
-      interval = setInterval(() => setTime(Date.now() - start), 10)
+    if (mat) {
+      opacity = 1
+      border = '1px solid rgba(255,255,255,.25)'
+      shadow = 'inset 0 0 10px rgba(0,0,0,.5)'
+      if      (nom.includes('tungst'))  { bg = 'linear-gradient(135deg,#2255aa,#3377cc)' }
+      else if (nom.includes('plomb'))   { bg = 'linear-gradient(135deg,#708090,#8a9aaa)' }
+      else if (nom.includes('laiton'))  { bg = 'linear-gradient(135deg,#c8a030,#e8b840)' }
+      else if (nom.includes('lourd'))   { bg = 'linear-gradient(135deg,#cd7f32,#e8963c)' }
+      else                              { bg = 'linear-gradient(135deg,#8b949e,#a0aab4)' }
     }
-    return () => clearInterval(interval)
-  }, [running])
 
-  const format = (ms) => {
-    const m = Math.floor(ms / 60000)
-    const s = Math.floor((ms % 60000) / 1000)
-    const c = Math.floor((ms % 1000) / 10)
-    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}.${c.toString().padStart(2, '0')}`
-  }
-
-  return (
-    <div className="bg-blue-900 rounded p-1.5 flex items-center justify-between">
-      <div className="text-xl font-black font-mono">{format(time)}</div>
-      <div className="flex gap-1">
-        <button
-          onClick={() => setRunning(!running)}
-          className="bg-green-600 px-2.5 py-1.5 rounded text-[10px] font-bold"
-        >
-          {running ? 'Stop' : 'Start'}
-        </button>
-        <button
-          onClick={() => console.log('Cap')}
-          className="bg-gray-700 px-2.5 py-1.5 rounded text-[10px] font-bold"
-        >
-          Cap
-        </button>
-        <button
-          onClick={() => { setRunning(false); setTime(0) }}
-          className="bg-red-600 px-2.5 py-1.5 rounded text-[10px] font-bold"
-        >
-          Rst
-        </button>
-        <button
-          onClick={() => console.log('Save')}
-          className="bg-blue-600 px-2.5 py-1.5 rounded flex items-center"
-        >
-          <Save size={12} />
-        </button>
-      </div>
-    </div>
-  )
+    return (
+      <div key={i} style={{
+        flex:1, height:'100%', borderRadius:3,
+        background: bg, border, boxShadow: shadow, opacity,
+        transition:'all .15s'
+      }} />
+    )
+  })
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 
