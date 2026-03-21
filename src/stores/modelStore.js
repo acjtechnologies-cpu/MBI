@@ -1,13 +1,13 @@
-import { create } from 'zustand'
+﻿import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 /**
  * STORE MODELES - Gestion des planeurs F3F
- * Matrice constructeur intégrée par planeur
+ * Matrice constructeur intÃ©grÃ©e par planeur
  * Compatible avec NewSolver.js dynamique
  */
 
-// Matrice Mamba S — 20 configs constructeur validées
+// Matrice Mamba S â€” 20 configs constructeur validÃ©es
 const MATRIX_MAMBA = [
   {n: 1, m:2726, cg:102.2, av:{G:0,D:0,matG:'Laiton',matD:'Laiton'}, c:{G:1,D:1,matG:'Plomb',matD:'Plomb'}, ar:{G:0,D:0,matG:'Laiton',matD:'Laiton'}},
   {n: 2, m:2814, cg:102.2, av:{G:0,D:0,matG:'Laiton',matD:'Laiton'}, c:{G:2,D:1,matG:'Plomb',matD:'Plomb'}, ar:{G:0,D:0,matG:'Laiton',matD:'Laiton'}},
@@ -31,11 +31,64 @@ const MATRIX_MAMBA = [
   {n:20, m:4072, cg:102.8, av:{G:3,D:3,matG:'Laiton',matD:'Laiton'}, c:{G:3,D:3,matG:'Plomb',matD:'Plomb'}, ar:{G:4,D:4,matG:'Laiton',matD:'Laiton'}}
 ]
 
-// Modele par defaut — Mamba S avec matrice intégrée
+
+// ══ PIKE PRECISION 2 — 17 configs constructeur ══
+const MATRIX_PIKE2 = [
+  {n:1,  m:2500, cg:96.2, av:{G:1,D:0,matG:'Laiton42',matD:'Laiton42'},    ar:{G:1,D:0,matG:'Laiton126',matD:'Laiton126'}},
+  {n:2,  m:2584, cg:97.1, av:{G:1,D:1,matG:'Laiton21',matD:'Laiton42'},    ar:{G:1,D:1,matG:'Laiton126',matD:'Laiton63'}},
+  {n:3,  m:2670, cg:96.6, av:{G:1,D:1,matG:'Laiton42',matD:'Laiton42'},    ar:{G:1,D:1,matG:'Laiton126',matD:'Laiton126'}},
+  {n:4,  m:2714, cg:97.3, av:{G:2,D:1,matG:'Laiton42',matD:'Laiton42'},    ar:{G:1,D:2,matG:'Laiton126',matD:'Laiton126'}},
+  {n:5,  m:2799, cg:96.9, av:{G:2,D:2,matG:'Laiton42',matD:'Laiton42'},    ar:{G:2,D:2,matG:'Laiton126',matD:'Laiton126'}},
+  {n:6,  m:2884, cg:97.6, av:{G:2,D:2,matG:'Laiton42',matD:'Laiton42'},    ar:{G:2,D:2,matG:'Laiton126',matD:'Laiton126'}},
+  {n:7,  m:2969, cg:97.1, av:{G:2,D:2,matG:'Laiton42',matD:'Laiton42'},    ar:{G:2,D:2,matG:'Laiton126',matD:'Laiton126'}},
+  {n:8,  m:3054, cg:97.7, av:{G:3,D:2,matG:'Laiton42',matD:'Laiton42'},    ar:{G:2,D:3,matG:'Laiton126',matD:'Laiton126'}},
+  {n:9,  m:3118, cg:97.2, av:{G:3,D:3,matG:'Laiton42',matD:'Laiton42'},    ar:{G:3,D:3,matG:'Laiton126',matD:'Laiton126'}},
+  {n:10, m:3350, cg:97.0, av:{G:3,D:3,matG:'Laiton42',matD:'Laiton42'},    ar:{G:3,D:3,matG:'Laiton126',matD:'Laiton126'}},
+  {n:11, m:3484, cg:97.5, av:{G:4,D:3,matG:'Laiton42',matD:'Laiton42'},    ar:{G:3,D:4,matG:'Laiton126',matD:'Laiton126'}},
+  {n:12, m:3569, cg:97.1, av:{G:4,D:4,matG:'Laiton42',matD:'Laiton42'},    ar:{G:4,D:4,matG:'Laiton126',matD:'Laiton126'}},
+  {n:13, m:3654, cg:97.3, av:{G:4,D:4,matG:'Tungsten70',matD:'Tungsten70'},ar:{G:4,D:4,matG:'Laiton126',matD:'Laiton126'}},
+  {n:14, m:3794, cg:97.0, av:{G:4,D:4,matG:'Tungsten70',matD:'Tungsten70'},ar:{G:4,D:4,matG:'Laiton126',matD:'Laiton126'}},
+  {n:15, m:3879, cg:97.4, av:{G:4,D:5,matG:'Tungsten70',matD:'Tungsten70'},ar:{G:5,D:4,matG:'Laiton126',matD:'Laiton126'}},
+  {n:16, m:3824, cg:97.1, av:{G:5,D:5,matG:'Tungsten70',matD:'Tungsten70'},ar:{G:5,D:5,matG:'Laiton126',matD:'Laiton126'}},
+  {n:17, m:4242, cg:97.0, av:{G:5,D:5,matG:'Tungsten70',matD:'Tungsten70'},ar:{G:5,D:5,matG:'Laiton126',matD:'Laiton126'}},
+]
+const DEFAULT_MODEL_PIKE2 = {
+  id: 'pike-precision-2',
+  nom: 'Pike Precision 2',
+  drapeau: 'DE',
+  masseVide: 2332,
+  cgVide: 97.0,
+  surface: 66,
+  offset: 1,
+  version: '1.0',
+  matrix: MATRIX_PIKE2,
+  soutes: {
+    'avant-cle': {
+      id: 'avant-cle', nom: 'Small Ballast', couleur: '#c8a030',
+      distanceBA: 54, capacite: 5,
+      materiaux: [
+        { nom: 'Laiton21',   masse: 21,  stock: null },
+        { nom: 'Laiton42',   masse: 42,  stock: null },
+        { nom: 'Tungsten70', masse: 70,  stock: null },
+      ]
+    },
+    'centrale-cle': null,
+    'arriere-aile': {
+      id: 'arriere-aile', nom: 'Big Ballast', couleur: '#708090',
+      distanceBA: 118, capacite: 5,
+      materiaux: [
+        { nom: 'Laiton63',  masse: 63,  stock: null },
+        { nom: 'Laiton126', masse: 126, stock: null },
+      ]
+    }
+  }
+}
+
+// Modele par defaut â€” Mamba S avec matrice intÃ©grÃ©e
 const DEFAULT_MODEL = {
   id: 'mamba-s',
   nom: 'Mamba S',
-  drapeau: '🇫🇷',
+  drapeau: 'ðŸ‡«ðŸ‡·',
   masseVide: 2550,
   cgVide: 102,
   surface: 59,
@@ -45,7 +98,7 @@ const DEFAULT_MODEL = {
   soutes: {
     'avant-cle': {
       id: 'avant-cle',
-      nom: 'Avant Clé',
+      nom: 'Avant ClÃ©',
       couleur: '#6b7280',
       distanceBA: 80,
       capacite: 3,
@@ -55,7 +108,7 @@ const DEFAULT_MODEL = {
     },
     'centrale-cle': {
       id: 'centrale-cle',
-      nom: 'Centrale Clé',
+      nom: 'Centrale ClÃ©',
       couleur: '#3b82f6',
       distanceBA: 102,
       capacite: 3,
@@ -66,7 +119,7 @@ const DEFAULT_MODEL = {
     },
     'arriere-aile': {
       id: 'arriere-aile',
-      nom: 'Arrière Aile',
+      nom: 'ArriÃ¨re Aile',
       couleur: '#6b7280',
       distanceBA: 129,
       capacite: 4,
@@ -83,7 +136,9 @@ const useModelStore = create(
   persist(
     (set, get) => ({
       models: {
-        'mamba-s': DEFAULT_MODEL
+        'mamba-s': DEFAULT_MODEL,
+        'pike-precision-2': DEFAULT_MODEL_PIKE2,
+        'pike-precision-2': DEFAULT_MODEL_PIKE2
       },
       activeModelId: 'mamba-s',
       _hasHydrated: false,
@@ -142,7 +197,7 @@ const useModelStore = create(
         return Object.values(state.models || {}).map(m => ({
           id: m.id,
           nom: m.nom,
-          drapeau: m.drapeau || '🛩️',
+          drapeau: m.drapeau || 'ðŸ›©ï¸',
           masseVide: m.masseVide,
           hasMatrix: !!(m.matrix && m.matrix.length > 0)
         }))
@@ -186,7 +241,7 @@ const useModelStore = create(
         return JSON.stringify(state.models[modelId], null, 2)
       },
 
-      // Reset modèle aux valeurs par défaut
+      // Reset modÃ¨le aux valeurs par dÃ©faut
       resetModel: (modelId) => {
         if (modelId === 'mamba-s') {
           set((state) => ({
@@ -204,9 +259,9 @@ const useModelStore = create(
       onRehydrateStorage: () => (state) => {
         if (state) {
           state.setHasHydrated(true)
-          // Vérifier que la matrice Mamba est bien présente
+          // VÃ©rifier que la matrice Mamba est bien prÃ©sente
           if (!state.models) {
-            state.models = { 'mamba-s': DEFAULT_MODEL }
+            state.models = { 'mamba-s': DEFAULT_MODEL, 'pike-precision-2': DEFAULT_MODEL_PIKE2 }
             state.activeModelId = 'mamba-s'
           } else if (state.models['mamba-s'] && !state.models['mamba-s'].matrix) {
             // Migrer: ajouter la matrice si absente
@@ -224,3 +279,4 @@ const useModelStore = create(
 
 export default useModelStore
 export { useModelStore }
+
