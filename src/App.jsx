@@ -3,6 +3,7 @@ import { Home, Settings, Calculator, Package, Radio } from 'lucide-react'
 // Dashboard Pilote
 import DashboardPilote from './components/Pilote/DashboardPilote'
 import DashboardMamba  from './components/Pilote/DashboardMamba'
+import DashboardPike2  from './components/Pilote/DashboardPike2'
 import { useModelStore } from './stores/modelStore'
 // Config
 import ParamEditor    from './components/Config/ParamEditor'
@@ -10,7 +11,6 @@ import ChronoEditor   from './components/Config/ChronoEditor'
 import ModelManager   from './components/Config/ModelManager'
 import Poly4Component from './components/Poly4/Poly4Page'
 import StationPage    from './components/Station/StationPage'
-
 class ErrorBoundary extends React.Component {
   constructor(p) { super(p); this.state = { err: null } }
   static getDerivedStateFromError(e) { return { err: e.message } }
@@ -23,22 +23,39 @@ class ErrorBoundary extends React.Component {
     return this.props.children
   }
 }
-
 function PilotePage() {
   const { getActiveModel } = useModelStore()
   const m = getActiveModel()
-  if (m?.id === 'mamba-s') return <DashboardMamba />
-  return <DashboardPilote />
+  // Pike2 : id exact OU type/nom contenant 'pike'
+  const isPike2 = m?.id === 'pike-precision-2'
+    || m?.id?.toLowerCase().includes('pike')
+    || m?.nom?.toLowerCase().includes('pike')
+  // Mamba : id exact OU type/nom contenant 'mamba'
+  const isMamba = m?.id === 'mamba-s'
+    || m?.id?.toLowerCase().includes('mamba')
+    || m?.nom?.toLowerCase().includes('mamba')
+  if (isPike2) return <DashboardPike2 />
+  if (isMamba) return <DashboardMamba />
+  // Fallback : modèle inconnu → affiche message plutôt que crash
+  return (
+    <div style={{ padding: 24, color: '#8b949e', textAlign: 'center', marginTop: 40 }}>
+      <div style={{ fontSize: 32, marginBottom: 12 }}>🛩️</div>
+      <div style={{ fontSize: 14, fontWeight: 700, color: '#fff', marginBottom: 8 }}>
+        {m ? m.nom : 'Aucun modèle actif'}
+      </div>
+      <div style={{ fontSize: 12 }}>
+        Dashboard non disponible pour ce planeur.<br />
+        Sélectionne Mamba S ou Pike Precision 2 dans Soute.
+      </div>
+    </div>
+  )
 }
-
 function SoutePage() {
   return <ModelManager />
 }
-
 function Poly4Page() {
   return <Poly4Component />
 }
-
 function ConfigPage() {
   return (
     <div className="p-4 space-y-4">
@@ -47,10 +64,8 @@ function ConfigPage() {
     </div>
   )
 }
-
 function App() {
   const [activeTab, setActiveTab] = useState('pilote')
-
   const tabs = [
     { id: 'pilote',  label: 'Pilotage', icon: Home },
     { id: 'soute',   label: 'Soute',    icon: Package },
@@ -58,7 +73,6 @@ function App() {
     { id: 'station', label: 'Station',  icon: Radio },
     { id: 'config',  label: 'Config',   icon: Settings },
   ]
-
   return (
     <ErrorBoundary>
       <div className="min-h-screen bg-gray-900 text-white flex flex-col">
@@ -96,5 +110,4 @@ function App() {
     </ErrorBoundary>
   )
 }
-
 export default App

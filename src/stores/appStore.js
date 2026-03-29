@@ -1,4 +1,4 @@
-import { create } from 'zustand'
+﻿import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 const useAppStore = create(
@@ -6,7 +6,7 @@ const useAppStore = create(
     (set, get) => ({
       // Paramètres météo
       params: {
-        vent: 9.0,
+        vent: 8.0,
         pression: 1015,
        
         temperature: 15,
@@ -39,7 +39,7 @@ altitude: 0,
 
       incrementParam: (key) =>
         set((state) => {
-          const step = key === 'vent' ? 0.5 : 1
+          const step = key === 'vent' ? 0.1 : 1
           return {
             params: { ...state.params, [key]: state.params[key] + step },
           }
@@ -47,7 +47,7 @@ altitude: 0,
 
       decrementParam: (key) =>
         set((state) => {
-          const step = key === 'vent' ? 0.5 : 1
+          const step = key === 'vent' ? 0.1 : 1
           return {
             params: { ...state.params, [key]: Math.max(0, state.params[key] - step) },
           }
@@ -82,7 +82,7 @@ altitude: 0,
       resetParams: () =>
         set({
           params: {
-            vent: 9.0,
+            vent: 8.0,
             pression: 1015,
         
             temperature: 15,
@@ -106,7 +106,6 @@ altitude: 0,
         chronoR: state.chronoR,
         lievre: state.lievre,
         offset: state.offset,
-        selectedParam: state.selectedParam,
         k_up: state.k_up,
         alpha: state.alpha,
         altitude: state.altitude   

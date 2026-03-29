@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useRef } from 'react'
 import { useAppStore } from '../../stores/appStore'
 
 // ── Config Mamba S (identique V10) ──────────────────
@@ -48,9 +48,9 @@ function solve(targetG) {
   return s
 }
 
-// ── Styles CSS (identique V10) ──────────────────────
+// ── Styles CSS ───────────────────────────────────────
 const CSS = `
-.mb-app { display:flex; flex-direction:column; height:100vh; max-width:420px;
+.mb-app { display:flex; flex-direction:column; height:100dvh; max-width:420px;
   margin:0 auto; padding:6px; background:#05070a; color:#fff;
   font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
   user-select:none; overflow:hidden; }
@@ -133,18 +133,31 @@ const CSS = `
 `
 
 export default function DashboardMamba() {
-  const { params, incrementParam, decrementParam,
-          offset, incrementOffset, decrementOffset,
-          selectedParam, selectParam, altitude } = useAppStore()
+  const {
+    params, incrementParam, decrementParam,
+    offset, setOffset,
+  } = useAppStore()
+
+  // ── État local — indépendant du store partagé ────
+  const [selectedParam, setSelectedParam] = useState('vent')
+  const [alt, setAlt] = useState(0)
+  const [kgManuel, setKgManuel] = useState(null) // null = mode auto
+
+  function selectParam(p) {
+    setSelectedParam(p)
+    if (p !== 'kg') setKgManuel(null) // reset manuel quand on quitte kg
+  }
 
   const repeatRef = useRef(null)
   const vent = params.vent
-  const alt  = altitude || 0
 
   // Calcul masse cible
   const m0kg   = getMasse0m(vent)
   const mAltkg = getMasseAlt(m0kg, alt)
-  const targetG = Math.max(CFG.m_vide, Math.round((mAltkg * 1000) + CFG.OFFSET + offset))
+  const targetGAuto = Math.max(CFG.m_vide, Math.round((mAltkg * 1000) + CFG.OFFSET + offset))
+  const targetG = kgManuel !== null
+    ? Math.max(CFG.m_vide, Math.round(kgManuel * 1000))
+    : targetGAuto
   const kgVal   = parseFloat((targetG / 1000).toFixed(3))
 
   // Solver
@@ -154,7 +167,7 @@ export default function DashboardMamba() {
   let ballast = 0, mom = CFG.m_vide * CFG.cg_vide
   ;['AV','C','AR'].forEach(sec => {
     ;['L','R'].forEach(side => {
-      const key = sec + (side === 'L' ? 'L' : 'R')
+      const key = sec + side
       const slots = sol[key] || []
       const m = slots.length * CFG[sec].w
       ballast += m
@@ -164,40 +177,64 @@ export default function DashboardMamba() {
   const mFinal  = CFG.m_vide + ballast
   const cgFinal = mom / mFinal
   const cgDelta = cgFinal - CFG.cg_vide
-
-  // CG classe
   const cgClass = Math.abs(cgDelta) < 0.5 ? 'neutre' : cgDelta < 0 ? 'avant' : 'arriere'
   const cgLbl   = Math.abs(cgDelta) < 0.5 ? 'OK CG' : (cgDelta > 0 ? '+' : '') + cgDelta.toFixed(1) + 'mm'
 
-  // Vent label
+  // Labels
   const ventLabel = alt > 0
-    ? `VENT m/s - air -${((1 - getMasseAlt(1, alt)) * 100).toFixed(1)}%`
+    ? `VENT m/s — air −${((1 - getMasseAlt(1, alt)) * 100).toFixed(1)}%`
     : 'VENT m/s — Mamba S'
 
-  // Offset label
   const nbPlombs = Math.round(offset / 71)
-  const offsetLbl = nbPlombs === 0 ? 'OFFSET' : `${nbPlombs > 0 ? '+' : ''}${nbPlombs} plomb`
+  const offsetLbl = nbPlombs === 0 ? 'OFFSET' : `${nbPlombs > 0 ? '+' : ''}${nbPlombs} blocs`
 
-  // Hint
   const c100 = Math.round((m0kg - getMasseAlt(m0kg, 100)) * 1000)
   const hints = {
-    vent:   alt > 0 ? `Table 0m -> Baro ${alt}m -> Offset -144g -> ${kgVal.toFixed(3)} kg` : 'Appui long = defilement rapide',
-    kg:     'Masse manuelle - vent/alt gardes en reference',
-    alt:    `Pas 50m - correction ~-${c100}g / 100m a ${vent.toFixed(1)} m/s`,
-    offset: `Decalage +/-71g par plomb - total: ${offset >= 0 ? '+' : ''}${offset}g`,
+    vent:   alt > 0
+      ? `Table 0m → Baro ${alt}m → Offset -144g → ${kgVal.toFixed(3)} kg`
+      : 'Appui long = défilement rapide',
+    kg:     `Pas +42g — config la plus proche`,
+    alt:    `Pas 50m — correction ~−${c100}g / 100m à ${vent.toFixed(1)} m/s`,
+    offset: `Pas 71g · total: ${offset >= 0 ? '+' : ''}${offset}g`,
   }
 
+  // ── Repeat press ─────────────────────────────────
   function handlePress(dir) {
     doChange(dir)
-    repeatRef.current = setInterval(() => doChange(dir), 90)
+    // Délai initial 400ms avant repeat, puis 200ms
+    repeatRef.current = setTimeout(() => {
+      repeatRef.current = setInterval(() => doChange(dir), 200)
+    }, 400)
   }
-  function handleRelease() { clearInterval(repeatRef.current) }
+  function handleRelease() {
+    clearTimeout(repeatRef.current)
+    clearInterval(repeatRef.current)
+  }
 
   function doChange(dir) {
-    if (selectedParam === 'vent') {
-      if (dir > 0) incrementParam('vent'); else decrementParam('vent')
-    } else if (selectedParam === 'offset') {
-      if (dir > 0) incrementOffset(); else decrementOffset()
+    switch (selectedParam) {
+      case 'vent':
+        dir > 0 ? incrementParam('vent') : decrementParam('vent')
+        break
+      case 'offset': {
+        // Pas 71g, passage obligatoire par 0
+        const newOff = offset + dir * 71
+        if ((offset < 0 && newOff > 0) || (offset > 0 && newOff < 0)) {
+          setOffset(0)
+        } else {
+          setOffset(Math.max(-500, Math.min(500, offset + dir * 71)))
+        }
+        break
+      }
+      case 'alt':
+        setAlt(a => Math.max(0, Math.min(3000, a + dir * 50)))
+        break
+      case 'kg': {
+        // Mode kg : ajuste masse directement ±0.010 kg (pas d'effet sur offset)
+        const base = kgManuel !== null ? kgManuel : kgVal
+        setKgManuel(parseFloat(Math.max(CFG.m_vide / 1000, Math.min(6.0, base + dir * 0.010)).toFixed(3)))
+        break
+      }
     }
   }
 
@@ -268,8 +305,8 @@ export default function DashboardMamba() {
               <span className="mb-ab-val">{alt} m</span>
             </div>
             <div style={{ textAlign:'center', flex:1 }}>
-              <span className="mb-ab-lbl">DEDUIT</span>
-              <span className="mb-ab-val">-{Math.round((m0kg - mAltkg) * 1000) + Math.abs(CFG.OFFSET)} g</span>
+              <span className="mb-ab-lbl">DÉDUIT</span>
+              <span className="mb-ab-val">−{Math.round((m0kg - mAltkg) * 1000) + Math.abs(CFG.OFFSET)} g</span>
             </div>
             <div style={{ textAlign:'center', flex:1 }}>
               <span className="mb-ab-lbl">FINALE</span>
@@ -283,16 +320,25 @@ export default function DashboardMamba() {
           <div className="mb-ctrl-grid">
             <div className="mb-ctrl-left">
               <div className="mb-ctrl-top2">
-                <div className={`mb-mode-btn${selectedParam === 'kg' ? ' active' : ''}`} onClick={() => selectParam('kg')}>
+                <div
+                  className={`mb-mode-btn${selectedParam === 'kg' ? ' active' : ''}`}
+                  onClick={() => selectParam('kg')}
+                >
                   <span className="mb-mode-val">{kgVal.toFixed(3)}</span>
                   <span className="mb-mode-lbl">KG</span>
                 </div>
-                <div className={`mb-mode-btn${selectedParam === 'alt' ? ' active-alt' : ''}`} onClick={() => selectParam('alt')}>
+                <div
+                  className={`mb-mode-btn${selectedParam === 'alt' ? ' active-alt' : ''}`}
+                  onClick={() => selectParam('alt')}
+                >
                   <span className="mb-mode-val">{alt}</span>
                   <span className="mb-mode-lbl">ALT m</span>
                 </div>
               </div>
-              <div className={`mb-mode-btn${selectedParam === 'offset' ? ' active' : ''}`} onClick={() => selectParam('offset')}>
+              <div
+                className={`mb-mode-btn${selectedParam === 'offset' ? ' active' : ''}`}
+                onClick={() => selectParam('offset')}
+              >
                 <span className="mb-mode-val">{offset >= 0 ? '+' : ''}{offset}g</span>
                 <span className="mb-mode-lbl">{offsetLbl}</span>
               </div>
@@ -301,14 +347,14 @@ export default function DashboardMamba() {
               <button className="mb-nav"
                 onMouseDown={() => handlePress(-1)} onMouseUp={handleRelease} onMouseLeave={handleRelease}
                 onTouchStart={(e) => { e.preventDefault(); handlePress(-1) }} onTouchEnd={handleRelease}
-              >{'<'}</button>
+              >◀</button>
               <button className="mb-nav"
                 onMouseDown={() => handlePress(1)} onMouseUp={handleRelease} onMouseLeave={handleRelease}
                 onTouchStart={(e) => { e.preventDefault(); handlePress(1) }} onTouchEnd={handleRelease}
-              >{'>'}</button>
+              >▶</button>
             </div>
           </div>
-          <div className="mb-hint">{hints[selectedParam] || 'Appui long = defilement rapide'}</div>
+          <div className="mb-hint">{hints[selectedParam] || 'Appui long = défilement rapide'}</div>
         </div>
       </div>
     </>
