@@ -1,4 +1,4 @@
-import { create } from 'zustand'
+﻿import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 /**
@@ -180,7 +180,63 @@ const useModelStore = create(
         })
       },
 
-      exportModel: (modelId) => {
+
+      addSoute: (modelId, soute) => {
+        set((state) => {
+          if (!state.models?.[modelId]) return state
+          return {
+            models: {
+              ...state.models,
+              [modelId]: {
+                ...state.models[modelId],
+                soutes: { ...state.models[modelId].soutes, [soute.id]: soute }
+              }
+            }
+          }
+        })
+      },
+
+      updateSoute: (modelId, souteId, updates) => {
+        set((state) => {
+          if (!state.models?.[modelId]?.soutes?.[souteId]) return state
+          return {
+            models: {
+              ...state.models,
+              [modelId]: {
+                ...state.models[modelId],
+                soutes: {
+                  ...state.models[modelId].soutes,
+                  [souteId]: { ...state.models[modelId].soutes[souteId], ...updates }
+                }
+              }
+            }
+          }
+        })
+      },
+
+      deleteSoute: (modelId, souteId) => {
+        set((state) => {
+          if (!state.models?.[modelId]) return state
+          const newSoutes = { ...state.models[modelId].soutes }
+          delete newSoutes[souteId]
+          return {
+            models: {
+              ...state.models,
+              [modelId]: { ...state.models[modelId], soutes: newSoutes }
+            }
+          }
+        })
+      },
+
+      duplicateModel: (modelId) => {
+        set((state) => {
+          if (!state.models?.[modelId]) return state
+          const src = state.models[modelId]
+          const newId = 'model-' + Date.now()
+          const copy = { ...src, id: newId, nom: src.nom + ' (copie)' }
+          return { models: { ...state.models, [newId]: copy } }
+        })
+      },      exportModel: (modelId) => {
         const state = get()
         if (!state.models?.[modelId]) return null
         return JSON.stringify(state.models[modelId], null, 2)
