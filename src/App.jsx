@@ -4,7 +4,6 @@ import DashboardPilote from './components/Pilote/DashboardPilote'
 import DashboardPike2  from './components/Pilote/DashboardPike2'
 import { useModelStore } from './stores/modelStore'
 import SouteConfig    from './components/Config/SouteConfig'
-import ProfileManager from './components/Soute/ProfileManager'
 import ModelManager   from './components/Config/ModelManager'
 import Poly4Component from './components/Poly4/Poly4Page'
 import StationPage    from './components/Station/StationPage'
@@ -22,7 +21,6 @@ function SoutePage() {
   return (
     <div className="p-4 space-y-4">
       <ModelManager />
-      <ProfileManager />
       <SouteConfig />
     </div>
   )
