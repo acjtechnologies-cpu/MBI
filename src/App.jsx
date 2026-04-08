@@ -1,14 +1,14 @@
 import { useState } from 'react'
-import { Home, Settings, Calculator, Package } from 'lucide-react'
+import { Home, Radio, Calculator, Package, Timer } from 'lucide-react'
 import DashboardPilote from './components/Pilote/DashboardPilote'
 import DashboardPike2  from './components/Pilote/DashboardPike2'
 import { useModelStore } from './stores/modelStore'
-import ParamEditor    from './components/Config/ParamEditor'
-import ChronoEditor   from './components/Config/ChronoEditor'
 import SouteConfig    from './components/Config/SouteConfig'
 import ProfileManager from './components/Soute/ProfileManager'
 import ModelManager   from './components/Config/ModelManager'
 import Poly4Component from './components/Poly4/Poly4Page'
+import StationPage    from './components/Station/StationPage'
+import ChronoPage     from './components/Chrono/ChronoPage'
 import WelcomePage    from './pages/WelcomePage'
 
 function PilotePage() {
@@ -32,27 +32,18 @@ function Poly4Page() {
   return <Poly4Component />
 }
 
-function ConfigPage() {
-  return (
-    <div className="p-4 space-y-4">
-      <ParamEditor />
-      <ChronoEditor />
-    </div>
-  )
-}
-
 function App() {
   const [activeTab, setActiveTab] = useState('pilote')
   const [gliderChosen, setGliderChosen] = useState(false)
-  const { getActiveModel } = useModelStore()
 
   if (!gliderChosen) return <WelcomePage onSelect={() => setGliderChosen(true)} />
 
   const tabs = [
-    { id: 'pilote', label: 'Pilotage', icon: Home },
-    { id: 'soute',  label: 'Soute',   icon: Package },
-    { id: 'poly4',  label: 'Poly4',   icon: Calculator },
-    { id: 'config', label: 'Config',  icon: Settings },
+    { id: 'pilote',  label: 'Pilotage', icon: Home },
+    { id: 'soute',   label: 'Soute',    icon: Package },
+    { id: 'poly4',   label: 'Poly4',    icon: Calculator },
+    { id: 'station', label: 'Station',  icon: Radio },
+    { id: 'chrono',  label: 'Chrono',   icon: Timer },
   ]
 
   return (
@@ -81,10 +72,11 @@ function App() {
         </div>
       </nav>
       <main className="flex-1 overflow-auto">
-        {activeTab === 'pilote' && <PilotePage />}
-        {activeTab === 'soute'  && <SoutePage />}
-        {activeTab === 'poly4'  && <Poly4Page />}
-        {activeTab === 'config' && <ConfigPage />}
+        {activeTab === 'pilote'  && <PilotePage />}
+        {activeTab === 'soute'   && <SoutePage />}
+        {activeTab === 'poly4'   && <Poly4Page />}
+        {activeTab === 'station' && <StationPage />}
+        {activeTab === 'chrono'  && <ChronoPage />}
       </main>
     </div>
   )
