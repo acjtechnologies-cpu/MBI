@@ -28,17 +28,20 @@
       "av": {
         "G": 0,
         "D": 0,
-        "mat": "Laiton"
+        "matG": "Laiton",
+        "matD": "Laiton"
       },
       "c": {
         "G": 1,
         "D": 1,
-        "mat": "Plomb"
+        "matG": "Plomb",
+        "matD": "Plomb"
       },
       "ar": {
         "G": 0,
         "D": 0,
-        "mat": "Laiton"
+        "matG": "Laiton",
+        "matD": "Laiton"
       }
     },
     {
@@ -48,17 +51,20 @@
       "av": {
         "G": 0,
         "D": 0,
-        "mat": "Laiton"
+        "matG": "Laiton",
+        "matD": "Laiton"
       },
       "c": {
         "G": 2,
         "D": 1,
-        "mat": "Plomb"
+        "matG": "Plomb",
+        "matD": "Plomb"
       },
       "ar": {
         "G": 0,
         "D": 0,
-        "mat": "Laiton"
+        "matG": "Laiton",
+        "matD": "Laiton"
       }
     },
     {
@@ -68,17 +74,20 @@
       "av": {
         "G": 0,
         "D": 0,
-        "mat": "Laiton"
+        "matG": "Laiton",
+        "matD": "Laiton"
       },
       "c": {
         "G": 2,
         "D": 2,
-        "mat": "Plomb"
+        "matG": "Plomb",
+        "matD": "Plomb"
       },
       "ar": {
         "G": 0,
         "D": 0,
-        "mat": "Laiton"
+        "matG": "Laiton",
+        "matD": "Laiton"
       }
     },
     {
@@ -88,17 +97,20 @@
       "av": {
         "G": 0,
         "D": 0,
-        "mat": "Laiton"
+        "matG": "Laiton",
+        "matD": "Laiton"
       },
       "c": {
         "G": 3,
         "D": 2,
-        "mat": "Plomb"
+        "matG": "Plomb",
+        "matD": "Plomb"
       },
       "ar": {
         "G": 0,
         "D": 0,
-        "mat": "Laiton"
+        "matG": "Laiton",
+        "matD": "Laiton"
       }
     },
     {
@@ -108,17 +120,20 @@
       "av": {
         "G": 0,
         "D": 0,
-        "mat": "Laiton"
+        "matG": "Laiton",
+        "matD": "Laiton"
       },
       "c": {
         "G": 3,
         "D": 3,
-        "mat": "Plomb"
+        "matG": "Plomb",
+        "matD": "Plomb"
       },
       "ar": {
         "G": 0,
         "D": 0,
-        "mat": "Laiton"
+        "matG": "Laiton",
+        "matD": "Laiton"
       }
     },
     {
@@ -128,17 +143,20 @@
       "av": {
         "G": 1,
         "D": 0,
-        "mat": "Laiton"
+        "matG": "Laiton",
+        "matD": "Laiton"
       },
       "c": {
         "G": 3,
         "D": 3,
-        "mat": "Plomb"
+        "matG": "Plomb",
+        "matD": "Plomb"
       },
       "ar": {
         "G": 0,
         "D": 0,
-        "mat": "Laiton"
+        "matG": "Laiton",
+        "matD": "Laiton"
       }
     },
     {
@@ -148,17 +166,20 @@
       "av": {
         "G": 1,
         "D": 0,
-        "mat": "Laiton"
+        "matG": "Laiton",
+        "matD": "Laiton"
       },
       "c": {
         "G": 3,
         "D": 3,
-        "mat": "Plomb"
+        "matG": "Plomb",
+        "matD": "Plomb"
       },
       "ar": {
         "G": 1,
         "D": 0,
-        "mat": "Laiton"
+        "matG": "Laiton",
+        "matD": "Laiton"
       }
     },
     {
@@ -168,17 +189,20 @@
       "av": {
         "G": 1,
         "D": 1,
-        "mat": "Laiton"
+        "matG": "Laiton",
+        "matD": "Laiton"
       },
       "c": {
         "G": 3,
         "D": 3,
-        "mat": "Plomb"
+        "matG": "Plomb",
+        "matD": "Plomb"
       },
       "ar": {
         "G": 1,
         "D": 0,
-        "mat": "Laiton"
+        "matG": "Laiton",
+        "matD": "Laiton"
       }
     },
     {
@@ -188,17 +212,20 @@
       "av": {
         "G": 1,
         "D": 1,
-        "mat": "Laiton"
+        "matG": "Laiton",
+        "matD": "Laiton"
       },
       "c": {
         "G": 3,
         "D": 3,
-        "mat": "Plomb"
+        "matG": "Plomb",
+        "matD": "Plomb"
       },
       "ar": {
         "G": 1,
         "D": 1,
-        "mat": "Laiton"
+        "matG": "Laiton",
+        "matD": "Laiton"
       }
     },
     {
@@ -208,17 +235,20 @@
       "av": {
         "G": 2,
         "D": 1,
-        "mat": "Laiton"
+        "matG": "Laiton",
+        "matD": "Laiton"
       },
       "c": {
         "G": 3,
         "D": 3,
-        "mat": "Plomb"
+        "matG": "Plomb",
+        "matD": "Plomb"
       },
       "ar": {
         "G": 1,
         "D": 1,
-        "mat": "Laiton"
+        "matG": "Laiton",
+        "matD": "Laiton"
       }
     },
     {
@@ -228,17 +258,20 @@
       "av": {
         "G": 2,
         "D": 1,
-        "mat": "Laiton"
+        "matG": "Laiton",
+        "matD": "Laiton"
       },
       "c": {
         "G": 3,
         "D": 3,
-        "mat": "Plomb"
+        "matG": "Plomb",
+        "matD": "Plomb"
       },
       "ar": {
         "G": 2,
         "D": 1,
-        "mat": "Laiton"
+        "matG": "Laiton",
+        "matD": "Laiton"
       }
     },
     {
@@ -248,17 +281,20 @@
       "av": {
         "G": 2,
         "D": 1,
-        "mat": "Laiton"
+        "matG": "Laiton",
+        "matD": "Laiton"
       },
       "c": {
         "G": 3,
         "D": 3,
-        "mat": "Plomb"
+        "matG": "Plomb",
+        "matD": "Plomb"
       },
       "ar": {
         "G": 2,
         "D": 2,
-        "mat": "Laiton"
+        "matG": "Laiton",
+        "matD": "Laiton"
       }
     },
     {
@@ -268,17 +304,20 @@
       "av": {
         "G": 2,
         "D": 2,
-        "mat": "Laiton"
+        "matG": "Laiton",
+        "matD": "Laiton"
       },
       "c": {
         "G": 3,
         "D": 3,
-        "mat": "Plomb"
+        "matG": "Plomb",
+        "matD": "Plomb"
       },
       "ar": {
         "G": 2,
         "D": 2,
-        "mat": "Laiton"
+        "matG": "Laiton",
+        "matD": "Laiton"
       }
     },
     {
@@ -288,17 +327,20 @@
       "av": {
         "G": 3,
         "D": 2,
-        "mat": "Laiton"
+        "matG": "Laiton",
+        "matD": "Laiton"
       },
       "c": {
         "G": 3,
         "D": 3,
-        "mat": "Plomb"
+        "matG": "Plomb",
+        "matD": "Plomb"
       },
       "ar": {
         "G": 2,
         "D": 2,
-        "mat": "Laiton"
+        "matG": "Laiton",
+        "matD": "Laiton"
       }
     },
     {
@@ -308,17 +350,20 @@
       "av": {
         "G": 3,
         "D": 3,
-        "mat": "Laiton"
+        "matG": "Laiton",
+        "matD": "Laiton"
       },
       "c": {
         "G": 3,
         "D": 3,
-        "mat": "Plomb"
+        "matG": "Plomb",
+        "matD": "Plomb"
       },
       "ar": {
         "G": 2,
         "D": 2,
-        "mat": "Laiton"
+        "matG": "Laiton",
+        "matD": "Laiton"
       }
     },
     {
@@ -328,17 +373,20 @@
       "av": {
         "G": 3,
         "D": 3,
-        "mat": "Laiton"
+        "matG": "Laiton",
+        "matD": "Laiton"
       },
       "c": {
         "G": 3,
         "D": 3,
-        "mat": "Plomb"
+        "matG": "Plomb",
+        "matD": "Plomb"
       },
       "ar": {
         "G": 3,
         "D": 2,
-        "mat": "Laiton"
+        "matG": "Laiton",
+        "matD": "Laiton"
       }
     },
     {
@@ -348,17 +396,20 @@
       "av": {
         "G": 3,
         "D": 3,
-        "mat": "Laiton"
+        "matG": "Laiton",
+        "matD": "Laiton"
       },
       "c": {
         "G": 3,
         "D": 3,
-        "mat": "Plomb"
+        "matG": "Plomb",
+        "matD": "Plomb"
       },
       "ar": {
         "G": 3,
         "D": 3,
-        "mat": "Laiton"
+        "matG": "Laiton",
+        "matD": "Laiton"
       }
     },
     {
@@ -368,17 +419,20 @@
       "av": {
         "G": 3,
         "D": 3,
-        "mat": "Laiton"
+        "matG": "Laiton",
+        "matD": "Laiton"
       },
       "c": {
         "G": 3,
         "D": 3,
-        "mat": "Plomb"
+        "matG": "Plomb",
+        "matD": "Plomb"
       },
       "ar": {
         "G": 4,
         "D": 3,
-        "mat": "Laiton"
+        "matG": "Laiton",
+        "matD": "Laiton"
       }
     },
     {
@@ -388,17 +442,20 @@
       "av": {
         "G": 3,
         "D": 3,
-        "mat": "Laiton"
+        "matG": "Laiton",
+        "matD": "Laiton"
       },
       "c": {
         "G": 3,
         "D": 3,
-        "mat": "Plomb"
+        "matG": "Plomb",
+        "matD": "Plomb"
       },
       "ar": {
         "G": 4,
         "D": 4,
-        "mat": "Laiton"
+        "matG": "Laiton",
+        "matD": "Laiton"
       }
     },
     {
@@ -408,17 +465,20 @@
       "av": {
         "G": 3,
         "D": 3,
-        "mat": "Laiton"
+        "matG": "Laiton",
+        "matD": "Laiton"
       },
       "c": {
         "G": 3,
         "D": 3,
-        "mat": "Plomb"
+        "matG": "Plomb",
+        "matD": "Plomb"
       },
       "ar": {
         "G": 4,
         "D": 4,
-        "mat": "Laiton"
+        "matG": "Laiton",
+        "matD": "Laiton"
       }
     }
   ],
@@ -426,7 +486,7 @@
     "avant-cle": {
       "id": "avant-cle",
       "nom": "Avant Clé",
-      "couleur": "#6b7280",
+      "couleur": "#ffd700",
       "distanceBA": 80,
       "capacite": 3,
       "materiaux": [
@@ -445,21 +505,21 @@
       "capacite": 3,
       "materiaux": [
         {
-          "nom": "Laiton",
-          "masse": 71,
-          "stock": 0
-        },
-        {
           "nom": "Plomb",
           "masse": 88,
           "stock": 3
+        },
+        {
+          "nom": "Laiton",
+          "masse": 71,
+          "stock": 0
         }
       ]
     },
     "arriere-aile": {
       "id": "arriere-aile",
       "nom": "Arrière Aile",
-      "couleur": "#6b7280",
+      "couleur": "#3fb950",
       "distanceBA": 129,
       "capacite": 4,
       "materiaux": [
