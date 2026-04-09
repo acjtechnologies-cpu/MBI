@@ -1,0 +1,77 @@
+{
+  "id": "pike-precision-2",
+  "nom": "Pike Precision 2",
+  "version": "2.0",
+  "drapeau": "🏁",
+  "constructeur": "Paritech",
+  "strategie": "complementaire",
+  "masseVide": 2332,
+  "cgVide": 97,
+  "surface": 55,
+  "offset": 0,
+  "poly4": {
+    "A4": -0.0001728,
+    "A3": 0.008178,
+    "A2": -0.1498,
+    "A1": 1.34713,
+    "A0": -1.19522,
+    "vMin": 4.05,
+    "vMax": 15.3,
+    "alpha": 1.0,
+    "k_up": 1.0
+  },
+  "soutes": {
+    "small-av": {
+      "id": "small-av",
+      "nom": "Small AV",
+      "couleur": "#c8a030",
+      "distanceBA": 54,
+      "capacite": 5,
+      "materiaux": [
+        {
+          "nom": "Laiton",
+          "masse": 42,
+          "stock": 5
+        },
+        {
+          "nom": "Tungstène",
+          "masse": 70,
+          "stock": 2
+        }
+      ]
+    },
+    "central": {
+      "id": "central",
+      "nom": "Central",
+      "couleur": "#3b82f6",
+      "distanceBA": 97,
+      "capacite": 5,
+      "materiaux": [
+        {
+          "nom": "Laiton",
+          "masse": 42,
+          "stock": 5
+        },
+        {
+          "nom": "Plomb",
+          "masse": 84,
+          "stock": 3
+        }
+      ]
+    },
+    "big-ar": {
+      "id": "big-ar",
+      "nom": "Big AR",
+      "couleur": "#708090",
+      "distanceBA": 118,
+      "capacite": 5,
+      "materiaux": [
+        {
+          "nom": "Laiton",
+          "masse": 126,
+          "stock": 5
+        }
+      ]
+    }
+  }
+}

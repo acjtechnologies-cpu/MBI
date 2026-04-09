@@ -1,0 +1,474 @@
+{
+  "id": "mamba-s",
+  "nom": "Mamba S",
+  "version": "2.0",
+  "drapeau": "🇫🇷",
+  "constructeur": "Aeromod",
+  "strategie": "complementaire",
+  "masseVide": 2550,
+  "cgVide": 102,
+  "surface": 59,
+  "offset": -144,
+  "poly4": {
+    "A4": -0.0001728,
+    "A3": 0.008178,
+    "A2": -0.1498,
+    "A1": 1.34713,
+    "A0": -1.19522,
+    "vMin": 4.05,
+    "vMax": 15.3,
+    "alpha": 1.0,
+    "k_up": 1.0
+  },
+  "matrix": [
+    {
+      "n": 1,
+      "m": 2726,
+      "cg": 102.2,
+      "av": {
+        "G": 0,
+        "D": 0,
+        "mat": "Laiton"
+      },
+      "c": {
+        "G": 1,
+        "D": 1,
+        "mat": "Plomb"
+      },
+      "ar": {
+        "G": 0,
+        "D": 0,
+        "mat": "Laiton"
+      }
+    },
+    {
+      "n": 2,
+      "m": 2814,
+      "cg": 102.2,
+      "av": {
+        "G": 0,
+        "D": 0,
+        "mat": "Laiton"
+      },
+      "c": {
+        "G": 2,
+        "D": 1,
+        "mat": "Plomb"
+      },
+      "ar": {
+        "G": 0,
+        "D": 0,
+        "mat": "Laiton"
+      }
+    },
+    {
+      "n": 3,
+      "m": 2902,
+      "cg": 102.2,
+      "av": {
+        "G": 0,
+        "D": 0,
+        "mat": "Laiton"
+      },
+      "c": {
+        "G": 2,
+        "D": 2,
+        "mat": "Plomb"
+      },
+      "ar": {
+        "G": 0,
+        "D": 0,
+        "mat": "Laiton"
+      }
+    },
+    {
+      "n": 4,
+      "m": 2990,
+      "cg": 102.4,
+      "av": {
+        "G": 0,
+        "D": 0,
+        "mat": "Laiton"
+      },
+      "c": {
+        "G": 3,
+        "D": 2,
+        "mat": "Plomb"
+      },
+      "ar": {
+        "G": 0,
+        "D": 0,
+        "mat": "Laiton"
+      }
+    },
+    {
+      "n": 5,
+      "m": 3078,
+      "cg": 102.4,
+      "av": {
+        "G": 0,
+        "D": 0,
+        "mat": "Laiton"
+      },
+      "c": {
+        "G": 3,
+        "D": 3,
+        "mat": "Plomb"
+      },
+      "ar": {
+        "G": 0,
+        "D": 0,
+        "mat": "Laiton"
+      }
+    },
+    {
+      "n": 6,
+      "m": 3149,
+      "cg": 102.0,
+      "av": {
+        "G": 1,
+        "D": 0,
+        "mat": "Laiton"
+      },
+      "c": {
+        "G": 3,
+        "D": 3,
+        "mat": "Plomb"
+      },
+      "ar": {
+        "G": 0,
+        "D": 0,
+        "mat": "Laiton"
+      }
+    },
+    {
+      "n": 7,
+      "m": 3220,
+      "cg": 102.7,
+      "av": {
+        "G": 1,
+        "D": 0,
+        "mat": "Laiton"
+      },
+      "c": {
+        "G": 3,
+        "D": 3,
+        "mat": "Plomb"
+      },
+      "ar": {
+        "G": 1,
+        "D": 0,
+        "mat": "Laiton"
+      }
+    },
+    {
+      "n": 8,
+      "m": 3291,
+      "cg": 102.8,
+      "av": {
+        "G": 1,
+        "D": 1,
+        "mat": "Laiton"
+      },
+      "c": {
+        "G": 3,
+        "D": 3,
+        "mat": "Plomb"
+      },
+      "ar": {
+        "G": 1,
+        "D": 0,
+        "mat": "Laiton"
+      }
+    },
+    {
+      "n": 9,
+      "m": 3362,
+      "cg": 102.8,
+      "av": {
+        "G": 1,
+        "D": 1,
+        "mat": "Laiton"
+      },
+      "c": {
+        "G": 3,
+        "D": 3,
+        "mat": "Plomb"
+      },
+      "ar": {
+        "G": 1,
+        "D": 1,
+        "mat": "Laiton"
+      }
+    },
+    {
+      "n": 10,
+      "m": 3433,
+      "cg": 102.8,
+      "av": {
+        "G": 2,
+        "D": 1,
+        "mat": "Laiton"
+      },
+      "c": {
+        "G": 3,
+        "D": 3,
+        "mat": "Plomb"
+      },
+      "ar": {
+        "G": 1,
+        "D": 1,
+        "mat": "Laiton"
+      }
+    },
+    {
+      "n": 11,
+      "m": 3504,
+      "cg": 102.8,
+      "av": {
+        "G": 2,
+        "D": 1,
+        "mat": "Laiton"
+      },
+      "c": {
+        "G": 3,
+        "D": 3,
+        "mat": "Plomb"
+      },
+      "ar": {
+        "G": 2,
+        "D": 1,
+        "mat": "Laiton"
+      }
+    },
+    {
+      "n": 12,
+      "m": 3575,
+      "cg": 102.8,
+      "av": {
+        "G": 2,
+        "D": 1,
+        "mat": "Laiton"
+      },
+      "c": {
+        "G": 3,
+        "D": 3,
+        "mat": "Plomb"
+      },
+      "ar": {
+        "G": 2,
+        "D": 2,
+        "mat": "Laiton"
+      }
+    },
+    {
+      "n": 13,
+      "m": 3646,
+      "cg": 103.1,
+      "av": {
+        "G": 2,
+        "D": 2,
+        "mat": "Laiton"
+      },
+      "c": {
+        "G": 3,
+        "D": 3,
+        "mat": "Plomb"
+      },
+      "ar": {
+        "G": 2,
+        "D": 2,
+        "mat": "Laiton"
+      }
+    },
+    {
+      "n": 14,
+      "m": 3717,
+      "cg": 103.1,
+      "av": {
+        "G": 3,
+        "D": 2,
+        "mat": "Laiton"
+      },
+      "c": {
+        "G": 3,
+        "D": 3,
+        "mat": "Plomb"
+      },
+      "ar": {
+        "G": 2,
+        "D": 2,
+        "mat": "Laiton"
+      }
+    },
+    {
+      "n": 15,
+      "m": 3788,
+      "cg": 102.3,
+      "av": {
+        "G": 3,
+        "D": 3,
+        "mat": "Laiton"
+      },
+      "c": {
+        "G": 3,
+        "D": 3,
+        "mat": "Plomb"
+      },
+      "ar": {
+        "G": 2,
+        "D": 2,
+        "mat": "Laiton"
+      }
+    },
+    {
+      "n": 16,
+      "m": 3859,
+      "cg": 102.3,
+      "av": {
+        "G": 3,
+        "D": 3,
+        "mat": "Laiton"
+      },
+      "c": {
+        "G": 3,
+        "D": 3,
+        "mat": "Plomb"
+      },
+      "ar": {
+        "G": 3,
+        "D": 2,
+        "mat": "Laiton"
+      }
+    },
+    {
+      "n": 17,
+      "m": 3930,
+      "cg": 103.2,
+      "av": {
+        "G": 3,
+        "D": 3,
+        "mat": "Laiton"
+      },
+      "c": {
+        "G": 3,
+        "D": 3,
+        "mat": "Plomb"
+      },
+      "ar": {
+        "G": 3,
+        "D": 3,
+        "mat": "Laiton"
+      }
+    },
+    {
+      "n": 18,
+      "m": 4001,
+      "cg": 104.0,
+      "av": {
+        "G": 3,
+        "D": 3,
+        "mat": "Laiton"
+      },
+      "c": {
+        "G": 3,
+        "D": 3,
+        "mat": "Plomb"
+      },
+      "ar": {
+        "G": 4,
+        "D": 3,
+        "mat": "Laiton"
+      }
+    },
+    {
+      "n": 19,
+      "m": 4072,
+      "cg": 102.8,
+      "av": {
+        "G": 3,
+        "D": 3,
+        "mat": "Laiton"
+      },
+      "c": {
+        "G": 3,
+        "D": 3,
+        "mat": "Plomb"
+      },
+      "ar": {
+        "G": 4,
+        "D": 4,
+        "mat": "Laiton"
+      }
+    },
+    {
+      "n": 20,
+      "m": 4072,
+      "cg": 102.8,
+      "av": {
+        "G": 3,
+        "D": 3,
+        "mat": "Laiton"
+      },
+      "c": {
+        "G": 3,
+        "D": 3,
+        "mat": "Plomb"
+      },
+      "ar": {
+        "G": 4,
+        "D": 4,
+        "mat": "Laiton"
+      }
+    }
+  ],
+  "soutes": {
+    "avant-cle": {
+      "id": "avant-cle",
+      "nom": "Avant Clé",
+      "couleur": "#6b7280",
+      "distanceBA": 80,
+      "capacite": 3,
+      "materiaux": [
+        {
+          "nom": "Laiton",
+          "masse": 71,
+          "stock": 3
+        }
+      ]
+    },
+    "centrale-cle": {
+      "id": "centrale-cle",
+      "nom": "Centrale Clé",
+      "couleur": "#3b82f6",
+      "distanceBA": 102,
+      "capacite": 3,
+      "materiaux": [
+        {
+          "nom": "Laiton",
+          "masse": 71,
+          "stock": 0
+        },
+        {
+          "nom": "Plomb",
+          "masse": 88,
+          "stock": 3
+        }
+      ]
+    },
+    "arriere-aile": {
+      "id": "arriere-aile",
+      "nom": "Arrière Aile",
+      "couleur": "#6b7280",
+      "distanceBA": 129,
+      "capacite": 4,
+      "materiaux": [
+        {
+          "nom": "Laiton",
+          "masse": 71,
+          "stock": 4
+        }
+      ]
+    }
+  }
+}

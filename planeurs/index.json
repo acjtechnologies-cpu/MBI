@@ -1,0 +1,25 @@
+{
+  "version": "1.0",
+  "planeurs": [
+    {
+      "id": "mamba-s",
+      "nom": "Mamba S",
+      "drapeau": "🇫🇷",
+      "constructeur": "Aeromod",
+      "strategie": "complementaire",
+      "masseVide": 2550,
+      "description": "Planeur F3F français, matrice 20 configs + Poly4",
+      "url": "planeurs/mamba-s.json"
+    },
+    {
+      "id": "pike-precision-2",
+      "nom": "Pike Precision 2",
+      "drapeau": "🏁",
+      "constructeur": "Paritech",
+      "strategie": "poly4",
+      "masseVide": 2332,
+      "description": "Planeur F3F international, Poly4 calibré",
+      "url": "planeurs/pike-precision-2.json"
+    }
+  ]
+}
