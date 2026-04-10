@@ -141,8 +141,8 @@ export default function DashboardPilote() {
   const c100 = Math.round((m0kg - getMasseAlt(m0kg, 100)) * 1000)
 
   const ventLabel = alt > 0
-    ? `VENT m/s — correction −${((1-getMasseAlt(1,alt))*100).toFixed(1)}%`
-    : cfg ? `VENT m/s — cfg #${cfg.n} · ${kgVal.toFixed(3)} kg` : `VENT m/s — ${kgVal.toFixed(3)} kg`
+    ? `VENT m/s — ${model.nom} · −${((1-getMasseAlt(1,alt))*100).toFixed(1)}%`
+    : `VENT m/s — ${model.nom}`
 
   function selectParam(p) {
     setSelectedParam(p)
@@ -284,8 +284,10 @@ export default function DashboardPilote() {
             {/* Data bar */}
             <div className="mb-data">
               <div style={{textAlign:'center'}}>
-                <div style={{fontSize:26,fontWeight:900,color:'#8b949e',lineHeight:1}}>{kgVal.toFixed(3)}</div>
-                <div style={{fontSize:9,color:'#8b949e',marginTop:3}}>Poly4 {m0kg.toFixed(3)}</div>
+                <div style={{fontSize:26,fontWeight:900,color:'#8b949e',lineHeight:1}}>{m0kg.toFixed(3)}</div>
+                <div style={{fontSize:9,color:'#8b949e',marginTop:3}}>
+                  Poly4{alt>0?<span style={{color:'#a78bfa'}}> →{kgVal.toFixed(3)}</span>:''}
+                </div>
               </div>
               <div style={{textAlign:'center'}}>
                 <div style={{fontSize:26,fontWeight:900,color:'#3fb950',lineHeight:1}}>
