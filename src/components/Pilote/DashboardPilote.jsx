@@ -54,7 +54,8 @@ const CSS = `
 .mb-ab-val{font-size:14px;font-weight:900;color:#a78bfa}
 .mb-ctrl{height:32vh;min-height:220px;flex-shrink:0;background:#0d1117;border-radius:12px;padding:10px;border:1px solid #30363d;display:flex;flex-direction:column;gap:8px}
 .mb-ctrl-grid{display:grid;grid-template-columns:1fr 1.4fr;gap:10px;flex-grow:1}
-.mb-ctrl-left{display:grid;grid-template-rows:1fr 1fr 1fr;gap:4px}
+.mb-ctrl-left{display:grid;grid-template-rows:1fr 1fr;gap:6px}
+.mb-ctrl-top2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .mb-ctrl-arrows{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .mb-mode-btn{background:#1c2128;border:2px solid #30363d;border-radius:10px;display:flex;flex-direction:column;justify-content:center;align-items:center;cursor:pointer;transition:all .2s}
 .mb-mode-btn.active{background:linear-gradient(135deg,#1a73e8,#1557b0);border-color:#fff}
@@ -88,20 +89,22 @@ const CSS = `
 export default function DashboardPilote() {
   const store = useAppStore()
   const { params, incrementParam, decrementParam, offset, setOffset } = store
-  const altitude = store.altitude || store.params?.altitude || 0
-  const setAltitude = store.setAltitude || store.setParam
-    ? (v) => { if (store.setAltitude) store.setAltitude(v); else store.setParam('altitude', v) }
-    : () => {}
+  const altitude = parseFloat(store.altitude || store.params?.altitude || 0) || 0
+  const setAltitude = (v) => {
+    if (store.setAltitude) store.setAltitude(typeof v === 'function' ? v(altitude) : v)
+    else if (store.setParam) store.setParam('altitude', typeof v === 'function' ? v(altitude) : v)
+  }
 
   const { getActiveModel } = useModelStore()
   const model = getActiveModel()
 
-  const [selectedParam, setSelectedParam] = useState('vent')
-  const [tab, setTab]             = useState('calc')
+  const [selectedParam, setSelectedParam] = useState('kg')
+  const [kgManuel, setKgManuel] = useState(null)
+  const [tab, setTab]           = useState('calc')
   const [matrixIdx, setMatrixIdx] = useState(null)
-  const [gpsOpen, setGpsOpen]     = useState(false)
+  const [gpsOpen, setGpsOpen]   = useState(false)
   const [gpsCapturing, setGpsCapturing] = useState(false)
-  const [gpsData, setGpsData]     = useState({ lat:null, lon:null, alt:null, accuracy:null })
+  const [gpsData, setGpsData]   = useState({ lat:null, lon:null, alt:null, accuracy:null })
   const repeatRef = useRef(null)
 
   if (!model) return (
@@ -115,14 +118,20 @@ export default function DashboardPilote() {
     ? Object.values(model.soutes).sort((a,b) => a.distanceBA - b.distanceBA)
     : []
 
-  const vent   = params.vent
-  const alt    = parseFloat(altitude) || 0
-  const m0kg   = poly4(vent)
-  const mAltkg = getMasseAlt(m0kg, alt)
+  const vent        = params.vent
+  const alt         = altitude
+  const m0kg        = poly4(vent)
+  const mAltkg      = getMasseAlt(m0kg, alt)
   const modelOffset = parseFloat(model.offset) || 0
   const offsetVal   = parseFloat(offset) || 0
-  const targetG = Math.max(model.masseVide, Math.round(mAltkg * 1000 + modelOffset + offsetVal))
-  const kgVal   = targetG / 1000
+
+  // Masse cible auto
+  const targetGAuto = Math.max(model.masseVide, Math.round(mAltkg * 1000 + modelOffset + offsetVal))
+  // Masse manuelle possible (mode kg)
+  const targetG = kgManuel !== null
+    ? Math.max(model.masseVide, Math.round(kgManuel * 1000))
+    : targetGAuto
+  const kgVal = targetG / 1000
 
   const ci  = matrix.length > 0 ? findNearest(matrix, targetG) : -1
   const cfg = ci >= 0 ? matrix[ci] : null
@@ -134,6 +143,11 @@ export default function DashboardPilote() {
   const ventLabel = alt > 0
     ? `VENT m/s — correction −${((1-getMasseAlt(1,alt))*100).toFixed(1)}%`
     : cfg ? `VENT m/s — cfg #${cfg.n} · ${kgVal.toFixed(3)} kg` : `VENT m/s — ${kgVal.toFixed(3)} kg`
+
+  function selectParam(p) {
+    setSelectedParam(p)
+    if (p !== 'kg') setKgManuel(null)
+  }
 
   function slotCls(nom) {
     if (!nom) return 'mb-slot mb-s'
@@ -193,9 +207,22 @@ export default function DashboardPilote() {
     clearTimeout(repeatRef.current); clearInterval(repeatRef.current)
   }
   function doChange(dir) {
-    if (selectedParam === 'vent')   { dir > 0 ? incrementParam('vent') : decrementParam('vent') }
-    if (selectedParam === 'offset') { setOffset(Math.max(-500, Math.min(500, offsetVal + dir * 42))) }
-    if (selectedParam === 'alt')    { setAltitude(Math.max(0, Math.min(3000, alt + dir * 50))) }
+    switch (selectedParam) {
+      case 'vent':
+        dir > 0 ? incrementParam('vent') : decrementParam('vent')
+        break
+      case 'kg': {
+        const base = kgManuel !== null ? kgManuel : kgVal
+        setKgManuel(parseFloat(Math.max(model.masseVide/1000, Math.min(6.0, base + dir * 0.010)).toFixed(3)))
+        break
+      }
+      case 'offset':
+        setOffset(Math.max(-500, Math.min(500, offsetVal + dir * 42)))
+        break
+      case 'alt':
+        setAltitude(Math.max(0, Math.min(3000, alt + dir * 50)))
+        break
+    }
   }
 
   const displayCfg = matrixIdx !== null ? matrix[matrixIdx] : cfg
@@ -214,12 +241,15 @@ export default function DashboardPilote() {
 
         {tab === 'calc' && (
           <div className="mb-calc">
-            <div className={`mb-vent${selectedParam==='vent'?' active':''}`} onClick={() => setSelectedParam('vent')}>
+
+            {/* Header vent */}
+            <div className={`mb-vent${selectedParam==='vent'?' active':''}`} onClick={() => selectParam('vent')}>
               <div className="mb-vent-val">{vent.toFixed(1)}</div>
               <div className="mb-vent-lbl">{ventLabel}</div>
               <button className="mb-gps-btn" onClick={(e) => { e.stopPropagation(); setGpsOpen(true); captureGPS() }}>📍</button>
             </div>
 
+            {/* Barographe */}
             <div className="mb-baro">
               {soutes.map((soute, idx) => {
                 const cap = soute.capacite || 3
@@ -242,14 +272,16 @@ export default function DashboardPilote() {
               })}
             </div>
 
+            {/* Bande altitude */}
             {alt > 0 && (
               <div className="mb-alt">
-                <div><span className="mb-ab-lbl">ALTITUDE</span><span className="mb-ab-val">{alt} m</span></div>
-                <div style={{textAlign:'center'}}><span className="mb-ab-lbl">CORRECTION</span><span className="mb-ab-val">−{Math.round((m0kg-mAltkg)*1000)}g</span></div>
-                <div style={{textAlign:'right'}}><span className="mb-ab-lbl">~100m</span><span className="mb-ab-val">−{c100}g</span></div>
+                <div style={{textAlign:'center',flex:1}}><span className="mb-ab-lbl">ALTITUDE</span><span className="mb-ab-val">{alt} m</span></div>
+                <div style={{textAlign:'center',flex:1}}><span className="mb-ab-lbl">DÉDUIT</span><span className="mb-ab-val">−{Math.round((m0kg-mAltkg)*1000)} g</span></div>
+                <div style={{textAlign:'center',flex:1}}><span className="mb-ab-lbl">FINALE</span><span className="mb-ab-val">{kgVal.toFixed(3)} kg</span></div>
               </div>
             )}
 
+            {/* Data bar */}
             <div className="mb-data">
               <div style={{textAlign:'center'}}>
                 <div style={{fontSize:26,fontWeight:900,color:'#8b949e',lineHeight:1}}>{kgVal.toFixed(3)}</div>
@@ -270,18 +302,21 @@ export default function DashboardPilote() {
               </div>
             </div>
 
+            {/* Contrôles — KG + ALT sur ligne haute, OFFSET en dessous */}
             <div className="mb-ctrl">
               <div className="mb-ctrl-grid">
                 <div className="mb-ctrl-left">
-                  <button className={`mb-mode-btn${selectedParam==='vent'?' active':''}`} onClick={() => setSelectedParam('vent')}>
-                    <div className="mb-mode-val">{vent.toFixed(1)}</div>
-                    <div className="mb-mode-lbl">VENT m/s</div>
-                  </button>
-                  <button className={`mb-mode-btn${selectedParam==='alt'?' active-alt':''}`} onClick={() => setSelectedParam('alt')}>
-                    <div className="mb-mode-val">{alt}</div>
-                    <div className="mb-mode-lbl">ALT m</div>
-                  </button>
-                  <button className={`mb-mode-btn${selectedParam==='offset'?' active':''}`} onClick={() => setSelectedParam('offset')}>
+                  <div className="mb-ctrl-top2">
+                    <button className={`mb-mode-btn${selectedParam==='kg'?' active':''}`} onClick={() => selectParam('kg')}>
+                      <div className="mb-mode-val">{kgVal.toFixed(3)}</div>
+                      <div className="mb-mode-lbl">KG</div>
+                    </button>
+                    <button className={`mb-mode-btn${selectedParam==='alt'?' active-alt':''}`} onClick={() => selectParam('alt')}>
+                      <div className="mb-mode-val">{alt}</div>
+                      <div className="mb-mode-lbl">ALT m</div>
+                    </button>
+                  </div>
+                  <button className={`mb-mode-btn${selectedParam==='offset'?' active':''}`} onClick={() => selectParam('offset')}>
                     <div className="mb-mode-val">{offsetVal>=0?'+':''}{offsetVal}g</div>
                     <div className="mb-mode-lbl">OFFSET</div>
                   </button>
@@ -292,9 +327,10 @@ export default function DashboardPilote() {
                 </div>
               </div>
               <div className="mb-hint">
-                {selectedParam==='vent'   && cfg && `Config #${cfg.n} — ${cfg.m}g (Δ${dm>0?'+':''}${dm}g)`}
+                {selectedParam==='kg'     && `Pas ±10g — cfg #${cfg?.n||'—'} la plus proche`}
                 {selectedParam==='alt'    && `Pas 50m — ~−${c100}g/100m à ${vent.toFixed(1)} m/s`}
                 {selectedParam==='offset' && `Pas 42g · total: ${offsetVal>=0?'+':''}${offsetVal}g`}
+                {selectedParam==='vent'   && cfg && `Config #${cfg.n} — ${cfg.m}g (Δ${dm>0?'+':''}${dm}g)`}
               </div>
             </div>
           </div>
@@ -312,7 +348,6 @@ export default function DashboardPilote() {
                 <div style={{fontSize:9,color:'#8b949e'}}>Δ{displayCfg?(displayCfg.m-targetG>0?'+':'')+(displayCfg.m-targetG)+'g':'—'}</div>
               </div>
             </div>
-
             <div className="mb-sg">
               {matrix.map((row, i) => (
                 <div key={i} className={`mb-rb${matrixIdx===i?' sel':i===ci?' near':''}`}
@@ -321,7 +356,6 @@ export default function DashboardPilote() {
                 </div>
               ))}
             </div>
-
             <div className="mb-m-soutes">
               {soutes.map((soute, idx) => {
                 const cap = soute.capacite || 3
