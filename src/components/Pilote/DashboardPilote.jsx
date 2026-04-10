@@ -140,8 +140,9 @@ export default function DashboardPilote() {
   const cgClass = Math.abs(cgD) < 0.5 ? 'neutre' : cgD < 0 ? 'avant' : 'arriere'
   const c100 = Math.round((m0kg - getMasseAlt(m0kg, 100)) * 1000)
 
+  const altCorrection = Math.round((m0kg - mAltkg) * 1000)
   const ventLabel = alt > 0
-    ? `VENT m/s — ${model.nom} · −${((1-getMasseAlt(1,alt))*100).toFixed(1)}%`
+    ? `VENT m/s — ${model.nom} · ρ −${altCorrection}g`
     : `VENT m/s — ${model.nom}`
 
   function selectParam(p) {
@@ -273,7 +274,7 @@ export default function DashboardPilote() {
             </div>
 
             {/* Bande altitude */}
-            {alt > 0 && (
+            {alt > 0 && selectedParam === 'alt' && (
               <div className="mb-alt">
                 <div style={{textAlign:'center',flex:1}}><span className="mb-ab-lbl">ALTITUDE</span><span className="mb-ab-val">{alt} m</span></div>
                 <div style={{textAlign:'center',flex:1}}><span className="mb-ab-lbl">DÉDUIT</span><span className="mb-ab-val">−{Math.round((m0kg-mAltkg)*1000)} g</span></div>
