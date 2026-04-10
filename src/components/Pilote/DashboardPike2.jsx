@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+﻿import { useState, useRef } from 'react'
 import { useAppStore } from '../../stores/appStore'
 
 // ── Données Pike Precision 2 ───────────────────────────────────────────────
@@ -89,8 +89,6 @@ const CSS = `
   width:38px; height:38px; border-radius:50%; background:#065f46; border:2px solid #34d399;
   color:#fff; font-size:18px; cursor:pointer; display:flex; align-items:center;
   justify-content:center; box-shadow:0 2px 8px rgba(52,211,153,.4); }
-.p2-gps-btn.capturing { background:#1a3a8f; border-color:#60a5fa; animation:p2pulse 1s infinite; }
-@keyframes p2pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
 .p2-baro { flex-grow:1; display:flex; flex-direction:column;
   justify-content:space-evenly; padding:4px 0; min-height:0; }
 .p2-row-wrap { display:flex; flex-direction:column; gap:2px; }
@@ -107,12 +105,9 @@ const CSS = `
 .p2-side-l { flex-direction:row-reverse; }
 .p2-slot { flex:1; height:100%; border-radius:3px; transition:all .15s; }
 .p2-s  { background:#1a2535; opacity:.2; border:1px dashed rgba(255,255,255,.06); }
-.p2-l  { background:linear-gradient(135deg,#c8a030,#e8b840);
-         box-shadow:inset 0 0 8px rgba(255,215,0,.4); border:1px solid rgba(255,255,255,.2); }
-.p2-t  { background:linear-gradient(135deg,#2255aa,#3377cc);
-         box-shadow:inset 0 0 8px rgba(80,160,255,.3); border:1px solid rgba(100,180,255,.3); }
-.p2-lb { background:linear-gradient(135deg,#708090,#8a9aaa);
-         box-shadow:inset 0 0 8px rgba(0,0,0,.4); border:1px solid rgba(255,255,255,.15); }
+.p2-l  { background:linear-gradient(135deg,#c8a030,#e8b840); box-shadow:inset 0 0 8px rgba(255,215,0,.4); border:1px solid rgba(255,255,255,.2); }
+.p2-t  { background:linear-gradient(135deg,#2255aa,#3377cc); box-shadow:inset 0 0 8px rgba(80,160,255,.3); border:1px solid rgba(100,180,255,.3); }
+.p2-lb { background:linear-gradient(135deg,#708090,#8a9aaa); box-shadow:inset 0 0 8px rgba(0,0,0,.4); border:1px solid rgba(255,255,255,.15); }
 .p2-data { height:9vh; min-height:65px; flex-shrink:0;
   display:flex; justify-content:space-around; align-items:center; padding:0 12px;
   background:linear-gradient(135deg,rgba(255,255,255,.05),rgba(255,255,255,.02));
@@ -188,26 +183,52 @@ const CSS = `
 .p2-m-leg { display:flex; gap:5px; justify-content:center; flex-wrap:wrap; flex-shrink:0; }
 .p2-m-li { display:flex; align-items:center; gap:2px; font-size:8px; color:#8b949e; }
 .p2-m-ls { width:8px; height:8px; border-radius:2px; }
-.p2-m-ph { display:flex; align-items:center; justify-content:center; flex:1;
-  color:#8b949e; font-size:13px; }
+.p2-m-ph { display:flex; align-items:center; justify-content:center; flex:1; color:#8b949e; font-size:13px; }
+/* GPS Overlay */
+.p2-overlay { position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:200;
+  display:flex; align-items:flex-end; justify-content:center; }
+.p2-overlay-box { width:100%; max-width:420px; background:#0d1117;
+  border-radius:16px 16px 0 0; border:1px solid #30363d; padding:16px;
+  max-height:90vh; overflow-y:auto; }
+.p2-gh-popup { position:fixed; inset:0; background:rgba(0,0,0,.9); z-index:300;
+  display:flex; align-items:center; justify-content:center; }
+.p2-gh-box { width:90%; max-width:360px; background:#161b22; border-radius:16px;
+  border:1px solid #30363d; padding:20px; }
 `
 
 // ── Composant ──────────────────────────────────────────────────────────────
 export default function DashboardPike2() {
-  const { params, incrementParam, decrementParam, offset, setOffset } = useAppStore()
+  const { params, incrementParam, decrementParam, offset, setOffset,
+          altitude, setAltitude } = useAppStore()
 
   const [selectedParam, setSelectedParam] = useState('vent')
-  const [alt, setAlt]             = useState(0)
   const [kgManuel, setKgManuel]   = useState(null)
   const [tab, setTab]             = useState('calc')
   const [matrixIdx, setMatrixIdx] = useState(null)
-  const [gpsStatus, setGpsStatus] = useState('')
   const repeatRef = useRef(null)
+
+  // GPS overlay state
+  const [gpsOpen, setGpsOpen]       = useState(false)
+  const [ghPopup, setGhPopup]       = useState(false)
+  const [gpsCapturing, setGpsCapturing] = useState(false)
+  const [gpsData, setGpsData]       = useState({ lat: null, lon: null, alt: null, accuracy: null })
+  const [ghToken, setGhToken]       = useState(() => localStorage.getItem('pike2_gh_token') || '')
+  const [ghLogin, setGhLogin]       = useState(() => localStorage.getItem('pike2_gh_login') || '')
+  const [ghGistId, setGhGistId]     = useState(() => localStorage.getItem('pike2_gist_id') || '')
+  const [ghTokenInput, setGhTokenInput] = useState('')
+  const [ghTokenError, setGhTokenError] = useState('')
+  const [logSite, setLogSite]       = useState('')
+  const [logNote, setLogNote]       = useState('')
+  const [saveStatus, setSaveStatus] = useState('')
+  const [logList, setLogList]       = useState([])
 
   function selectParam(p) {
     setSelectedParam(p)
     if (p !== 'kg') setKgManuel(null)
   }
+
+  const alt = altitude || 0
+  function setAlt(v) { setAltitude(typeof v === 'function' ? v(alt) : v) }
 
   const vent = params.vent
   const m0kg    = getMasse0m(vent)
@@ -219,9 +240,7 @@ export default function DashboardPike2() {
   const cfg = MATRIX[ci]
   const cgD = cfg.cg - CFG.cg_vide
 
-  const ventLabel = alt > 0
-    ? `VENT m/s — air −${((1 - getMasseAlt(1, alt)) * 100).toFixed(1)}%`
-    : `VENT m/s — cfg #${cfg.n} · ${cfg.avL.length + cfg.avR.length}S+${cfg.arL.length + cfg.arR.length}B`
+  const altCorrection = Math.round((m0kg - mAltkg) * 1000)n    ? VENT m/s \u2014 Pike Precision 2 \u00b7 \u03c1 \u2212n    : VENT m/s \u2014 Pike Precision 2— cfg #${cfg.n} · ${cfg.avL.length + cfg.avR.length}S+${cfg.arL.length + cfg.arR.length}B`
 
   const dm = cfg.m - targetG
   const c100 = Math.round((m0kg - getMasseAlt(m0kg, 100)) * 1000)
@@ -234,23 +253,112 @@ export default function DashboardPike2() {
     offset: `Pas 42g · total: ${offset >= 0 ? '+' : ''}${offset}g`,
   }
 
-  // GPS
+  // ── GPS capture ───────────────────────────────────
   function captureGPS() {
-    if (!navigator.geolocation) { setGpsStatus('err'); return }
-    setGpsStatus('capturing')
+    if (!navigator.geolocation) return
+    setGpsCapturing(true)
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        const a = pos.coords.altitude
-        if (a !== null) { setAlt(Math.round(a / 50) * 50); setGpsStatus('ok') }
-        else setGpsStatus('err')
-        setTimeout(() => setGpsStatus(''), 3000)
+        const { latitude, longitude, altitude: a, accuracy } = pos.coords
+        setGpsData({ lat: latitude, lon: longitude, alt: a, accuracy: Math.round(accuracy) })
+        setGpsCapturing(false)
       },
-      () => { setGpsStatus('err'); setTimeout(() => setGpsStatus(''), 3000) },
+      () => setGpsCapturing(false),
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
     )
   }
 
-  // Repeat
+  function useAltitude() {
+    if (gpsData.alt !== null) {
+      setAlt(Math.round(gpsData.alt / 50) * 50)
+      setGpsOpen(false)
+    }
+  }
+
+  // ── GitHub Auth ───────────────────────────────────
+  async function validateToken() {
+    setGhTokenError('Vérification…')
+    try {
+      const r = await fetch('https://api.github.com/user', {
+        headers: { Authorization: 'token ' + ghTokenInput }
+      })
+      if (!r.ok) throw new Error('Token invalide')
+      const u = await r.json()
+      setGhToken(ghTokenInput)
+      setGhLogin(u.login)
+      localStorage.setItem('pike2_gh_token', ghTokenInput)
+      localStorage.setItem('pike2_gh_login', u.login)
+      setGhPopup(false)
+      setGhTokenError('')
+      loadLogs(ghTokenInput, ghGistId)
+    } catch (e) {
+      setGhTokenError('✗ ' + e.message)
+    }
+  }
+
+  // ── Gist save/load ────────────────────────────────
+  async function saveLog() {
+    if (!ghToken) { setGhPopup(true); return }
+    setSaveStatus('Enregistrement…')
+    const entry = {
+      timestamp: new Date().toISOString(),
+      site: logSite,
+      note: logNote,
+      vent,
+      altitude: alt,
+      gps: gpsData.alt !== null ? { lat: gpsData.lat, lon: gpsData.lon, alt: Math.round(gpsData.alt) } : null,
+      masse: kgVal,
+      config: cfg.n,
+      cg: cfg.cg,
+    }
+    try {
+      let entries = []
+      if (ghGistId) {
+        const r = await fetch('https://api.github.com/gists/' + ghGistId, {
+          headers: { Authorization: 'token ' + ghToken }
+        })
+        if (r.ok) {
+          const g = await r.json()
+          const raw = g.files['pike2_log.json']?.content
+          if (raw) entries = JSON.parse(raw)
+        }
+      }
+      entries.unshift(entry)
+      const body = {
+        description: 'Pike2 GPS Log MBI',
+        public: false,
+        files: { 'pike2_log.json': { content: JSON.stringify(entries, null, 2) } }
+      }
+      const res = await fetch('https://api.github.com/gists' + (ghGistId ? '/' + ghGistId : ''), {
+        method: ghGistId ? 'PATCH' : 'POST',
+        headers: { Authorization: 'token ' + ghToken, 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      })
+      const saved = await res.json()
+      setGhGistId(saved.id)
+      localStorage.setItem('pike2_gist_id', saved.id)
+      setSaveStatus('✓ Sauvegardé')
+      setLogSite(''); setLogNote('')
+      loadLogs(ghToken, saved.id)
+    } catch (e) {
+      setSaveStatus('✗ ' + e.message)
+    }
+  }
+
+  async function loadLogs(tok = ghToken, gid = ghGistId) {
+    if (!tok || !gid) return
+    try {
+      const r = await fetch('https://api.github.com/gists/' + gid, {
+        headers: { Authorization: 'token ' + tok }
+      })
+      if (!r.ok) throw new Error('Gist introuvable')
+      const g = await r.json()
+      const raw = g.files['pike2_log.json']?.content
+      if (raw) setLogList(JSON.parse(raw).slice(0, 10))
+    } catch { setLogList([]) }
+  }
+
+  // ── Repeat ────────────────────────────────────────
   function handlePress(dir) {
     doChange(dir)
     repeatRef.current = setTimeout(() => {
@@ -264,18 +372,14 @@ export default function DashboardPike2() {
 
   function doChange(dir) {
     switch (selectedParam) {
-      case 'vent':
-        dir > 0 ? incrementParam('vent') : decrementParam('vent')
-        break
+      case 'vent': dir > 0 ? incrementParam('vent') : decrementParam('vent'); break
       case 'offset': {
         const newOff = offset + dir * 42
         if ((offset < 0 && newOff > 0) || (offset > 0 && newOff < 0)) setOffset(0)
         else setOffset(Math.max(-500, Math.min(500, offset + dir * 42)))
         break
       }
-      case 'alt':
-        setAlt(a => Math.max(0, Math.min(3000, a + dir * 50)))
-        break
+      case 'alt': setAlt(a => Math.max(0, Math.min(3000, a + dir * 50))); break
       case 'kg': {
         const base = kgManuel !== null ? kgManuel : kgVal
         setKgManuel(parseFloat(Math.max(CFG.m_vide / 1000, Math.min(6.0, base + dir * 0.010)).toFixed(3)))
@@ -308,24 +412,28 @@ export default function DashboardPike2() {
   const capS = Math.max(cfg.avL.length, cfg.avR.length, CFG.SB.cap)
   const capB = Math.max(cfg.arL.length, cfg.arR.length, CFG.BB.cap)
 
+  const inp = { background: '#0d1117', border: '1px solid #30363d', color: '#fff', borderRadius: 6, padding: '6px 8px', fontSize: 12, width: '100%' }
+  const btn = (bg) => ({ background: bg, border: 'none', color: '#fff', borderRadius: 8, padding: '8px 12px', cursor: 'pointer', fontWeight: 700, fontSize: 13 })
+  const card = { background: '#161b22', borderRadius: 10, padding: 10, border: '1px solid #21262d', marginBottom: 10 }
+
   return (
     <>
       <style>{CSS}</style>
       <div className="p2-app" translate="no">
+
+        {/* Tabs */}
         <div className="p2-tabs">
           <button className={`p2-tab${tab === 'calc' ? ' on' : ''}`} onClick={() => setTab('calc')}>⚖ CALCULATEUR</button>
           <button className={`p2-tab${tab === 'matrix' ? ' on' : ''}`} onClick={() => setTab('matrix')}>📋 MATRICE</button>
         </div>
 
+        {/* ══ CALC ══ */}
         {tab === 'calc' && (
           <div className="p2-calc">
             <div className={`p2-vent${selectedParam === 'vent' ? ' active' : ''}`} onClick={() => selectParam('vent')}>
               <div className="p2-vent-val">{vent.toFixed(1)}</div>
               <div className="p2-vent-lbl">{ventLabel}</div>
-              <button
-                className={`p2-gps-btn${gpsStatus === 'capturing' ? ' capturing' : ''}`}
-                onClick={(e) => { e.stopPropagation(); captureGPS() }}
-              >{gpsStatus === 'ok' ? '✓' : gpsStatus === 'err' ? '✗' : '📍'}</button>
+              <button className="p2-gps-btn" onClick={(e) => { e.stopPropagation(); setGpsOpen(true); loadLogs() }}>📍</button>
             </div>
 
             <div className="p2-baro">
@@ -358,7 +466,7 @@ export default function DashboardPike2() {
               </div>
             </div>
 
-            {alt > 0 && (
+            {alt > 0 && selectedParam === 'alt' && (
               <div className="p2-alt">
                 <div style={{ textAlign:'center', flex:1 }}><span className="p2-ab-lbl">ALTITUDE</span><span className="p2-ab-val">{alt} m</span></div>
                 <div style={{ textAlign:'center', flex:1 }}><span className="p2-ab-lbl">DÉDUIT</span><span className="p2-ab-val">−{Math.round((m0kg - mAltkg) * 1000)} g</span></div>
@@ -387,12 +495,10 @@ export default function DashboardPike2() {
                 <div className="p2-ctrl-arrows">
                   <button className="p2-nav"
                     onMouseDown={() => handlePress(-1)} onMouseUp={handleRelease} onMouseLeave={handleRelease}
-                    onTouchStart={(e) => { e.preventDefault(); handlePress(-1) }} onTouchEnd={handleRelease}
-                  >◀</button>
+                    onTouchStart={(e) => { e.preventDefault(); handlePress(-1) }} onTouchEnd={handleRelease}>◀</button>
                   <button className="p2-nav"
                     onMouseDown={() => handlePress(1)} onMouseUp={handleRelease} onMouseLeave={handleRelease}
-                    onTouchStart={(e) => { e.preventDefault(); handlePress(1) }} onTouchEnd={handleRelease}
-                  >▶</button>
+                    onTouchStart={(e) => { e.preventDefault(); handlePress(1) }} onTouchEnd={handleRelease}>▶</button>
                 </div>
               </div>
               <div className="p2-hint">{hints[selectedParam] || 'Appui long = défilement rapide'}</div>
@@ -400,6 +506,7 @@ export default function DashboardPike2() {
           </div>
         )}
 
+        {/* ══ MATRICE ══ */}
         {tab === 'matrix' && (
           <div className="p2-matrix">
             <div className="p2-m-hdr">
@@ -414,18 +521,13 @@ export default function DashboardPike2() {
                 <div style={{ fontSize:9, color:'#8b949e' }}>{selCfg ? `calc ${calcM}g (${calcM-selCfg.m>0?'+':''}${calcM-selCfg.m}g)` : '—'}</div>
               </div>
             </div>
-
             <div className="p2-sg">
               {MATRIX.map((c, i) => (
-                <div key={i}
-                  className={`p2-rb${matrixIdx===i?' sel':''}${[...c.avL,...c.avR].some(s=>s.cls==='t70')?' t':''}`}
-                  onClick={() => setMatrixIdx(i)}
-                >{c.n}</div>
+                <div key={i} className={`p2-rb${matrixIdx===i?' sel':''}${[...c.avL,...c.avR].some(s=>s.cls==='t70')?' t':''}`}
+                  onClick={() => setMatrixIdx(i)}>{c.n}</div>
               ))}
             </div>
-
             {!selCfg && <div className="p2-m-ph">← Choisir une configuration</div>}
-
             {selCfg && (
               <>
                 <div className="p2-m-soutes">
@@ -461,7 +563,6 @@ export default function DashboardPike2() {
                 </div>
               </>
             )}
-
             <div className="p2-m-leg">
               {[{bg:'#c8a030',lbl:'42g L'},{bg:'#8a6a10',lbl:'21g ½L'},{bg:'#2255aa',lbl:'70g T'},{bg:'#708090',lbl:'126g L'},{bg:'#4a5a66',lbl:'63g ½L'}].map(({bg,lbl}) => (
                 <div key={lbl} className="p2-m-li"><div className="p2-m-ls" style={{ background:bg }} />{lbl}</div>
@@ -469,6 +570,129 @@ export default function DashboardPike2() {
             </div>
           </div>
         )}
+
+        {/* ══ GPS OVERLAY ══ */}
+        {gpsOpen && (
+          <div className="p2-overlay">
+            <div className="p2-overlay-box">
+              {/* Header */}
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12 }}>
+                <div>
+                  <div style={{ fontSize:16, fontWeight:800 }}>📍 GPS Log</div>
+                  <div style={{ fontSize:10, color:'#8b949e' }}>
+                    {ghLogin ? '✓ ' + ghLogin : 'Non connecté'}
+                  </div>
+                </div>
+                <div style={{ display:'flex', gap:8 }}>
+                  <button onClick={() => setGhPopup(true)} style={btn('#161b22')}>🔑 GitHub</button>
+                  <button onClick={() => setGpsOpen(false)} style={btn('#21262d')}>✕</button>
+                </div>
+              </div>
+
+              {/* Capture GPS */}
+              <div style={card}>
+                <div style={{ display:'flex', gap:8, alignItems:'center', marginBottom:8 }}>
+                  <button onClick={captureGPS} style={{ ...btn(gpsCapturing ? '#1a3a8f' : 'linear-gradient(135deg,#065f46,#047857)'), flex:1, border:'1px solid #34d399' }}>
+                    {gpsCapturing ? '⌛ Localisation…' : '📡 Capturer position'}
+                  </button>
+                  <div style={{ textAlign:'center', minWidth:50 }}>
+                    <div style={{ fontSize:10, color:'#8b949e' }}>PRÉCISION</div>
+                    <div style={{ fontSize:12, fontWeight:700, color:'#34d399' }}>{gpsData.accuracy ? gpsData.accuracy+'m' : '—'}</div>
+                  </div>
+                </div>
+                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:6 }}>
+                  {[['ALTITUDE', gpsData.alt !== null ? Math.round(gpsData.alt)+' m' : '— m', '#34d399'],
+                    ['LAT', gpsData.lat ? gpsData.lat.toFixed(5)+'°' : '—', '#8b949e'],
+                    ['LON', gpsData.lon ? gpsData.lon.toFixed(5)+'°' : '—', '#8b949e']
+                  ].map(([lbl, val, c]) => (
+                    <div key={lbl} style={{ background:'#0d1117', borderRadius:6, padding:6, textAlign:'center', border:'1px solid #21262d' }}>
+                      <div style={{ fontSize:9, color:'#8b949e' }}>{lbl}</div>
+                      <div style={{ fontSize:14, fontWeight:900, color:c }}>{val}</div>
+                    </div>
+                  ))}
+                </div>
+                {gpsData.alt !== null && (
+                  <button onClick={useAltitude} style={{ ...btn('#1a2744'), width:'100%', marginTop:8, border:'1px solid #1a73e8' }}>
+                    ⬆ Utiliser {Math.round(gpsData.alt / 50) * 50} m comme altitude
+                  </button>
+                )}
+              </div>
+
+              {/* Enregistrer session */}
+              <div style={card}>
+                <div style={{ fontSize:11, color:'#8b949e', fontWeight:700, marginBottom:8 }}>ENREGISTRER SESSION</div>
+                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:6, marginBottom:8 }}>
+                  <div>
+                    <div style={{ fontSize:9, color:'#8b949e', marginBottom:2 }}>SITE</div>
+                    <input value={logSite} onChange={e => setLogSite(e.target.value)} placeholder="Nom du site" style={inp} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize:9, color:'#8b949e', marginBottom:2 }}>CONDITIONS</div>
+                    <input value={logNote} onChange={e => setLogNote(e.target.value)} placeholder="Notes libres" style={inp} />
+                  </div>
+                </div>
+                <div style={{ background:'#0d1117', borderRadius:6, padding:8, border:'1px solid #21262d', marginBottom:8, fontSize:10 }}>
+                  <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:4, textAlign:'center' }}>
+                    {[['VENT', vent.toFixed(1)+' m/s'], ['ALT', alt+' m'], ['MASSE', kgVal.toFixed(3)+' kg'], ['CONFIG', '#'+cfg.n]].map(([l,v]) => (
+                      <div key={l}><span style={{ color:'#8b949e', display:'block' }}>{l}</span><span style={{ color:'#fff', fontWeight:700 }}>{v}</span></div>
+                    ))}
+                  </div>
+                </div>
+                <button onClick={saveLog} style={{ ...btn('linear-gradient(135deg,#1a3a8f,#1a73e8)'), width:'100%', border:'1px solid #1a73e8' }}>
+                  💾 Enregistrer sur GitHub Gist
+                </button>
+                {saveStatus && <div style={{ textAlign:'center', fontSize:10, color:'#8b949e', marginTop:4 }}>{saveStatus}</div>}
+              </div>
+
+              {/* Historique */}
+              <div style={card}>
+                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8 }}>
+                  <div style={{ fontSize:11, color:'#8b949e', fontWeight:700 }}>HISTORIQUE</div>
+                  <button onClick={() => loadLogs()} style={{ background:'#21262d', border:'1px solid #30363d', color:'#8b949e', borderRadius:6, padding:'3px 8px', cursor:'pointer', fontSize:10 }}>↻</button>
+                </div>
+                {logList.length === 0 ? (
+                  <div style={{ fontSize:10, color:'#8b949e' }}>{ghToken ? 'Aucun log.' : 'Connectez-vous à GitHub.'}</div>
+                ) : logList.map((e, i) => {
+                  const d = new Date(e.timestamp)
+                  const dt = d.toLocaleDateString('fr-FR') + ' ' + d.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' })
+                  return (
+                    <div key={i} style={{ padding:'6px 0', borderBottom:'1px solid #21262d', display:'flex', justifyContent:'space-between' }}>
+                      <div>
+                        <span style={{ color:'#fff', fontWeight:700 }}>{e.site || '—'}</span>
+                        <span style={{ color:'#8b949e' }}> · {e.vent}m/s · alt{e.altitude}m{e.gps ? ' · GPS'+e.gps.alt+'m' : ''}</span><br />
+                        <span style={{ color:'#34d399' }}>cfg #{e.config} · {e.masse.toFixed(3)}kg · CG{e.cg}mm</span>
+                      </div>
+                      <span style={{ color:'#8b949e', fontSize:9 }}>{dt}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ══ GITHUB POPUP ══ */}
+        {ghPopup && (
+          <div className="p2-gh-popup">
+            <div className="p2-gh-box">
+              <div style={{ fontSize:15, fontWeight:800, marginBottom:4 }}>🔑 Connexion GitHub</div>
+              <div style={{ fontSize:10, color:'#8b949e', marginBottom:14 }}>
+                Token avec permission <strong>gist</strong><br />
+                <a href="https://github.com/settings/tokens/new?scopes=gist&description=Pike2+GPS+Log+MBI"
+                  target="_blank" rel="noreferrer" style={{ color:'#1a73e8' }}>Créer un token →</a>
+              </div>
+              <input type="password" value={ghTokenInput} onChange={e => setGhTokenInput(e.target.value)}
+                placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
+                style={{ ...inp, fontFamily:'monospace', marginBottom:10 }} />
+              <div style={{ display:'flex', gap:8 }}>
+                <button onClick={() => setGhPopup(false)} style={{ ...btn('#21262d'), flex:1, color:'#8b949e' }}>Annuler</button>
+                <button onClick={validateToken} style={{ ...btn('linear-gradient(135deg,#1a3a8f,#1a73e8)'), flex:2, border:'1px solid #1a73e8' }}>✓ Connecter</button>
+              </div>
+              {ghTokenError && <div style={{ color:'#f85149', fontSize:10, marginTop:6, textAlign:'center' }}>{ghTokenError}</div>}
+            </div>
+          </div>
+        )}
+
       </div>
     </>
   )
