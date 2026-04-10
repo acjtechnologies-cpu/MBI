@@ -1,10 +1,10 @@
-ï»¿import { create } from 'zustand'
+import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 const useAppStore = create(
   persist(
     (set, get) => ({
-      // ParamÃ¨tres mÃ©tÃ©o
+      // Paramètres météo
       params: {
         vent: 8.0,
         pression: 1015,
@@ -13,25 +13,27 @@ const useAppStore = create(
         rosee: 8,
       },
 
-      // ParamÃ¨tres planeur - CORRIGÃ‰S
-      mv: 2.455,        // Masse Ã  vide en kg
-      surface: 59.0,    // Surface alaire en dmÂ² (0.59 mÂ² = 59 dmÂ²) - PAR DÃ‰FAUT
+      // Paramètres planeur - CORRIGÉS
+      mv: 2.455,        // Masse à vide en kg
+      surface: 59.0,    // Surface alaire en dm² (0.59 m² = 59 dm²) - PAR DÉFAUT
       
       // Chronos
       chronoC: 40.0,    // Chrono cible
-      chronoR: 40.0,    // Chrono rÃ©alisÃ©
-      lievre: 38.0,     // Chrono liÃ¨vre
+      chronoR: 40.0,    // Chrono réalisé
+      lievre: 38.0,     // Chrono lièvre
 
       // Offset
       offset: 0,        // Offset en grammes
- k_up: 1.00,
+ activeSite: { name: '', irp: 171, k: 1.000 },
+      k_up: 1.00,
       alpha: 1.00,
 altitude: 0,
 
-      // ParamÃ¨tre sÃ©lectionnÃ© pour contrÃ´le
+      // Paramètre sélectionné pour contrôle
       selectedParam: 'vent',
 
-      // Actions paramÃ¨tres mÃ©tÃ©o
+      // Actions paramètres météo
+      setActiveSite: (site) => set({ activeSite: site }),
       setParam: (key, value) =>
         set((state) => ({
           params: { ...state.params, [key]: value },
@@ -75,7 +77,7 @@ altitude: 0,
  setKUp: (value) => set({ k_up: value }),
       setAlpha: (value) => set({ alpha: value }),
       setAltitude: (value) => set({ altitude: value }), 
-      // SÃ©lection paramÃ¨tre
+      // Sélection paramètre
       selectParam: (param) => set({ selectedParam: param }),
 
       // Reset

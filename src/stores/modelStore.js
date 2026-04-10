@@ -31,6 +31,41 @@ const MATRIX_MAMBA = [
   {n:20, m:4072, cg:102.8, av:{G:3,D:3,matG:'Laiton',matD:'Laiton'}, c:{G:3,D:3,matG:'Plomb',matD:'Plomb'}, ar:{G:4,D:4,matG:'Laiton',matD:'Laiton'}}
 ]
 
+
+// Modèle par défaut — Pike Precision 2
+const DEFAULT_PIKE2 = {
+  id: 'pike-precision-2',
+  nom: 'Pike Precision 2',
+  drapeau:'🏁' ,
+  masseVide: 2332,
+  cgVide: 97,
+  surface: 55,
+  offset: 0,
+  version: '1.0',
+  soutes: {
+    'small-av': {
+      id: 'small-av',
+      nom: 'Small AV',
+      couleur: '#c8a030',
+      distanceBA: 54,
+      capacite: 5,
+      materiaux: [
+        { nom: 'Laiton', masse: 42, stock: 5 },
+        { nom: 'TungstÃ¨ne', masse: 70, stock: 2 }
+      ]
+    },
+    'big-ar': {
+      id: 'big-ar',
+      nom: 'Big AR',
+      couleur: '#708090',
+      distanceBA: 118,
+      capacite: 5,
+      materiaux: [
+        { nom: 'Laiton', masse: 126, stock: 5 }
+      ]
+    }
+  }
+}
 // Modele par defaut — Mamba S avec matrice intégrée
 const DEFAULT_MODEL = {
   id: 'mamba-s',
@@ -83,7 +118,8 @@ const useModelStore = create(
   persist(
     (set, get) => ({
       models: {
-        'mamba-s': DEFAULT_MODEL
+        'mamba-s': DEFAULT_MODEL,
+        'pike-precision-2': DEFAULT_PIKE2
       },
       activeModelId: 'mamba-s',
       _hasHydrated: false,
@@ -263,6 +299,9 @@ const useModelStore = create(
           // Vérifier que la matrice Mamba est bien présente
           if (!state.models) {
             state.models = { 'mamba-s': DEFAULT_MODEL }
+          if (!state.models['pike-precision-2']) {
+            state.models['pike-precision-2'] = DEFAULT_PIKE2
+          }
             state.activeModelId = 'mamba-s'
           } else if (state.models['mamba-s'] && !state.models['mamba-s'].matrix) {
             // Migrer: ajouter la matrice si absente

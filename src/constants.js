@@ -1,4 +1,4 @@
-/**
+﻿/**
  * MBI vNext - Constants
  */
 
@@ -14,12 +14,12 @@ export const OFFSET_STEPS = [-170, -85, -42, 0, 42, 85, 170];
 export const MASSE_MAX = 4.200;
 export const DELTA_MASSE = 0.170;
 
-// === MÉTÉO ===
+// === MÃ‰TÃ‰O ===
 export const RHO_REF = 1.225;
 export const Rd = 287.05;
 export const Rv = 461.495;
 
-// === POLY4 - Points de référence ===
+// === POLY4 - Points de rÃ©fÃ©rence ===
 export const POLY4_REFERENCE_POINTS = [
   { vent: 4.05, masse: 2.300 }, { vent: 4.23, masse: 2.385 },
   { vent: 4.41, masse: 2.470 }, { vent: 4.61, masse: 2.555 },
@@ -67,17 +67,17 @@ export const UI_CONFIG = {
 export const PARAMS = {
   pression: { min: 950, max: 1050, step: 1, label: 'Pression', unit: 'hPa', decimals: 0 },
   altitude: { min: 0, max: 5000, step: 10, label: 'Altitude', unit: 'm', decimals: 0 },
-  temperature: { min: -30, max: 50, step: 1, label: 'T°', unit: '°C', decimals: 0 },
-  rosee: { min: -30, max: 50, step: 1, label: 'Td', unit: '°C', decimals: 0 },
+  temperature: { min: -30, max: 50, step: 1, label: 'TÂ°', unit: 'Â°C', decimals: 0 },
+  rosee: { min: -30, max: 50, step: 1, label: 'Td', unit: 'Â°C', decimals: 0 },
   vent: { min: 0, max: 25, step: 0.5, label: 'Vent', unit: 'm/s', decimals: 1 },
   offset: { min: -500, max: 500, step: 17, label: 'Offset', unit: 'g', decimals: 0 }
 };
 
-// === MATÉRIAUX ===
+// === MATÃ‰RIAUX ===
 export const MATERIALS = {
   B: { name: 'Laiton', color: 'gold', default_mass: 75 },
   L: { name: 'Plomb', color: 'gray', default_mass: 75 },
-  W: { name: 'Tungstène', color: 'red', default_mass: 75 }
+  W: { name: 'TungstÃ¨ne', color: 'red', default_mass: 75 }
 };
 
 // === DEFAULTS ===
@@ -104,16 +104,3 @@ export const STORAGE_KEYS = {
   RUNS: 'MBI_RUNS',
   GLIDER_PROFILE: 'MBI_GliderProfile_v1_last'
 };
-```
-
-6. **Sauvegarde** : Appuie sur **Ctrl+S**
-
----
-
-## ✅ **Vérifie**
-
-Tu devrais maintenant voir dans l'arbre de fichiers :
-```
-src/
-├── utils/
-│   └── constants.js    ← NOUVEAU (avec du code dedans)

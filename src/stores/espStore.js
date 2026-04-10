@@ -168,6 +168,9 @@ export const useESPStore = create((set, get) => ({
       const updated = {
         pitot: newData.pitot ?? state.data.pitot,
         vent: newData.vent ?? state.data.vent,
+        iqa:   newData.IQA   ?? state.data.iqa,
+        sGrad: newData.S_GRAD ?? state.data.sGrad,
+        bulle: newData.BULLE === 1,
         temperature: newData.temperature ?? state.data.temperature,
         pression: newData.pression ?? state.data.pression,
         humidity: newData.humidity ?? state.data.humidity,

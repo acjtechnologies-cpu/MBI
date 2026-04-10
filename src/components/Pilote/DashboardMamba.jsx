@@ -136,12 +136,15 @@ export default function DashboardMamba() {
   const {
     params, incrementParam, decrementParam,
     offset, setOffset,
+    altitude, setAltitude,
   } = useAppStore()
 
-  // ── État local — indépendant du store partagé ────
+  // ── État local ───────────────────────────────────
   const [selectedParam, setSelectedParam] = useState('vent')
-  const [alt, setAlt] = useState(0)
-  const [kgManuel, setKgManuel] = useState(null) // null = mode auto
+  const [kgManuel, setKgManuel] = useState(null)
+
+  const alt = altitude || 0
+  function setAlt(v) { setAltitude(typeof v === 'function' ? v(alt) : v) }
 
   function selectParam(p) {
     setSelectedParam(p)

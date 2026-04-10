@@ -1,10 +1,10 @@
-/**
+﻿/**
  * MBI vNext - App Store
  */
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { DEFAULT_VALUES, STORAGE_KEYS, PARAMS } from '../utils/constants';
+import { DEFAULT_VALUES, STORAGE_KEYS, PARAMS } from './constants';
 
 export const useAppStore = create(
   persist(
