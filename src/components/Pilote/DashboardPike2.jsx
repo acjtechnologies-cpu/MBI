@@ -194,10 +194,12 @@ const CSS = `
 
 // ── Composant ──────────────────────────────────────────────────────────────
 export default function DashboardPike2() {
-  const { params, incrementParam, decrementParam, offset, setOffset } = useAppStore()
+  const { params, incrementParam, decrementParam, offset, setOffset, altitude, setAltitude } = useAppStore()
 
   const [selectedParam, setSelectedParam] = useState('vent')
-  const [alt, setAlt]             = useState(0)
+  // altitude depuis appStore (persisté entre onglets)
+  const alt = altitude || 0
+  function setAlt(v) { setAltitude(typeof v === 'function' ? v(alt) : v) }
   const [kgManuel, setKgManuel]   = useState(null)
   const [tab, setTab]             = useState('calc')
   const [matrixIdx, setMatrixIdx] = useState(null)
