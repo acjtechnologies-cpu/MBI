@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Chart, registerables } from 'chart.js'
-import { useAppStore } from '../../stores/appStore'
+import { useAppStore }
+import { useModelStore } from '../../stores/modelStore' from '../../stores/appStore'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 Chart.register(...registerables)
@@ -67,6 +68,7 @@ export default function Poly4Page() {
     setAlpha,
     altitude
   } = useAppStore()
+  const activeModel = useModelStore(s => s.getActiveModel())
   
   const vent = params.vent
   const k_pilot = 1.0 + (offset / 5000)
@@ -96,7 +98,8 @@ export default function Poly4Page() {
   // Calculs
   const p4b = poly4(vent)
   const m_adapt = p4b * alpha * k_up * k_pilot
-  const m_fin = Math.min(faiEnv(vent), Math.max(0, m_adapt * rr))
+  const modelOff = (activeModel?.offset || 0) / 1000
+  const m_fin = Math.min(faiEnv(vent), Math.max(0, m_adapt * rr + modelOff))
   const am = aeromod(vent)
   
   // Interprétation k_up
