@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Chart, registerables } from 'chart.js'
-import { useAppStore }
-import { useModelStore } from '../../stores/modelStore' from '../../stores/appStore'
+import { useAppStore } from '../../stores/appStore'
+import { useModelStore } from '../../stores/modelStore'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 Chart.register(...registerables)
