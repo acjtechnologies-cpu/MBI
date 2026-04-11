@@ -108,6 +108,8 @@ altitude: 0,
         chronoR: state.chronoR,
         lievre: state.lievre,
         offset: state.offset,
+        altitude: state.altitude,
+        activeSite: state.activeSite,
         k_up: state.k_up,
         alpha: state.alpha,
         altitude: state.altitude   
