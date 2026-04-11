@@ -254,12 +254,10 @@ export default function Poly4Page() {
     
     chartInstance.current.data.datasets[2].data = vRange.map(v => poly4(v) * alpha * k_up * k_pilot)
     chartInstance.current.data.datasets[3].data = vRange.map(v => poly4(v) * alpha * k_up * k_pilot * rr)
-    const _modelOff = (activeModel?.offset || 0) / 1000
-    const _mFin = Math.min(faiEnv(vent), Math.max(0, poly4(vent) * alpha * k_up * k_pilot * rr + _modelOff))
-    chartInstance.current.data.datasets[4].data = [{ x: vent, y: _mFin }]
+    chartInstance.current.data.datasets[4].data = [{ x: vent, y: m_fin }]
     chartInstance.current.data.datasets[5].data = vRange.map(v => Math.abs(v - vent) < 0.06 ? 5.0 : null)
     chartInstance.current.update('none')
-  }, [vent, k_up, alpha, offset, altitude, activeTab, activeModel])
+  }, [vent, k_up, alpha, offset, altitude, activeTab, m_fin])
   
   return (
     <div className="flex flex-col h-screen overflow-hidden" style={{ background: '#0d0f14' }}>
