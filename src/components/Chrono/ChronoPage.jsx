@@ -90,8 +90,14 @@ export default function ChronoPage() {
         site_k:      activeSite?.k || 1.0,
         site_irp:    activeSite?.irp || 171,
         altitude:    altitude,
-        planeur_id:  activeModel?.id || '',
-        planeur_nom: activeModel?.nom || '',
+        planeur_id:   activeModel?.id || '',
+        planeur_nom:  activeModel?.nom || '',
+        planeur_mv:   activeModel?.masseVide || 0,
+        planeur_surf: activeModel?.surface || 0,
+        planeur_off:  activeModel?.offset || 0,
+        ballast_masse:  ballastSnap?.masse || 0,
+        ballast_config: ballastSnap?.config || 0,
+        ballast_cg:     ballastSnap?.cg || 0,
       };
       setRuns(prev => [newRun, ...prev]);
       db.runs.add(newRun).catch(() => {});
