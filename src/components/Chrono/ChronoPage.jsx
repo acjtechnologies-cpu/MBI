@@ -2,10 +2,11 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAppStore } from '../../stores/appStore'
 import { useESPStore } from '../../stores/espStore';
 import Dexie from 'dexie';
+import { useModelStore } from '../../stores/modelStore';
 
 const db = new Dexie('ChronoDB');
 db.version(1).stores({
-  runs: '++id, pilote_id, manche, t_start',
+  runs: '++id, pilote_id, manche, t_start, site_name, planeur_id',
 });
 
 function formatDuree(ms) {
@@ -38,6 +39,8 @@ export default function ChronoPage() {
   const [showReset, setShowReset]     = useState(false);
 
   const activeSite = useAppStore(s => s.activeSite)
+  const altitude   = useAppStore(s => s.altitude) || 0
+  const activeModel = useModelStore(s => s.getActiveModel())
   const espData = useESPStore(s => s.data);
   const iqa     = espData?.iqa   ?? 0;
   const vent    = espData?.vent  ?? espData?.pitot ?? 0;
