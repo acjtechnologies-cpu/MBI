@@ -84,8 +84,14 @@ export default function ChronoPage() {
         iqa_snap:   iqaRef.current,
         vent_snap:  ventRef.current,
         sgrad_snap: sGradRef.current,
-        bulle_snap: bulleRef.current,
-        t_start:    t0Ref.current,
+        bulle_snap:  bulleRef.current,
+        t_start:     t0Ref.current,
+        site_name:   activeSite?.name || '',
+        site_k:      activeSite?.k || 1.0,
+        site_irp:    activeSite?.irp || 171,
+        altitude:    altitude,
+        planeur_id:  activeModel?.id || '',
+        planeur_nom: activeModel?.nom || '',
       };
       setRuns(prev => [newRun, ...prev]);
       db.runs.add(newRun).catch(() => {});
