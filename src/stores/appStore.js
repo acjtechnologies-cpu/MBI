@@ -1,10 +1,10 @@
-import { create } from 'zustand'
+ï»¿import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 const useAppStore = create(
   persist(
     (set, get) => ({
-      // Paramètres météo
+      // Paramï¿½tres mï¿½tï¿½o
       params: {
         vent: 8.0,
         pression: 1015,
@@ -13,14 +13,14 @@ const useAppStore = create(
         rosee: 8,
       },
 
-      // Paramètres planeur - CORRIGÉS
-      mv: 2.455,        // Masse à vide en kg
-      surface: 59.0,    // Surface alaire en dm² (0.59 m² = 59 dm²) - PAR DÉFAUT
+      // Paramï¿½tres planeur - CORRIGï¿½S
+      mv: 2.455,        // Masse ï¿½ vide en kg
+      surface: 59.0,    // Surface alaire en dmï¿½ (0.59 mï¿½ = 59 dmï¿½) - PAR Dï¿½FAUT
       
       // Chronos
       chronoC: 40.0,    // Chrono cible
-      chronoR: 40.0,    // Chrono réalisé
-      lievre: 38.0,     // Chrono lièvre
+      chronoR: 40.0,    // Chrono rï¿½alisï¿½
+      lievre: 38.0,     // Chrono liï¿½vre
 
       // Offset
       offset: 0,        // Offset en grammes
@@ -29,10 +29,11 @@ const useAppStore = create(
       alpha: 1.00,
 altitude: 0,
 
-      // Paramètre sélectionné pour contrôle
+      // Paramï¿½tre sï¿½lectionnï¿½ pour contrï¿½le
       selectedParam: 'vent',
+      ballastSnap: { masse: 0, config: 0, cg: 0, planeur_id: '', planeur_nom: '', mv: 0, offset: 0, surface: 0 },
 
-      // Actions paramètres météo
+      // Actions paramï¿½tres mï¿½tï¿½o
       setActiveSite: (site) => set({ activeSite: site }),
       setParam: (key, value) =>
         set((state) => ({
@@ -77,8 +78,9 @@ altitude: 0,
  setKUp: (value) => set({ k_up: value }),
       setAlpha: (value) => set({ alpha: value }),
       setAltitude: (value) => set({ altitude: value }), 
-      // Sélection paramètre
+      // Sï¿½lection paramï¿½tre
       selectParam: (param) => set({ selectedParam: param }),
+      setBallastSnap: (snap) => set({ ballastSnap: snap }),
 
       // Reset
       resetParams: () =>
@@ -110,6 +112,7 @@ altitude: 0,
         offset: state.offset,
         altitude: state.altitude,
         activeSite: state.activeSite,
+        ballastSnap: state.ballastSnap,
         k_up: state.k_up,
         alpha: state.alpha,
         altitude: state.altitude   
