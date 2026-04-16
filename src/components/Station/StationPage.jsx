@@ -165,7 +165,7 @@ export default function StationPage() {
   })
 
   return (
-    <div style={{ display:'flex', flexDirection:'column', height:'calc(100dvh - 52px)', overflowY:'auto', overflowX:'hidden', padding:6, gap:6, maxWidth:480, margin:'0 auto', background:'#05070a' }}>
+    <div style={{ display:'flex', flexDirection:'column', height:'calc(100dvh - 42px)', overflowY:'auto', overflowX:'hidden', padding:6, gap:6, maxWidth:480, margin:'0 auto', background:'#05070a' }}>
 
       <div style={{ display:'flex', gap:6, alignItems:'center', background:'#0d1117', border:'1px solid #30363d', borderRadius:10, padding:'7px 10px', flexShrink:0 }}>
         <div style={{ width:8, height:8, borderRadius:'50%', background:dotColor, flexShrink:0, boxShadow:wsStatus==='live'?'0 0 8px #3fb950':'none', transition:'all .3s' }}/>

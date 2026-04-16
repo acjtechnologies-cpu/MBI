@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState, useMemo, useCallback } from 'react'
+import { useEffect, useRef, useState, useMemo, useCallback } from 'react'
 import { useAppStore } from '../../stores/appStore'
 import { useModelStore } from '../../stores/modelStore'
 import Chart from 'chart.js/auto'
@@ -207,7 +207,7 @@ export default function Poly4Page() {
 
   return (
     <div style={{
-      height: 'calc(100dvh - 52px)', display: 'flex', flexDirection: 'column',
+      height: '100dvh', display: 'flex', flexDirection: 'column',
       background: '#0b0e12', color: '#c9d1d9',
       fontFamily: '-apple-system, system-ui, sans-serif',
       padding: '10px', overflow: 'hidden', boxSizing: 'border-box',

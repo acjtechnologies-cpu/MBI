@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAppStore } from '../../stores/appStore'
 import { useESPStore } from '../../stores/espStore';
 import Dexie from 'dexie';
@@ -149,7 +149,7 @@ export default function ChronoPage() {
   return (
     <div style={{
       display:'flex', flexDirection:'column',
-      height:'calc(100dvh - 52px)', background:'#0a0a0a',
+      height:'calc(100dvh - 42px)', background:'#0a0a0a',
       color:'#fff', fontFamily:'var(--font-sans,sans-serif)',
       overflowY:'auto', userSelect:'none',
     }}>
