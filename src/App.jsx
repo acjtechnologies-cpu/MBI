@@ -1,4 +1,4 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import { Home, Radio, Calculator, Package, Timer } from 'lucide-react'
 import DashboardPilote from './components/Pilote/DashboardPilote'
 import DashboardPike2  from './components/Pilote/DashboardPike2'
@@ -9,39 +9,34 @@ import StationPage    from './components/Station/StationPage'
 import ChronoPage     from './components/Chrono/ChronoPage'
 import WelcomePage    from './pages/WelcomePage'
 
-function PilotePage() {
-  const { getActiveModel } = useModelStore()
-  const m = getActiveModel()
-  if (m?.id === 'pike-precision-2') return <DashboardPike2 />
-  return <DashboardPilote />
-}
-
-function SoutePage() {
-  return <ModelManager />
-}
-
-function Poly4Page() {
-  return <Poly4Component />
-}
+const tabs = [
+  { id: 'pilote',  label: 'Pilotage', icon: Home },
+  { id: 'soute',   label: 'Soute',    icon: Package },
+  { id: 'poly4',   label: 'Poly4',    icon: Calculator },
+  { id: 'station', label: 'Station',  icon: Radio },
+  { id: 'chrono',  label: 'Chrono',   icon: Timer },
+]
 
 function App() {
   const [activeTab, setActiveTab] = useState('pilote')
   const activeModelId = useModelStore(s => s.activeModelId)
-  const [gliderChosen, setGliderChosen] = useState(() => {
-    return localStorage.getItem('mbi_glider_chosen') === '1'
-  })
-  // Si modelStore a un modele actif, bypass WelcomePage
+  const getActiveModel = useModelStore(s => s.getActiveModel)
+
+  const [gliderChosen, setGliderChosen] = useState(() =>
+    localStorage.getItem('mbi_glider_chosen') === '1'
+  )
+
   const shouldShowApp = gliderChosen || !!activeModelId
 
-  if (!shouldShowApp) return <WelcomePage onSelect={() => { localStorage.setItem('mbi_glider_chosen', '1'); setGliderChosen(true) }} />
+  if (!shouldShowApp) return (
+    <WelcomePage onSelect={() => {
+      localStorage.setItem('mbi_glider_chosen', '1')
+      setGliderChosen(true)
+    }} />
+  )
 
-  const tabs = [
-    { id: 'pilote',  label: 'Pilotage', icon: Home },
-    { id: 'soute',   label: 'Soute',    icon: Package },
-    { id: 'poly4',   label: 'Poly4',    icon: Calculator },
-    { id: 'station', label: 'Station',  icon: Radio },
-    { id: 'chrono',  label: 'Chrono',   icon: Timer },
-  ]
+  const m = getActiveModel()
+  const PiloteComponent = m?.id === 'pike-precision-2' ? DashboardPike2 : DashboardPilote
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col">
@@ -69,9 +64,9 @@ function App() {
         </div>
       </nav>
       <main className="flex-1 overflow-auto">
-        {activeTab === 'pilote'  && <PilotePage />}
-        {activeTab === 'soute'   && <SoutePage />}
-        {activeTab === 'poly4'   && <Poly4Page />}
+        {activeTab === 'pilote'  && <PiloteComponent />}
+        {activeTab === 'soute'   && <ModelManager />}
+        {activeTab === 'poly4'   && <Poly4Component />}
         {activeTab === 'station' && <StationPage />}
         {activeTab === 'chrono'  && <ChronoPage />}
       </main>
