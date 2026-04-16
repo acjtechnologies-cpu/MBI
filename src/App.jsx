@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { Home, Radio, Calculator, Package, Timer } from 'lucide-react'
 import DashboardPilote from './components/Pilote/DashboardPilote'
 import DashboardPike2  from './components/Pilote/DashboardPike2'
@@ -26,7 +26,7 @@ function Poly4Page() {
 
 function App() {
   const [activeTab, setActiveTab] = useState('pilote')
-  const [gliderChosen, setGliderChosen] = useState(false)
+  const [gliderChosen, setGliderChosen] = useState(true)
 
   if (!gliderChosen) return <WelcomePage onSelect={() => setGliderChosen(true)} />
 
