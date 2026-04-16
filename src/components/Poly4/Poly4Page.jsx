@@ -207,7 +207,7 @@ export default function Poly4Page() {
 
   return (
     <div style={{
-      height: 'calc(100dvh - 42px)', display: 'flex', flexDirection: 'column',
+      height: 'calc(100dvh - 52px)', display: 'flex', flexDirection: 'column',
       background: '#0b0e12', color: '#c9d1d9',
       fontFamily: '-apple-system, system-ui, sans-serif',
       padding: '10px', overflow: 'hidden', boxSizing: 'border-box',

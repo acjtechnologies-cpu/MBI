@@ -67,7 +67,7 @@ function findNearest(tg) {
 
 // ── CSS ────────────────────────────────────────────────────────────────────
 const CSS = `
-.p2-app { display:flex; flex-direction:column; height:calc(100dvh - 42px); max-width:420px;
+.p2-app { display:flex; flex-direction:column; height:calc(100dvh - 52px); max-width:420px;
   margin:0 auto; background:#05070a; color:#fff;
   font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
   user-select:none; overflow:hidden; }
