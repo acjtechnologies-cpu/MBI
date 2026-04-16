@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Home, Radio, Calculator, Package, Timer } from 'lucide-react'
 import DashboardPilote from './components/Pilote/DashboardPilote'
 import DashboardPike2  from './components/Pilote/DashboardPike2'
 import { useModelStore } from './stores/modelStore'
@@ -9,11 +8,11 @@ import StationPage    from './components/Station/StationPage'
 import ChronoPage     from './components/Chrono/ChronoPage'
 
 const TABS = [
-  { id: 'pilote',  label: 'Pilotage', Icon: Home },
-  { id: 'soute',   label: 'Soute',    Icon: Package },
-  { id: 'poly4',   label: 'Poly4',    Icon: Calculator },
-  { id: 'station', label: 'Station',  Icon: Radio },
-  { id: 'chrono',  label: 'Chrono',   Icon: Timer },
+  { id: 'pilote',  label: 'Pilotage' },
+  { id: 'soute',   label: 'Soute' },
+  { id: 'poly4',   label: 'Poly4' },
+  { id: 'station', label: 'Station' },
+  { id: 'chrono',  label: 'Chrono' },
 ]
 
 function App() {
@@ -33,46 +32,32 @@ function App() {
   }
 
   return (
-    <div style={{
-      position: 'fixed', inset: 0,
-      display: 'flex', flexDirection: 'column',
-      background: '#0b0e12', overflow: 'hidden',
-    }}>
-      {/* NAV BAS — zIndex 100, toujours accessible */}
-      <nav style={{
-        position: 'absolute', bottom: 0, left: 0, right: 0,
-        height: 52, zIndex: 100,
-        display: 'flex',
-        background: '#161b22',
-        borderTop: '1px solid #21262d',
-      }}>
-        {TABS.map(({ id, label, Icon }) => {
-          const active = activeTab === id
-          return (
-            <button key={id} onClick={() => setActiveTab(id)} style={{
-              flex: 1, display: 'flex', flexDirection: 'column',
-              alignItems: 'center', justifyContent: 'center', gap: 2,
-              border: 'none', background: 'none', cursor: 'pointer',
-              color: active ? '#58a6ff' : '#4a5568',
-              borderTop: active ? '2px solid #58a6ff' : '2px solid transparent',
-              fontSize: 9, fontWeight: 700, padding: 0,
-              WebkitTapHighlightColor: 'transparent',
-              touchAction: 'manipulation',
-            }}>
-              <Icon size={18} />
-              <span>{label}</span>
-            </button>
-          )
-        })}
+    <div style={{ display:'flex', flexDirection:'column', height:'100dvh', overflow:'hidden', background:'#0b0e12' }}>
+
+      <nav style={{ display:'flex', flexShrink:0, height:44, background:'#161b22', borderBottom:'1px solid #21262d', zIndex:999 }}>
+        {TABS.map(({ id, label }) => (
+          <button
+            key={id}
+            onClick={() => setActiveTab(id)}
+            style={{
+              flex:1, border:'none', background:'none',
+              color: activeTab===id ? '#58a6ff' : '#4a5568',
+              fontSize:10, fontWeight:700, cursor:'pointer',
+              borderBottom: activeTab===id ? '2px solid #58a6ff' : '2px solid transparent',
+              WebkitTapHighlightColor:'transparent',
+              touchAction:'manipulation',
+              padding:0,
+            }}
+          >
+            {label}
+          </button>
+        ))}
       </nav>
 
-      {/* CONTENU — clipé au-dessus de la nav */}
-      <main style={{
-        position: 'absolute', top: 0, left: 0, right: 0,
-        bottom: 52, overflow: 'hidden',
-      }}>
+      <div style={{ flex:1, overflow:'hidden' }}>
         {renderPage()}
-      </main>
+      </div>
+
     </div>
   )
 }
