@@ -26,9 +26,14 @@ function Poly4Page() {
 
 function App() {
   const [activeTab, setActiveTab] = useState('pilote')
-  const [gliderChosen, setGliderChosen] = useState(() => localStorage.getItem('mbi_glider_chosen') === '1')
+  const activeModelId = useModelStore(s => s.activeModelId)
+  const [gliderChosen, setGliderChosen] = useState(() => {
+    return localStorage.getItem('mbi_glider_chosen') === '1'
+  })
+  // Si modelStore a un modele actif, bypass WelcomePage
+  const shouldShowApp = gliderChosen || !!activeModelId
 
-  if (!gliderChosen) return <WelcomePage onSelect={() => { localStorage.setItem('mbi_glider_chosen', '1'); setGliderChosen(true) }} />
+  if (!shouldShowApp) return <WelcomePage onSelect={() => { localStorage.setItem('mbi_glider_chosen', '1'); setGliderChosen(true) }} />
 
   const tabs = [
     { id: 'pilote',  label: 'Pilotage', icon: Home },
