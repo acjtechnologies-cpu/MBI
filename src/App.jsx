@@ -17,9 +17,11 @@ const tabs = [
   { id: 'chrono',  label: 'Chrono',   icon: Timer },
 ]
 
+const NAV_H = 42 // hauteur barre onglets en px
+
 function App() {
   const [activeTab, setActiveTab] = useState('pilote')
-  const activeModelId = useModelStore(s => s.activeModelId)
+  const activeModelId  = useModelStore(s => s.activeModelId)
   const getActiveModel = useModelStore(s => s.getActiveModel)
 
   const [gliderChosen, setGliderChosen] = useState(() =>
@@ -39,37 +41,60 @@ function App() {
   const PiloteComponent = m?.id === 'pike-precision-2' ? DashboardPike2 : DashboardPilote
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex flex-col">
-      <nav className="bg-gray-800 border-b border-gray-700 px-2">
-        <div className="flex space-x-0.5">
-          {tabs.map((tab) => {
-            const Icon = tab.icon
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`
-                  flex items-center gap-1.5 px-3 py-2 font-medium transition-colors text-xs
-                  ${activeTab === tab.id
-                    ? 'text-blue-400 border-b-2 border-blue-400'
-                    : 'text-gray-400 hover:text-gray-200'
-                  }
-                `}
-              >
-                <Icon size={14} />
-                <span>{tab.label}</span>
-              </button>
-            )
-          })}
-        </div>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100dvh', overflow: 'hidden', background: '#0b0e12' }}>
+
+      {/* Barre onglets — toujours AU-DESSUS, zIndex 50 */}
+      <nav style={{
+        height: NAV_H,
+        flexShrink: 0,
+        display: 'flex',
+        background: '#161b22',
+        borderBottom: '1px solid #21262d',
+        zIndex: 50,
+        position: 'relative',
+      }}>
+        {tabs.map((tab) => {
+          const Icon = tab.icon
+          const active = activeTab === tab.id
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              style={{
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 2,
+                border: 'none',
+                background: 'none',
+                cursor: 'pointer',
+                color: active ? '#58a6ff' : '#8b949e',
+                borderBottom: active ? '2px solid #58a6ff' : '2px solid transparent',
+                fontSize: 9,
+                fontWeight: 700,
+                padding: '4px 0',
+                WebkitTapHighlightColor: 'transparent',
+                transition: 'color 0.15s',
+              }}
+            >
+              <Icon size={16} />
+              <span>{tab.label}</span>
+            </button>
+          )
+        })}
       </nav>
-      <main className="flex-1 overflow-auto">
+
+      {/* Contenu — hauteur restante, pas d'overflow qui déborde */}
+      <main style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
         {activeTab === 'pilote'  && <PiloteComponent />}
         {activeTab === 'soute'   && <ModelManager />}
         {activeTab === 'poly4'   && <Poly4Component />}
         {activeTab === 'station' && <StationPage />}
         {activeTab === 'chrono'  && <ChronoPage />}
       </main>
+
     </div>
   )
 }
