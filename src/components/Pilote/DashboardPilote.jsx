@@ -23,7 +23,7 @@ function findNearest(matrix, tg) {
 const MAT_KEYS = ['av', 'c', 'ar']
 
 const CSS = `
-.mb-app{display:flex;flex-direction:column;height:100dvh;max-width:420px;margin:0 auto;background:#05070a;color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;user-select:none;overflow:hidden}
+.mb-app{display:flex;flex-direction:column;height:calc(100dvh - 42px);max-width:420px;margin:0 auto;background:#05070a;color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;user-select:none;overflow:hidden}
 .mb-tabs{display:flex;gap:4px;padding:6px 6px 0;height:42px;flex-shrink:0}
 .mb-tab{flex:1;padding:8px 0;border-radius:8px 8px 0 0;border:none;cursor:pointer;font-size:13px;font-weight:700;background:#1a1f2a;color:#8b949e;transition:all .2s}
 .mb-tab.on{background:#161b22;color:#fff;border-bottom:2px solid #3fb950}
@@ -108,7 +108,7 @@ export default function DashboardPilote() {
   const repeatRef = useRef(null)
 
   if (!model) return (
-    <div style={{height:'100dvh',display:'flex',alignItems:'center',justifyContent:'center',background:'#05070a',color:'#8b949e'}}>
+    <div style={{height:'calc(100dvh - 42px)',display:'flex',alignItems:'center',justifyContent:'center',background:'#05070a',color:'#8b949e'}}>
       Chargement...
     </div>
   )
