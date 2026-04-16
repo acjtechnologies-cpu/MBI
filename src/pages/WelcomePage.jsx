@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useModelStore } from '../stores/modelStore'
 import pikeImg from '../assets/pike_precision2.png'
 import mambaImg from '../assets/mamba_s.png'
@@ -186,7 +186,7 @@ export default function WelcomePage({ onSelect }) {
                 background: g.card.bg,
                 border: `2px solid ${g.card.border}`,
                 position:'relative', overflow:'hidden',
-                cursor:'pointer', minHeight:96,
+                cursor:'pointer', minHeight:96, touchAction:'manipulation', WebkitTapHighlightColor:'transparent',
               }}
             >
               <img
