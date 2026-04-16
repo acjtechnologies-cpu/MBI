@@ -1,4 +1,4 @@
-﻿import { useState, useRef } from 'react'
+import { useState, useRef } from 'react'
 import { useAppStore } from '../../stores/appStore'
 import { useModelStore } from '../../stores/modelStore'
 
@@ -88,7 +88,7 @@ const CSS = `
 
 export default function DashboardPilote() {
   const store = useAppStore()
-  const { params, incrementParam, decrementParam, offset, setOffset, setBallastSnap, activeSite } = store
+  const { params, incrementParam, decrementParam, offset, setOffset, setBallastSnap } = store
   const altitude = parseFloat(store.altitude || store.params?.altitude || 0) || 0
   const setAltitude = (v) => {
     if (store.setAltitude) store.setAltitude(typeof v === 'function' ? v(altitude) : v)
@@ -126,8 +126,7 @@ export default function DashboardPilote() {
   const offsetVal   = parseFloat(offset) || 0
 
   // Masse cible auto
-  const kPente = activeSite?.k ?? 1.00
-    const targetGAuto = Math.max(model.masseVide, Math.round(mAltkg * kPente * 1000 + modelOffset + offsetVal))
+  const targetGAuto = Math.max(model.masseVide, Math.round(mAltkg * 1000 + modelOffset + offsetVal))
   // Masse manuelle possible (mode kg)
   const targetG = kgManuel !== null
     ? Math.max(model.masseVide, Math.round(kgManuel * 1000))
