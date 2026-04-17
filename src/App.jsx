@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import DashboardPilote from './components/Pilote/DashboardPilote'
 import DashboardPike2  from './components/Pilote/DashboardPike2'
 import { useModelStore } from './stores/modelStore'
@@ -6,7 +6,7 @@ import ModelManager    from './components/Config/ModelManager'
 import Poly4Component from './components/Poly4/Poly4Page'
 import StationPage     from './components/Station/StationPage'
 import ChronoPage      from './components/Chrono/ChronoPage'
-import WelcomePage from './pages/WelcomePage'
+import WelcomePage     from './pages/WelcomePage'
 
 const TABS = [
   { id: 'pilote',  label: 'Pilotage' },
@@ -17,19 +17,24 @@ const TABS = [
 ]
 
 function App() {
-  const [activeTab, setActiveTab] = useState('pilote')
+  const [activeTab, setActiveTab]     = useState('pilote')
   const [gliderChosen, setGliderChosen] = useState(false)
 
   const activeId = useModelStore(s => s.activeModelId)
   const models   = useModelStore(s => s.models)
   const m        = models[activeId]
 
-  if (!gliderChosen) {
+  // Bypass WelcomePage si modelStore a déjà un modèle actif (rehydraté)
+  useEffect(() => {
+    if (activeId) setGliderChosen(true)
+  }, [activeId])
+
+  if (!gliderChosen && !activeId) {
     return <WelcomePage onSelect={() => setGliderChosen(true)} />
   }
 
   const renderPage = () => {
-    if (!m) return <div style={{color:'white',padding:20}}>Modèle en cours de chargement...</div>
+    if (!m) return <div style={{color:'white',padding:20}}>Chargement du modèle...</div>
     switch(activeTab) {
       case 'pilote':  return m.id === 'pike-precision-2' ? <DashboardPike2 /> : <DashboardPilote />
       case 'soute':   return <ModelManager />
@@ -52,9 +57,9 @@ function App() {
               color: activeTab===id ? '#58a6ff' : '#4a5568',
               fontSize:10, fontWeight:700, cursor:'pointer',
               borderBottom: activeTab===id ? '2px solid #58a6ff' : '2px solid transparent',
+              padding:0,
               WebkitTapHighlightColor:'transparent',
               touchAction:'manipulation',
-              padding:0,
             }}
           >
             {label}
