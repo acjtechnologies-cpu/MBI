@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+﻿import { useState, useRef } from 'react'
 import { useAppStore } from '../../stores/appStore'
 import { useModelStore } from '../../stores/modelStore'
 
@@ -23,7 +23,7 @@ function findNearest(matrix, tg) {
 const MAT_KEYS = ['av', 'c', 'ar']
 
 const CSS = `
-.mb-app{display:flex;flex-direction:column;height:100%;max-width:420px;margin:0 auto;background:#05070a;color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;user-select:none;overflow:hidden}
+.mb-app{display:flex;flex-direction:column;height:100dvh;max-width:420px;margin:0 auto;background:#05070a;color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;user-select:none;overflow:hidden}
 .mb-tabs{display:flex;gap:4px;padding:6px 6px 0;height:42px;flex-shrink:0}
 .mb-tab{flex:1;padding:8px 0;border-radius:8px 8px 0 0;border:none;cursor:pointer;font-size:13px;font-weight:700;background:#1a1f2a;color:#8b949e;transition:all .2s}
 .mb-tab.on{background:#161b22;color:#fff;border-bottom:2px solid #3fb950}
@@ -88,7 +88,7 @@ const CSS = `
 
 export default function DashboardPilote() {
   const store = useAppStore()
-  const { params, incrementParam, decrementParam, offset, setOffset, setBallastSnap } = store
+  const { params, incrementParam, decrementParam, offset, setOffset, setBallastSnap, activeSite } = store
   const altitude = parseFloat(store.altitude || store.params?.altitude || 0) || 0
   const setAltitude = (v) => {
     if (store.setAltitude) store.setAltitude(typeof v === 'function' ? v(altitude) : v)
@@ -108,7 +108,7 @@ export default function DashboardPilote() {
   const repeatRef = useRef(null)
 
   if (!model) return (
-    <div style={{height:'100%',display:'flex',alignItems:'center',justifyContent:'center',background:'#05070a',color:'#8b949e'}}>
+    <div style={{height:'100dvh',display:'flex',alignItems:'center',justifyContent:'center',background:'#05070a',color:'#8b949e'}}>
       Chargement...
     </div>
   )
@@ -126,7 +126,8 @@ export default function DashboardPilote() {
   const offsetVal   = parseFloat(offset) || 0
 
   // Masse cible auto
-  const targetGAuto = Math.max(model.masseVide, Math.round(mAltkg * 1000 + modelOffset + offsetVal))
+  const kPente = activeSite?.k ?? 1.00
+    const targetGAuto = Math.max(model.masseVide, Math.round(mAltkg * kPente * 1000 + modelOffset + offsetVal))
   // Masse manuelle possible (mode kg)
   const targetG = kgManuel !== null
     ? Math.max(model.masseVide, Math.round(kgManuel * 1000))
@@ -142,8 +143,8 @@ export default function DashboardPilote() {
 
   const altCorrection = Math.round((m0kg - mAltkg) * 1000)
   const ventLabel = alt > 0
-    ? `VENT m/s â€” ${model.nom} Â· Ï âˆ’${altCorrection}g`
-    : `VENT m/s â€” ${model.nom}`
+    ? `VENT m/s — ${model.nom} · ρ −${altCorrection}g`
+    : `VENT m/s — ${model.nom}`
 
   function selectParam(p) {
     setSelectedParam(p)
@@ -241,9 +242,9 @@ export default function DashboardPilote() {
       <div className="mb-app" translate="no">
 
         <div className="mb-tabs">
-          <button className={`mb-tab${tab==='calc'?' on':''}`} onClick={() => setTab('calc')}>âš– CALCULATEUR</button>
+          <button className={`mb-tab${tab==='calc'?' on':''}`} onClick={() => setTab('calc')}>⚖ CALCULATEUR</button>
           {matrix.length > 0 && (
-            <button className={`mb-tab${tab==='matrix'?' on':''}`} onClick={() => setTab('matrix')}>ðŸ“‹ MATRICE</button>
+            <button className={`mb-tab${tab==='matrix'?' on':''}`} onClick={() => setTab('matrix')}>📋 MATRICE</button>
           )}
         </div>
 
@@ -254,7 +255,7 @@ export default function DashboardPilote() {
             <div className={`mb-vent${selectedParam==='vent'?' active':''}`} onClick={() => selectParam('vent')}>
               <div className="mb-vent-val">{vent.toFixed(1)}</div>
               <div className="mb-vent-lbl">{ventLabel}</div>
-              <button className="mb-gps-btn" onClick={(e) => { e.stopPropagation(); setGpsOpen(true); captureGPS() }}>ðŸ“</button>
+              <button className="mb-gps-btn" onClick={(e) => { e.stopPropagation(); setGpsOpen(true); captureGPS() }}>📍</button>
             </div>
 
             {/* Barographe */}
@@ -263,10 +264,10 @@ export default function DashboardPilote() {
                 const cap = soute.capacite || 3
                 const borderColor = idx===0?'rgba(255,215,0,.4)':idx===1?'rgba(26,115,232,.45)':'rgba(63,185,80,.4)'
                 const labelColor  = idx===0?'rgba(255,200,80,.9)':idx===1?'rgba(100,170,255,.9)':'rgba(63,185,80,.9)'
-                const matLabel = soute.materiaux?.map(m => `${m.nom} ${m.masse}g`).join(' Â· ') || ''
+                const matLabel = soute.materiaux?.map(m => `${m.nom} ${m.masse}g`).join(' · ') || ''
                 return (
                   <div key={idx} className="mb-row-wrap">
-                    <div className="mb-row-lbl" style={{color:labelColor}}>{soute.nom} Â· {matLabel}</div>
+                    <div className="mb-row-lbl" style={{color:labelColor}}>{soute.nom} · {matLabel}</div>
                     <div className="mb-row">
                       <div className="mb-side mb-side-l" style={{border:`1.5px solid ${borderColor}`}}>
                         {renderBaroSide('G', idx, cap)}
@@ -284,7 +285,7 @@ export default function DashboardPilote() {
             {alt > 0 && selectedParam === 'alt' && (
               <div className="mb-alt">
                 <div style={{textAlign:'center',flex:1}}><span className="mb-ab-lbl">ALTITUDE</span><span className="mb-ab-val">{alt} m</span></div>
-                <div style={{textAlign:'center',flex:1}}><span className="mb-ab-lbl">DÃ‰DUIT</span><span className="mb-ab-val">âˆ’{Math.round((m0kg-mAltkg)*1000)} g</span></div>
+                <div style={{textAlign:'center',flex:1}}><span className="mb-ab-lbl">DÉDUIT</span><span className="mb-ab-val">−{Math.round((m0kg-mAltkg)*1000)} g</span></div>
                 <div style={{textAlign:'center',flex:1}}><span className="mb-ab-lbl">FINALE</span><span className="mb-ab-val">{kgVal.toFixed(3)} kg</span></div>
               </div>
             )}
@@ -294,15 +295,15 @@ export default function DashboardPilote() {
               <div style={{textAlign:'center'}}>
                 <div style={{fontSize:26,fontWeight:900,color:'#8b949e',lineHeight:1}}>{m0kg.toFixed(3)}</div>
                 <div style={{fontSize:9,color:'#8b949e',marginTop:3}}>
-                  Poly4{alt>0?<span style={{color:'#a78bfa'}}> â†’{kgVal.toFixed(3)}</span>:''}
+                  Poly4{alt>0?<span style={{color:'#a78bfa'}}> →{kgVal.toFixed(3)}</span>:''}
                 </div>
               </div>
               <div style={{textAlign:'center'}}>
                 <div style={{fontSize:26,fontWeight:900,color:'#3fb950',lineHeight:1}}>
-                  {cfg ? (cfg.m/1000).toFixed(3) : 'â€”'}
+                  {cfg ? (cfg.m/1000).toFixed(3) : '—'}
                 </div>
                 <div style={{fontSize:9,color:'#8b949e',marginTop:3}}>
-                  {cfg ? `cfg #${cfg.n}` : 'â€”'}
+                  {cfg ? `cfg #${cfg.n}` : '—'}
                   {dm !== 0 && <span style={{color:dm>0?'#3fb950':'#f85149'}}> ({dm>0?'+':''}{dm}g)</span>}
                 </div>
               </div>
@@ -312,7 +313,7 @@ export default function DashboardPilote() {
               </div>
             </div>
 
-            {/* ContrÃ´les â€” KG + ALT sur ligne haute, OFFSET en dessous */}
+            {/* Contrôles — KG + ALT sur ligne haute, OFFSET en dessous */}
             <div className="mb-ctrl">
               <div className="mb-ctrl-grid">
                 <div className="mb-ctrl-left">
@@ -332,15 +333,15 @@ export default function DashboardPilote() {
                   </button>
                 </div>
                 <div className="mb-ctrl-arrows">
-                  <button className="mb-nav" onPointerDown={() => handlePress(-1)} onPointerUp={handleRelease} onPointerLeave={handleRelease}>â—€</button>
-                  <button className="mb-nav" onPointerDown={() => handlePress(1)}  onPointerUp={handleRelease} onPointerLeave={handleRelease}>â–¶</button>
+                  <button className="mb-nav" onPointerDown={() => handlePress(-1)} onPointerUp={handleRelease} onPointerLeave={handleRelease}>◀</button>
+                  <button className="mb-nav" onPointerDown={() => handlePress(1)}  onPointerUp={handleRelease} onPointerLeave={handleRelease}>▶</button>
                 </div>
               </div>
               <div className="mb-hint">
-                {selectedParam==='kg'     && `Pas Â±10g â€” cfg #${cfg?.n||'â€”'} la plus proche`}
-                {selectedParam==='alt'    && `Pas 50m â€” ~âˆ’${c100}g/100m Ã  ${vent.toFixed(1)} m/s`}
-                {selectedParam==='offset' && `Pas 42g Â· total: ${offsetVal>=0?'+':''}${offsetVal}g`}
-                {selectedParam==='vent'   && cfg && `Config #${cfg.n} â€” ${cfg.m}g (Î”${dm>0?'+':''}${dm}g)`}
+                {selectedParam==='kg'     && `Pas ±10g — cfg #${cfg?.n||'—'} la plus proche`}
+                {selectedParam==='alt'    && `Pas 50m — ~−${c100}g/100m à ${vent.toFixed(1)} m/s`}
+                {selectedParam==='offset' && `Pas 42g · total: ${offsetVal>=0?'+':''}${offsetVal}g`}
+                {selectedParam==='vent'   && cfg && `Config #${cfg.n} — ${cfg.m}g (Δ${dm>0?'+':''}${dm}g)`}
               </div>
             </div>
           </div>
@@ -350,12 +351,12 @@ export default function DashboardPilote() {
           <div className="mb-matrix">
             <div className="mb-m-hdr">
               <div>
-                <div style={{fontSize:13,fontWeight:800}}>{model.nom} â€” Matrice</div>
-                <div style={{fontSize:9,color:'#8b949e',marginTop:1}}>{matrix.length} configs Â· cible {targetG}g</div>
+                <div style={{fontSize:13,fontWeight:800}}>{model.nom} — Matrice</div>
+                <div style={{fontSize:9,color:'#8b949e',marginTop:1}}>{matrix.length} configs · cible {targetG}g</div>
               </div>
               <div style={{textAlign:'right'}}>
-                <div style={{fontSize:14,fontWeight:900,color:'#3fb950'}}>{displayCfg?displayCfg.m+'g':'â€”'}</div>
-                <div style={{fontSize:9,color:'#8b949e'}}>Î”{displayCfg?(displayCfg.m-targetG>0?'+':'')+(displayCfg.m-targetG)+'g':'â€”'}</div>
+                <div style={{fontSize:14,fontWeight:900,color:'#3fb950'}}>{displayCfg?displayCfg.m+'g':'—'}</div>
+                <div style={{fontSize:9,color:'#8b949e'}}>Δ{displayCfg?(displayCfg.m-targetG>0?'+':'')+(displayCfg.m-targetG)+'g':'—'}</div>
               </div>
             </div>
             <div className="mb-sg">
@@ -376,7 +377,7 @@ export default function DashboardPilote() {
                 return (
                   <div key={idx} className="mb-m-row-wrap">
                     <div className="mb-m-lbl" style={{color:labelColor}}>
-                      {soute.nom} Â· G={b.G||0} D={b.D||0} Â· {b.matG||'â€”'}
+                      {soute.nom} · G={b.G||0} D={b.D||0} · {b.matG||'—'}
                     </div>
                     <div className="mb-m-row">
                       <div className="mb-m-side mb-m-side-l" style={{border:`1.5px solid ${borderColor}`}}>
@@ -392,8 +393,8 @@ export default function DashboardPilote() {
               {displayCfg && (
                 <div className="mb-m-info">
                   <div style={{flex:1}}>
-                    <div style={{fontSize:12,fontWeight:800,color:'#fff'}}>Config #{displayCfg.n} â€” {displayCfg.m}g</div>
-                    <div style={{fontSize:10,color:'#8b949e',marginTop:2}}>CG: {displayCfg.cg} mm Â· Î”{(displayCfg.cg-model.cgVide).toFixed(1)}mm</div>
+                    <div style={{fontSize:12,fontWeight:800,color:'#fff'}}>Config #{displayCfg.n} — {displayCfg.m}g</div>
+                    <div style={{fontSize:10,color:'#8b949e',marginTop:2}}>CG: {displayCfg.cg} mm · Δ{(displayCfg.cg-model.cgVide).toFixed(1)}mm</div>
                   </div>
                   <div style={{textAlign:'right'}}>
                     <div style={{fontSize:11,fontWeight:700,color:Math.abs(displayCfg.m-targetG)<=30?'#3fb950':'#f0a500'}}>
@@ -409,18 +410,18 @@ export default function DashboardPilote() {
         {gpsOpen && (
           <div className="mb-overlay" onClick={() => setGpsOpen(false)}>
             <div className="mb-overlay-box" onClick={e => e.stopPropagation()}>
-              <div style={{fontSize:15,fontWeight:800,marginBottom:12}}>ðŸ“ Position GPS</div>
+              <div style={{fontSize:15,fontWeight:800,marginBottom:12}}>📍 Position GPS</div>
               {gpsCapturing && <div style={{color:'#8b949e',fontSize:13,marginBottom:8}}>Localisation en cours...</div>}
               {gpsData.lat && (
                 <div style={{fontSize:12,color:'#8b949e',marginBottom:10}}>
-                  <div>{gpsData.lat?.toFixed(5)}Â° Â· {gpsData.lon?.toFixed(5)}Â°</div>
-                  <div>Alt GPS: {gpsData.alt!==null?Math.round(gpsData.alt)+' m':'â€”'} Â· PrÃ©cision: {gpsData.accuracy} m</div>
+                  <div>{gpsData.lat?.toFixed(5)}° · {gpsData.lon?.toFixed(5)}°</div>
+                  <div>Alt GPS: {gpsData.alt!==null?Math.round(gpsData.alt)+' m':'—'} · Précision: {gpsData.accuracy} m</div>
                 </div>
               )}
               {gpsData.alt !== null && (
                 <button onClick={() => { setAltitude(Math.round(gpsData.alt/50)*50); setGpsOpen(false) }}
                   style={{background:'#1a73e8',border:'none',color:'#fff',borderRadius:8,padding:'10px 16px',cursor:'pointer',fontWeight:700,fontSize:13,width:'100%',marginBottom:8}}>
-                  â¬† Utiliser {Math.round(gpsData.alt)} m
+                  ⬆ Utiliser {Math.round(gpsData.alt)} m
                 </button>
               )}
               <button onClick={() => setGpsOpen(false)}

@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+﻿import { useState, useRef } from 'react'
 import { useAppStore } from '../../stores/appStore'
 
 // ── Données Pike Precision 2 ───────────────────────────────────────────────
@@ -194,7 +194,7 @@ const CSS = `
 
 // ── Composant ──────────────────────────────────────────────────────────────
 export default function DashboardPike2() {
-  const { params, incrementParam, decrementParam, offset, setOffset, altitude, setAltitude, setBallastSnap } = useAppStore()
+  const { params, incrementParam, decrementParam, offset, setOffset, altitude, setAltitude, setBallastSnap, activeSite } = useAppStore()
 
   const [selectedParam, setSelectedParam] = useState('vent')
   // altitude depuis appStore (persisté entre onglets)
@@ -214,7 +214,8 @@ export default function DashboardPike2() {
   const vent = params.vent
   const m0kg    = getMasse0m(vent)
   const mAltkg  = getMasseAlt(m0kg, alt)
-  const targetGAuto = Math.max(CFG.m_vide, Math.round((mAltkg * 1000) + CFG.OFFSET + offset))
+  const kPente = activeSite?.k ?? 1.00
+    const targetGAuto = Math.max(CFG.m_vide, Math.round((mAltkg * kPente * 1000) + CFG.OFFSET + offset))
   const targetG = kgManuel !== null ? Math.max(CFG.m_vide, Math.round(kgManuel * 1000)) : targetGAuto
   const kgVal   = parseFloat((targetG / 1000).toFixed(3))
   const ci  = findNearest(targetG)
