@@ -2,10 +2,10 @@ import { useState } from 'react'
 import DashboardPilote from './components/Pilote/DashboardPilote'
 import DashboardPike2  from './components/Pilote/DashboardPike2'
 import { useModelStore } from './stores/modelStore'
-import ModelManager   from './components/Config/ModelManager'
+import ModelManager    from './components/Config/ModelManager'
 import Poly4Component from './components/Poly4/Poly4Page'
-import StationPage    from './components/Station/StationPage'
-import ChronoPage     from './components/Chrono/ChronoPage'
+import StationPage     from './components/Station/StationPage'
+import ChronoPage      from './components/Chrono/ChronoPage'
 import WelcomePage from './pages/WelcomePage'
 
 const TABS = [
@@ -19,13 +19,19 @@ const TABS = [
 function App() {
   const [activeTab, setActiveTab] = useState('pilote')
   const [gliderChosen, setGliderChosen] = useState(false)
-  const getActiveModel = useModelStore(s => s.getActiveModel)
-  const m = getActiveModel()
-  if (!gliderChosen) return <WelcomePage onSelect={() => setGliderChosen(true)} />
+
+  const activeId = useModelStore(s => s.activeModelId)
+  const models   = useModelStore(s => s.models)
+  const m        = models[activeId]
+
+  if (!gliderChosen) {
+    return <WelcomePage onSelect={() => setGliderChosen(true)} />
+  }
 
   const renderPage = () => {
+    if (!m) return <div style={{color:'white',padding:20}}>Modèle en cours de chargement...</div>
     switch(activeTab) {
-      case 'pilote':  return m?.id === 'pike-precision-2' ? <DashboardPike2 /> : <DashboardPilote />
+      case 'pilote':  return m.id === 'pike-precision-2' ? <DashboardPike2 /> : <DashboardPilote />
       case 'soute':   return <ModelManager />
       case 'poly4':   return <Poly4Component />
       case 'station': return <StationPage />
@@ -36,7 +42,6 @@ function App() {
 
   return (
     <div style={{ display:'flex', flexDirection:'column', height:'100dvh', overflow:'hidden', background:'#0b0e12' }}>
-
       <nav style={{ display:'flex', flexShrink:0, height:44, background:'#161b22', borderBottom:'1px solid #21262d', zIndex:999 }}>
         {TABS.map(({ id, label }) => (
           <button
@@ -56,11 +61,9 @@ function App() {
           </button>
         ))}
       </nav>
-
       <div style={{ flex:1, overflow:'hidden' }}>
         {renderPage()}
       </div>
-
     </div>
   )
 }
