@@ -6,6 +6,7 @@ import ModelManager   from './components/Config/ModelManager'
 import Poly4Component from './components/Poly4/Poly4Page'
 import StationPage    from './components/Station/StationPage'
 import ChronoPage     from './components/Chrono/ChronoPage'
+import WelcomePage from './pages/WelcomePage'
 
 const TABS = [
   { id: 'pilote',  label: 'Pilotage' },
@@ -17,8 +18,10 @@ const TABS = [
 
 function App() {
   const [activeTab, setActiveTab] = useState('pilote')
+  const [gliderChosen, setGliderChosen] = useState(false)
   const getActiveModel = useModelStore(s => s.getActiveModel)
   const m = getActiveModel()
+  if (!gliderChosen) return <WelcomePage onSelect={() => setGliderChosen(true)} />
 
   const renderPage = () => {
     switch(activeTab) {
