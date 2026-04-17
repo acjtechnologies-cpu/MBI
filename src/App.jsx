@@ -26,7 +26,7 @@ function Poly4Page() {
 
 function App() {
   const [activeTab, setActiveTab] = useState('pilote')
-  const [gliderChosen, setGliderChosen] = useState(false)
+  const [gliderChosen, setGliderChosen] = useState(true)
 
   if (!gliderChosen) return <WelcomePage onSelect={() => setGliderChosen(true)} />
 
