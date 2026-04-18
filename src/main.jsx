@@ -1,4 +1,4 @@
-﻿// Reset localStorage si version app change
+// Reset localStorage si version app change
 const APP_VERSION = '2'
 if (localStorage.getItem('mbi_version') !== APP_VERSION) {
   localStorage.clear()
@@ -11,7 +11,7 @@ import App from './App.jsx'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
+  
     <App />
-  </React.StrictMode>,
+  ,
 )
