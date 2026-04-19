@@ -1,5 +1,6 @@
 ﻿import { useState, useRef } from 'react'
 import { useAppStore } from '../../stores/appStore'
+import { useShallow } from 'zustand/react/shallow'
 import { useModelStore } from '../../stores/modelStore'
 
 const P4 = { A4:-1.728e-4, A3:8.178e-3, A2:-0.14980, A1:1.34713, A0:-1.19522, vMin:4.05, vMax:15.30 }
@@ -87,7 +88,8 @@ const CSS = `
 `
 
 export default function DashboardPilote() {
-  const store = useAppStore()
+  const store = useAppStore(useShallow(s => ({params:s.params,altitude:s.altitude,offset:s.offset,k_up:s.k_up,alpha:s.alpha,activeSite:s.activeSite,selectedParam:s.selectedParam,setParam:s.setParam,setOffset:s.setOffset,setAltitude:s.setAltitude,selectParam:s.selectParam,setBallastSnap:s.setBallastSnap,incrementParam:s.incrementParam,decrementParam:s.decrementParam})))
+
   const { params, incrementParam, decrementParam, offset, setOffset, setBallastSnap, activeSite } = store
   const altitude = parseFloat(store.altitude || store.params?.altitude || 0) || 0
   const setAltitude = (v) => {
@@ -95,8 +97,7 @@ export default function DashboardPilote() {
     else if (store.setParam) store.setParam('altitude', typeof v === 'function' ? v(altitude) : v)
   }
 
-  const { getActiveModel } = useModelStore()
-  const model = getActiveModel()
+  const model = useModelStore(s => s.models[s.activeModelId])
 
   const [selectedParam, setSelectedParam] = useState('kg')
   const [kgManuel, setKgManuel] = useState(null)
@@ -333,8 +334,8 @@ export default function DashboardPilote() {
                   </button>
                 </div>
                 <div className="mb-ctrl-arrows">
-                  <button className="mb-nav" onPointerDown={() => handlePress(-1)} onPointerUp={handleRelease} onPointerLeave={handleRelease}>◀</button>
-                  <button className="mb-nav" onPointerDown={() => handlePress(1)}  onPointerUp={handleRelease} onPointerLeave={handleRelease}>▶</button>
+                  <button className="mb-nav" onTouchStart={() => handlePress(-1)} onTouchEnd={handleRelease} onTouchCancel={handleRelease}>◀</button>
+                  <button className="mb-nav" onTouchStart={() => handlePress(1)}  onTouchEnd={handleRelease} onTouchCancel={handleRelease}>▶</button>
                 </div>
               </div>
               <div className="mb-hint">
