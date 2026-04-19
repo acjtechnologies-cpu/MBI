@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { useModelStore } from '../stores/modelStore'
 import pikeImg  from '../assets/pike_precision2.png'
 import mambaImg from '../assets/mamba_s.png'
@@ -57,7 +57,7 @@ function GliderBrowser({ onClose, onImport }) {
   }
 
   return (
-    <div style={{position:'fixed',inset:0,zIndex:100,background:'rgba(0,0,0,0.88)',display:'flex',flexDirection:'column',fontFamily:'sans-serif'}}>
+    <div style={{height:'100%',display:'flex',flexDirection:'column',zIndex:100,background:'rgba(0,0,0,0.88)',display:'flex',flexDirection:'column',fontFamily:'sans-serif'}}>
       <div style={{padding:'18px 16px 14px',borderBottom:'1px solid rgba(255,255,255,0.1)',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
         <div>
           <div style={{color:'#fff',fontSize:16,fontWeight:600}}>Planeurs disponibles</div>
@@ -112,7 +112,7 @@ export default function WelcomePage({ onSelect }) {
         />
       )}
 
-      <div style={{position:'fixed',inset:0,background:'linear-gradient(170deg,#4a9fd4 0%,#87CEEB 25%,#9dd4e8 50%,#6aaa60 78%,#4a8a40 100%)',display:'flex',flexDirection:'column',fontFamily:'sans-serif',userSelect:'none'}}>
+      <div style={{height:'100%',display:'flex',flexDirection:'column',background:'linear-gradient(170deg,#4a9fd4 0%,#87CEEB 25%,#9dd4e8 50%,#6aaa60 78%,#4a8a40 100%)',display:'flex',flexDirection:'column',fontFamily:'sans-serif',userSelect:'none'}}>
         <div style={{position:'absolute',bottom:0,left:0,right:0,height:'58%',background:'linear-gradient(to top,rgba(0,0,0,0.75) 0%,transparent 100%)',pointerEvents:'none'}} />
 
         {/* Hero */}
@@ -132,9 +132,9 @@ export default function WelcomePage({ onSelect }) {
 
           {GLIDERS_LOCAL.map(g => (
             <button key={g.id} onClick={() => handleLocalSelect(g.id)}
-              style={{display:'block',width:'100%',borderRadius:18,marginBottom:10,background:g.bg,border:`2px solid ${g.borderColor}`,position:'relative',overflow:'hidden',cursor:'pointer',minHeight:96,textAlign:'left',padding:0,touchAction:'manipulation',WebkitTapHighlightColor:'transparent'}}>
+              style={{display:'block',width:'100%',borderRadius:18,marginBottom:10,background:g.bg,border:`2px solid ${g.borderColor}`,position:'relative',cursor:'pointer',minHeight:96,textAlign:'left',padding:0,touchAction:'manipulation',WebkitTapHighlightColor:'transparent'}}>
               <img src={IMG_MAP[g.id]} alt="" style={{position:'absolute',right:-20,top:'50%',transform:'translateY(-50%) rotate(-5deg)',width:'65%',opacity:0.9,pointerEvents:'none'}} />
-              <div style={{position:'absolute',inset:0,background:'linear-gradient(to right,rgba(0,0,0,0.72) 35%,transparent 70%)',pointerEvents:'none'}} />
+              <div style={{height:'100%',display:'flex',flexDirection:'column',background:'linear-gradient(to right,rgba(0,0,0,0.72) 35%,transparent 70%)',pointerEvents:'none'}} />
               <div style={{position:'relative',zIndex:2,padding:'16px'}}>
                 <div style={{fontSize:16,fontWeight:600,color:'#fff'}}>{g.name}</div>
                 <div style={{fontSize:11,color:'rgba(255,255,255,0.6)',marginTop:3}}>{g.spec}</div>

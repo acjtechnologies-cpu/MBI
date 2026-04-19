@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import DashboardPilote from './components/Pilote/DashboardPilote'
 import DashboardPike2  from './components/Pilote/DashboardPike2'
 import { useModelStore } from './stores/modelStore'
@@ -24,17 +24,14 @@ function App() {
   const models   = useModelStore(s => s.models)
   const m        = models[activeId]
 
-  // Bypass WelcomePage si modelStore a déjà un modèle actif (rehydraté)
-  useEffect(() => {
-    if (activeId) setGliderChosen(true)
-  }, [activeId])
 
-  if (!gliderChosen && !activeId) {
+
+  if (!gliderChosen) {
     return <WelcomePage onSelect={() => setGliderChosen(true)} />
   }
 
   const renderPage = () => {
-    if (!m) return <div style={{color:'white',padding:20}}>Chargement du modèle...</div>
+    if (!m) return <div style={{color:'white',padding:20}}>Chargement du modÃ¨le...</div>
     switch(activeTab) {
       case 'pilote':  return m.id === 'pike-precision-2' ? <DashboardPike2 /> : <DashboardPilote />
       case 'soute':   return <ModelManager />
@@ -66,7 +63,7 @@ function App() {
           </button>
         ))}
       </nav>
-      <div style={{ flex:1, overflow:'hidden' }}>
+      <div style={{ flex:1 }}>
         {renderPage()}
       </div>
     </div>

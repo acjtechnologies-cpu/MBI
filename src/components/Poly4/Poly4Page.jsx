@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useMemo, useCallback } from 'react'
+﻿import { useEffect, useRef, useState, useMemo, useCallback } from 'react'
 import { useAppStore } from '../../stores/appStore'
 import { useModelStore } from '../../stores/modelStore'
 import Chart from 'chart.js/auto'
@@ -123,7 +123,7 @@ export default function Poly4Page() {
           x: { type: 'linear', min: 4.0, max: 15.5,
                grid: { color: '#1a2030' },
                ticks: { color: '#4a5568', font: { family: 'monospace', size: 10 }, stepSize: 2 } },
-          y: { min: 2.0, max: 5.0,
+          y: { min: 2.2, max: 4.5,
                grid: { color: '#1a2030' },
                ticks: { color: '#4a5568', font: { family: 'monospace', size: 10 }, stepSize: 0.2 } },
         },
@@ -207,7 +207,7 @@ export default function Poly4Page() {
 
   return (
     <div style={{
-      height: '100dvh', display: 'flex', flexDirection: 'column',
+      height: '100dvh', display: 'flex', flexDirection: 'column', touchAction: 'manipulation',
       background: '#0b0e12', color: '#c9d1d9',
       fontFamily: '-apple-system, system-ui, sans-serif',
       padding: '10px', overflow: 'hidden', boxSizing: 'border-box',
@@ -272,7 +272,7 @@ export default function Poly4Page() {
 
       {/* BOTTOM */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 88px', gap: 10, flexShrink: 0 }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', touchAction: 'manipulation', gap: 8 }}>
 
           {/* Onglets mode */}
           <div style={{ display: 'flex', gap: 6 }}>
@@ -301,7 +301,7 @@ export default function Poly4Page() {
           <div style={{
             background: '#161b22', border: '1px solid #21262d',
             borderRadius: 10, padding: '10px 12px',
-            display: 'flex', flexDirection: 'column', gap: 6,
+            display: 'flex', flexDirection: 'column', touchAction: 'manipulation', gap: 6,
           }}>
             <input type="text" placeholder="Nom du site" value={newName}
               onChange={e => setNewName(e.target.value)} style={inputStyle} />
@@ -323,7 +323,7 @@ export default function Poly4Page() {
         </div>
 
         {/* Flèches */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', touchAction: 'manipulation', gap: 10 }}>
           {[1, -1].map(dir => (
             <button key={dir}
               onPointerDown={() => startPress(dir)} onPointerUp={stopPress} onPointerLeave={stopPress}

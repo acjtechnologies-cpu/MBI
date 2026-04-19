@@ -1,5 +1,6 @@
 ﻿import { useState, useRef } from 'react'
-import { useAppStore } from '../../stores/appStore'
+import { useAppStore } from '../../stores/appStore'
+import { useShallow } from 'zustand/react/shallow'
 
 // ── Données Pike Precision 2 ───────────────────────────────────────────────
 const MV = 2332
@@ -194,7 +195,7 @@ const CSS = `
 
 // ── Composant ──────────────────────────────────────────────────────────────
 export default function DashboardPike2() {
-  const { params, incrementParam, decrementParam, offset, setOffset, altitude, setAltitude, setBallastSnap, activeSite } = useAppStore()
+  const { params, incrementParam, decrementParam, offset, setOffset, altitude, setAltitude, setBallastSnap, activeSite } = useAppStore(useShallow(s => ({params:s.params,incrementParam:s.incrementParam,decrementParam:s.decrementParam,offset:s.offset,setOffset:s.setOffset,altitude:s.altitude,setAltitude:s.setAltitude,setBallastSnap:s.setBallastSnap,activeSite:s.activeSite})))
 
   const [selectedParam, setSelectedParam] = useState('vent')
   // altitude depuis appStore (persisté entre onglets)
