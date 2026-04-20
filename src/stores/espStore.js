@@ -1,282 +1,225 @@
 import { create } from 'zustand'
 
-// Configuration ESP32
+// ═══════════════════════════════════════════════════════════════════
+// _ws hors React — architecture validée anti-freeze Android
+// Ne jamais stocker le WebSocket dans le state Zustand
+// (setState sur ws → re-renders → gel touch sur Android)
+// ═══════════════════════════════════════════════════════════════════
+let _ws              = null
+let _reconnectTimer  = null
+let _heartbeatTimer  = null
+
 const ESP_CONFIG = {
-  wsUrl: 'ws://192.168.4.1:81',      // WebSocket par défaut
-  httpUrl: 'http://192.168.4.1',     // Fallback HTTP
-  reconnectDelay: 2000,               // Délai reconnexion (ms)
-  heartbeatInterval: 5000,            // Heartbeat (ms)
-  timeout: 10000,                     // Timeout requête HTTP (ms)
+  wsUrl:             'ws://192.168.4.1:81',
+  httpUrl:           'http://192.168.4.1',
+  reconnectDelay:    2000,
+  heartbeatInterval: 5000,
+  timeout:           10000,
+}
+
+// ── Helper envoi robuste ─────────────────────────────────────────
+function wsSend(obj) {
+  if (_ws && _ws.readyState === WebSocket.OPEN) {
+    try {
+      _ws.send(JSON.stringify(obj))
+      return true
+    } catch (e) {
+      console.error('[ESP] send error', e)
+    }
+  }
+  return false
 }
 
 export const useESPStore = create((set, get) => ({
-  // === ÉTAT CONNEXION ===
-  connected: false,
-  connecting: false,
-  mode: null,  // 'websocket' | 'http' | null
-  lastUpdate: null,
-  error: null,
-  
-  // === DONNÉES CAPTEURS ===
+  // ── ÉTAT (minimal — pas de ws ici) ──────────────────────────────
+  connected:   false,
+  connecting:  false,
+  mode:        null,   // 'websocket' | 'http' | null
+  lastUpdate:  null,
+  error:       null,
+  sdActive:    false,  // état carte SD reçu de l'ESP32
+
+  // ── DONNÉES CAPTEURS ────────────────────────────────────────────
   data: {
-    pitot: null,      // Vitesse air (m/s)
-    vent: null,       // Vitesse vent (m/s)
-    temperature: null, // Température (°C)
-    pression: null,   // Pression (hPa)
-    humidity: null,   // Humidité (%)
+    iqa:         null,
+    spd:         null,
+    temperature: null,
+    pression:    null,
+    humidity:    null,
+    rho:         null,
+    bulle:       false,
+    sGrad:       null,
+    sHeli:       null,
+    sTurb:       null,
+    vbat:        null,
   },
-  
-  // === BUFFER HISTORIQUE (pour IQA) ===
-  buffer: [],
-  bufferSize: 100,  // Nb max échantillons
-  
-  // === WEBSOCKET ===
-  ws: null,
-  reconnectTimer: null,
-  heartbeatTimer: null,
-  
-  // === ACTIONS ===
-  
-  // Connecter en WebSocket
+
+  // ── BUFFER HISTORIQUE ────────────────────────────────────────────
+  buffer:     [],
+  bufferSize: 100,
+
+  // ── CONNEXION WEBSOCKET ─────────────────────────────────────────
   connectWebSocket: () => {
-    const { ws, connected } = get()
-    
-    if (ws || connected) {
-      console.log('Already connected or connecting')
-      return
-    }
-    
+    if (_ws || get().connected) return
+
     set({ connecting: true, error: null })
-    
+
     try {
       const socket = new WebSocket(ESP_CONFIG.wsUrl)
-      
+      _ws = socket
+
       socket.onopen = () => {
-        console.log('WebSocket connected')
-        set({
-          connected: true,
-          connecting: false,
-          mode: 'websocket',
-          ws: socket,
-          error: null,
-        })
-        
-        // Démarrer heartbeat
-        get().startHeartbeat()
+        set({ connected: true, connecting: false, mode: 'websocket', error: null })
+
+        // Sync horloge — ESP32 reçoit {"cmd":"SET_TIME","epoch":...}
+        wsSend({ cmd: 'SET_TIME', epoch: Math.floor(Date.now() / 1000) })
+
+        // Heartbeat
+        _heartbeatTimer = setInterval(() => {
+          wsSend({ type: 'ping' })
+        }, ESP_CONFIG.heartbeatInterval)
       }
-      
+
       socket.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data)
           get().updateData(data)
         } catch (e) {
-          console.error('Failed to parse WebSocket data:', e)
+          console.error('[ESP] parse error', e)
         }
       }
-      
-      socket.onerror = (error) => {
-        console.error('WebSocket error:', error)
+
+      socket.onerror = () => {
         set({ error: 'WebSocket error' })
       }
-      
+
       socket.onclose = () => {
-        console.log('WebSocket closed')
-        set({
-          connected: false,
-          connecting: false,
-          mode: null,
-          ws: null,
-        })
-        
-        get().stopHeartbeat()
-        get().scheduleReconnect()
+        _ws = null
+        if (_heartbeatTimer) { clearInterval(_heartbeatTimer); _heartbeatTimer = null }
+        set({ connected: false, connecting: false, mode: null })
+        // Reconnexion auto
+        _reconnectTimer = setTimeout(() => get().connectWebSocket(), ESP_CONFIG.reconnectDelay)
       }
-      
-      set({ ws: socket })
-      
+
     } catch (e) {
-      console.error('Failed to create WebSocket:', e)
-      set({
-        connecting: false,
-        error: e.message,
-      })
-      
-      // Fallback HTTP
+      _ws = null
+      set({ connecting: false, error: e.message })
       get().connectHTTP()
     }
   },
-  
-  // Déconnecter WebSocket
+
+  // ── DÉCONNEXION ─────────────────────────────────────────────────
   disconnectWebSocket: () => {
-    const { ws, reconnectTimer } = get()
-    
-    if (reconnectTimer) {
-      clearTimeout(reconnectTimer)
-    }
-    
-    get().stopHeartbeat()
-    
-    if (ws) {
-      ws.close()
-    }
-    
-    set({
-      connected: false,
-      connecting: false,
-      mode: null,
-      ws: null,
-      reconnectTimer: null,
-    })
+    if (_reconnectTimer) { clearTimeout(_reconnectTimer);  _reconnectTimer = null }
+    if (_heartbeatTimer) { clearInterval(_heartbeatTimer); _heartbeatTimer = null }
+    if (_ws) { _ws.close(); _ws = null }
+    set({ connected: false, connecting: false, mode: null })
   },
-  
-  // Connexion HTTP (polling)
+
+  // ── CONNEXION HTTP (fallback polling) ───────────────────────────
   connectHTTP: async () => {
     set({ connecting: true, mode: 'http', error: null })
-    
+
     const poll = async () => {
       if (get().mode !== 'http') return
-      
       try {
-        const response = await fetch(`${ESP_CONFIG.httpUrl}/data`, {
+        const r = await fetch(`${ESP_CONFIG.httpUrl}/data`, {
           signal: AbortSignal.timeout(ESP_CONFIG.timeout),
         })
-        
-        if (!response.ok) throw new Error('HTTP error')
-        
-        const data = await response.json()
+        if (!r.ok) throw new Error('HTTP error')
+        const data = await r.json()
         get().updateData(data)
-        
         set({ connected: true, connecting: false, error: null })
-        
       } catch (e) {
-        console.error('HTTP poll failed:', e)
         set({ error: e.message })
       }
-      
-      // Re-poll après 1 seconde
       setTimeout(poll, 1000)
     }
-    
+
     poll()
   },
-  
-  // Mettre à jour les données capteurs
-  updateData: (newData) => {
+
+  // ── UPDATE DONNÉES CAPTEURS ─────────────────────────────────────
+  // Mappe les champs JSON ESP32 (IQA, SPD, TEMP…) vers le store
+  updateData: (raw) => {
     const now = Date.now()
-    
-    set((state) => {
-      const updated = {
-        pitot: newData.pitot ?? state.data.pitot,
-        vent: newData.vent ?? state.data.vent,
-        iqa:   newData.IQA   ?? state.data.iqa,
-        sGrad: newData.S_GRAD ?? state.data.sGrad,
-        bulle: newData.BULLE === 1,
-        temperature: newData.temperature ?? state.data.temperature,
-        pression: newData.pression ?? state.data.pression,
-        humidity: newData.humidity ?? state.data.humidity,
+
+    set(state => {
+      const d = {
+        iqa:         raw.IQA         ?? state.data.iqa,
+        spd:         raw.SPD         ?? state.data.spd,
+        temperature: raw.TEMP        ?? state.data.temperature,
+        pression:    raw.PRES        ?? state.data.pression,
+        humidity:    raw.HUM         ?? state.data.humidity,
+        rho:         raw.RHO         ?? state.data.rho,
+        bulle:       raw.BULLE !== undefined ? !!raw.BULLE : state.data.bulle,
+        sGrad:       raw.S_GRAD      ?? state.data.sGrad,
+        sHeli:       raw.S_HELI      ?? state.data.sHeli,
+        sTurb:       raw.S_TURB      ?? state.data.sTurb,
+        vbat:        raw.VBAT        ?? state.data.vbat,
       }
-      
-      // Ajouter au buffer
+
       const newBuffer = [
         ...state.buffer,
-        { timestamp: now, ...updated },
+        { timestamp: now, ...d },
       ].slice(-state.bufferSize)
-      
+
       return {
-        data: updated,
-        buffer: newBuffer,
+        data:       d,
+        buffer:     newBuffer,
         lastUpdate: now,
+        sdActive:   raw.SD !== undefined ? !!raw.SD : state.sdActive,
       }
     })
   },
-  
-  // Programmer reconnexion
-  scheduleReconnect: () => {
-    const timer = setTimeout(() => {
-      console.log('Attempting reconnect...')
-      get().connectWebSocket()
-    }, ESP_CONFIG.reconnectDelay)
-    
-    set({ reconnectTimer: timer })
+
+  // ── COMMANDES ESP32 ─────────────────────────────────────────────
+
+  // Marker de run — {"cmd":"MARKER","run":N,"state":"START|PAUSE"}
+  // Appelé depuis ChronoPage sur START et STOP
+  sendMarker: (run, state) => {
+    const ok = wsSend({ cmd: 'MARKER', run, state })
+    if (!ok) console.warn(`[ESP] sendMarker ${state} RUN ${run} — non connecté`)
   },
-  
-  // Démarrer heartbeat
-  startHeartbeat: () => {
-    const timer = setInterval(() => {
-      const { ws, connected } = get()
-      if (ws && connected) {
-        try {
-          ws.send(JSON.stringify({ type: 'ping' }))
-        } catch (e) {
-          console.error('Heartbeat failed:', e)
-        }
-      }
-    }, ESP_CONFIG.heartbeatInterval)
-    
-    set({ heartbeatTimer: timer })
-  },
-  
-  // Arrêter heartbeat
-  stopHeartbeat: () => {
-    const { heartbeatTimer } = get()
-    if (heartbeatTimer) {
-      clearInterval(heartbeatTimer)
-      set({ heartbeatTimer: null })
-    }
-  },
-  
-  // Envoyer une commande à l'ESP
+
+  // Fermeture propre SD — {"cmd":"CLOSE_SD"}
+  closeSD: () => wsSend({ cmd: 'CLOSE_SD' }),
+
+  // Commande générique (PID, etc.)
   sendCommand: (command) => {
-    const { ws, connected, mode } = get()
-    
-    if (mode === 'websocket' && ws && connected) {
-      try {
-        ws.send(JSON.stringify(command))
-        return true
-      } catch (e) {
-        console.error('Failed to send command:', e)
-        return false
-      }
-    }
-    
-    if (mode === 'http') {
-      // Envoyer en HTTP POST
+    if (get().mode === 'websocket') return wsSend(command)
+    if (get().mode === 'http') {
       fetch(`${ESP_CONFIG.httpUrl}/command`, {
-        method: 'POST',
+        method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(command),
-      }).catch(e => console.error('HTTP command failed:', e))
+        body:    JSON.stringify(command),
+      }).catch(e => console.error('[ESP] HTTP command failed', e))
     }
-    
     return false
   },
-  
+
   // Nettoyer le buffer
   clearBuffer: () => set({ buffer: [] }),
-  
-  // Obtenir statistiques du buffer
+
+  // Statistiques buffer
   getBufferStats: () => {
     const { buffer } = get()
-    if (buffer.length === 0) return null
-    
-    const calcStat = (key) => {
-      const values = buffer.map(d => d[key]).filter(v => v != null)
-      if (values.length === 0) return null
-      
+    if (!buffer.length) return null
+    const stat = (key) => {
+      const vals = buffer.map(d => d[key]).filter(v => v != null)
+      if (!vals.length) return null
       return {
-        min: Math.min(...values),
-        max: Math.max(...values),
-        avg: values.reduce((a, b) => a + b, 0) / values.length,
-        count: values.length,
+        min: Math.min(...vals),
+        max: Math.max(...vals),
+        avg: vals.reduce((a, b) => a + b, 0) / vals.length,
+        count: vals.length,
       }
     }
-    
     return {
-      pitot: calcStat('pitot'),
-      vent: calcStat('vent'),
-      temperature: calcStat('temperature'),
-      pression: calcStat('pression'),
-      duration: buffer.length > 0 
+      iqa:      stat('iqa'),
+      spd:      stat('spd'),
+      temp:     stat('temperature'),
+      duration: buffer.length > 1
         ? buffer[buffer.length - 1].timestamp - buffer[0].timestamp
         : 0,
     }
