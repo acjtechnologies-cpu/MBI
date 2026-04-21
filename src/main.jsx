@@ -1,5 +1,5 @@
 ﻿// Reset localStorage si version app change
-const APP_VERSION = '3'
+const APP_VERSION = '4'
 if (localStorage.getItem('mbi_version') !== APP_VERSION) {
   localStorage.clear()
   localStorage.setItem('mbi_version', APP_VERSION)
