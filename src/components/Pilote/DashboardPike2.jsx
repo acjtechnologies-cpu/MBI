@@ -206,11 +206,6 @@ export default function DashboardPike2() {
   const [gpsStatus,     setGpsStatus]     = useState('')
   const repeatRef = useRef(null)
 
-  // Sync config active dans matrice
-  useEffect(() => {
-    if (tab === 'matrix') setMatrixIdx(ci)
-  }, [tab, ci])
-
   // ── Guard ─────────────────────────────────────────────────────────────────
   if (!model) return (
     <div style={{ height:'100%', display:'flex', alignItems:'center', justifyContent:'center',
@@ -234,6 +229,7 @@ export default function DashboardPike2() {
   const targetG     = kgManuel !== null ? Math.max(model.masseVide, Math.round(kgManuel * 1000)) : targetGAuto
   const kgVal       = parseFloat((targetG / 1000).toFixed(3))
   const ci          = findNearest(matrix, targetG)
+    useEffect(() => { if (tab === 'matrix') setMatrixIdx(ci) }, [tab, ci])
   const cfg         = matrix[ci] || null
   const cgD         = cfg ? (cfg.cg - model.cgVide) : 0
   const altCorrection = Math.round((m0kg - mAltkg) * 1000)
@@ -245,11 +241,6 @@ export default function DashboardPike2() {
   // Max capacité soutes pour rendu uniforme
   const capAV = Math.max(...matrix.map(c => Math.max((c.av?.G||[]).length, (c.av?.D||[]).length)), 1)
   const capAR = Math.max(...matrix.map(c => Math.max((c.ar?.G||[]).length, (c.ar?.D||[]).length)), 1)
-
-  // Sync config active dans matrice
-  useEffect(() => {
-    if (tab === 'matrix') setMatrixIdx(ci)
-  }, [tab, ci])
 
   // ── Sync ballastSnap — useEffect (jamais pendant le render) ──────────────
   useEffect(() => {
@@ -375,7 +366,7 @@ export default function DashboardPike2() {
 
         <div className="p2-tabs">
           <button className={`p2-tab${tab === 'calc'   ? ' on' : ''}`} onClick={() => setTab('calc')}>⚖ CALCULATEUR</button>
-          <button className={\p2-tab\\} onClick={() => { setTab('matrix'); setMatrixIdx(ci) }}>📋 MATRICE</button>
+          <button className={`p2-tab${tab === 'matrix' ? ' on' : ''}`} onClick={() => { setTab('matrix'); setMatrixIdx(ci) }}>MATRICE</button>
         </div>
 
         {/* ── TAB CALCULATEUR ─────────────────────────────────────────────── */}
