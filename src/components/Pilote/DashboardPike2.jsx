@@ -152,6 +152,7 @@ const CSS = `
   touch-action:manipulation; -webkit-tap-highlight-color:transparent; }
 .p2-rb.sel { background:#1a2744; border-color:#1a73e8; color:#fff; }
 .p2-rb.t   { border-color:#3377cc; }
+.p2-rb.act { border-color:#3fb950; color:#3fb950; }
 .p2-m-soutes { flex:1; display:flex; flex-direction:column; gap:4px; min-height:0; overflow-y:auto; }
 .p2-m-sw   { display:flex; flex-direction:column; gap:4px; }
 .p2-m-lbl  { font-size:9px; font-weight:700; letter-spacing:.5px; padding-left:4px; }
@@ -472,7 +473,7 @@ export default function DashboardPike2() {
             <div className="p2-sg">
               {matrix.map((c, i) => (
                 <div key={i}
-                  className={`p2-rb${matrixIdx===i?' sel':''}${hasTungsten(c.av?.G, c.av?.D)?' t':''}`}
+                  className={\p2-rb\\\\}
                   onClick={() => setMatrixIdx(i)}
                 >{c.n}</div>
               ))}
