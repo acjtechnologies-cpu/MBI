@@ -1,0 +1,12 @@
+﻿{
+  "planeurs": [
+    {
+      "id": "pike-precision-2",
+      "nom": "Pike Precision 2",
+      "constructeur": "Pikurus",
+      "masseVide": 2332,
+      "drapeau": "🇩🇪",
+      "url": "planeurs/pike-precision-2.json"
+    }
+  ]
+}
