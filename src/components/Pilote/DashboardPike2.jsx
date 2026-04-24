@@ -365,7 +365,7 @@ export default function DashboardPike2() {
 
         <div className="p2-tabs">
           <button className={`p2-tab${tab === 'calc'   ? ' on' : ''}`} onClick={() => setTab('calc')}>⚖ CALCULATEUR</button>
-          <button className={`p2-tab${tab === 'matrix' ? ' on' : ''}`} onClick={() => setTab('matrix')}>📋 MATRICE</button>
+          <button className={\p2-tab\\} onClick={() => { setTab('matrix'); setMatrixIdx(ci) }}>📋 MATRICE</button>
         </div>
 
         {/* ── TAB CALCULATEUR ─────────────────────────────────────────────── */}
