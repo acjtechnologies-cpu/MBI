@@ -246,6 +246,11 @@ export default function DashboardPike2() {
   const capAV = Math.max(...matrix.map(c => Math.max((c.av?.G||[]).length, (c.av?.D||[]).length)), 1)
   const capAR = Math.max(...matrix.map(c => Math.max((c.ar?.G||[]).length, (c.ar?.D||[]).length)), 1)
 
+  // Sync config active dans matrice
+  useEffect(() => {
+    if (tab === 'matrix') setMatrixIdx(ci)
+  }, [tab, ci])
+
   // ── Sync ballastSnap — useEffect (jamais pendant le render) ──────────────
   useEffect(() => {
     if (cfg && model && setBallastSnap) {
