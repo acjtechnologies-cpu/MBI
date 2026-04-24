@@ -1,76 +1,60 @@
 {
   "id": "pike-precision-2",
   "nom": "Pike Precision 2",
-  "version": "2.0",
-  "drapeau": "🏁",
-  "constructeur": "Paritech",
+  "version": "1.0",
+  "drapeau": "🇩🇪",
+  "constructeur": "Pikurus",
   "strategie": "complementaire",
   "masseVide": 2332,
-  "cgVide": 97,
+  "cgVide": 97.0,
   "surface": 55,
-  "offset": 0,
+  "offset": 1,
   "poly4": {
-    "A4": -0.0001728,
-    "A3": 0.008178,
-    "A2": -0.1498,
-    "A1": 1.34713,
-    "A0": -1.19522,
-    "vMin": 4.05,
-    "vMax": 15.3,
-    "alpha": 1.0,
-    "k_up": 1.0
+    "type": "table",
+    "vent":  [4.05,4.23,4.41,4.61,4.82,5.04,5.28,5.53,5.80,6.10,6.42,6.78,7.17,7.61,8.10,8.65,9.28,9.99,10.78,11.65,12.60,13.70,15.30],
+    "masse": [2.300,2.385,2.470,2.555,2.640,2.725,2.810,2.895,2.980,3.065,3.150,3.235,3.320,3.405,3.490,3.575,3.660,3.745,3.830,3.915,4.000,4.085,4.170]
   },
+  "matrix": [
+    {"n":1,  "m":2500,"cg":96.2,"av":{"G":[{"nom":"Laiton","masse":42}],"D":[]},"ar":{"G":[{"nom":"Laiton","masse":126}],"D":[]}},
+    {"n":2,  "m":2584,"cg":97.1,"av":{"G":[{"nom":"Laiton","masse":21}],"D":[{"nom":"Laiton","masse":42}]},"ar":{"G":[{"nom":"Laiton","masse":126}],"D":[{"nom":"Laiton","masse":63}]}},
+    {"n":3,  "m":2670,"cg":96.6,"av":{"G":[{"nom":"Laiton","masse":42}],"D":[{"nom":"Laiton","masse":42}]},"ar":{"G":[{"nom":"Laiton","masse":126}],"D":[{"nom":"Laiton","masse":126}]}},
+    {"n":4,  "m":2714,"cg":97.3,"av":{"G":[{"nom":"Laiton","masse":21},{"nom":"Laiton","masse":42}],"D":[{"nom":"Laiton","masse":42}]},"ar":{"G":[{"nom":"Laiton","masse":126}],"D":[{"nom":"Laiton","masse":63},{"nom":"Laiton","masse":126}]}},
+    {"n":5,  "m":2799,"cg":96.9,"av":{"G":[{"nom":"Laiton","masse":21},{"nom":"Laiton","masse":42}],"D":[{"nom":"Laiton","masse":21},{"nom":"Laiton","masse":42}]},"ar":{"G":[{"nom":"Laiton","masse":63},{"nom":"Laiton","masse":126}],"D":[{"nom":"Laiton","masse":63},{"nom":"Laiton","masse":126}]}},
+    {"n":6,  "m":2884,"cg":97.6,"av":{"G":[{"nom":"Laiton","masse":42},{"nom":"Laiton","masse":42}],"D":[{"nom":"Laiton","masse":21},{"nom":"Laiton","masse":42}]},"ar":{"G":[{"nom":"Laiton","masse":63},{"nom":"Laiton","masse":126}],"D":[{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126}]}},
+    {"n":7,  "m":2969,"cg":97.1,"av":{"G":[{"nom":"Laiton","masse":42},{"nom":"Laiton","masse":42}],"D":[{"nom":"Laiton","masse":42},{"nom":"Laiton","masse":42}]},"ar":{"G":[{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126}],"D":[{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126}]}},
+    {"n":8,  "m":3054,"cg":97.7,"av":{"G":[{"nom":"Laiton","masse":42},{"nom":"Laiton","masse":42},{"nom":"Laiton","masse":21}],"D":[{"nom":"Laiton","masse":42},{"nom":"Laiton","masse":42}]},"ar":{"G":[{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126}],"D":[{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":63}]}},
+    {"n":9,  "m":3118,"cg":97.2,"av":{"G":[{"nom":"Laiton","masse":42},{"nom":"Laiton","masse":42},{"nom":"Laiton","masse":21}],"D":[{"nom":"Laiton","masse":42},{"nom":"Laiton","masse":42},{"nom":"Laiton","masse":21}]},"ar":{"G":[{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":63}],"D":[{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":63}]}},
+    {"n":10, "m":3350,"cg":97.0,"av":{"G":[{"nom":"Laiton","masse":42},{"nom":"Laiton","masse":42},{"nom":"Laiton","masse":42}],"D":[{"nom":"Laiton","masse":42},{"nom":"Laiton","masse":42},{"nom":"Laiton","masse":42}]},"ar":{"G":[{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126}],"D":[{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126}]}},
+    {"n":11, "m":3484,"cg":97.5,"av":{"G":[{"nom":"Laiton","masse":42},{"nom":"Laiton","masse":42},{"nom":"Laiton","masse":42},{"nom":"Laiton","masse":21}],"D":[{"nom":"Laiton","masse":42},{"nom":"Laiton","masse":42},{"nom":"Laiton","masse":42}]},"ar":{"G":[{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126}],"D":[{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":63}]}},
+    {"n":12, "m":3569,"cg":97.1,"av":{"G":[{"nom":"Laiton","masse":42},{"nom":"Laiton","masse":42},{"nom":"Laiton","masse":42},{"nom":"Laiton","masse":21}],"D":[{"nom":"Laiton","masse":42},{"nom":"Laiton","masse":42},{"nom":"Laiton","masse":42},{"nom":"Laiton","masse":21}]},"ar":{"G":[{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":63}],"D":[{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":63}]}},
+    {"n":13, "m":3654,"cg":97.3,"av":{"G":[{"nom":"Tungsten","masse":70},{"nom":"Laiton","masse":42},{"nom":"Laiton","masse":42},{"nom":"Laiton","masse":21}],"D":[{"nom":"Tungsten","masse":70},{"nom":"Laiton","masse":42},{"nom":"Laiton","masse":42},{"nom":"Laiton","masse":21}]},"ar":{"G":[{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":63}],"D":[{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126}]}},
+    {"n":14, "m":3794,"cg":97.0,"av":{"G":[{"nom":"Tungsten","masse":70},{"nom":"Tungsten","masse":70},{"nom":"Laiton","masse":42},{"nom":"Laiton","masse":42}],"D":[{"nom":"Tungsten","masse":70},{"nom":"Tungsten","masse":70},{"nom":"Laiton","masse":42},{"nom":"Laiton","masse":42}]},"ar":{"G":[{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126}],"D":[{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126}]}},
+    {"n":15, "m":3879,"cg":97.4,"av":{"G":[{"nom":"Tungsten","masse":70},{"nom":"Tungsten","masse":70},{"nom":"Laiton","masse":42},{"nom":"Laiton","masse":42}],"D":[{"nom":"Tungsten","masse":70},{"nom":"Tungsten","masse":70},{"nom":"Laiton","masse":42},{"nom":"Laiton","masse":42},{"nom":"Laiton","masse":21}]},"ar":{"G":[{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":63}],"D":[{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126}]}},
+    {"n":16, "m":3824,"cg":97.1,"av":{"G":[{"nom":"Tungsten","masse":70},{"nom":"Tungsten","masse":70},{"nom":"Laiton","masse":42},{"nom":"Laiton","masse":42},{"nom":"Laiton","masse":21}],"D":[{"nom":"Tungsten","masse":70},{"nom":"Tungsten","masse":70},{"nom":"Laiton","masse":42},{"nom":"Laiton","masse":42},{"nom":"Laiton","masse":21}]},"ar":{"G":[{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":63}],"D":[{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":63}]}},
+    {"n":17, "m":4242,"cg":97.0,"av":{"G":[{"nom":"Tungsten","masse":70},{"nom":"Tungsten","masse":70},{"nom":"Laiton","masse":42},{"nom":"Laiton","masse":42},{"nom":"Laiton","masse":42}],"D":[{"nom":"Tungsten","masse":70},{"nom":"Tungsten","masse":70},{"nom":"Laiton","masse":42},{"nom":"Laiton","masse":42},{"nom":"Laiton","masse":42}]},"ar":{"G":[{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126}],"D":[{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126},{"nom":"Laiton","masse":126}]}}
+  ],
   "soutes": {
-    "small-av": {
-      "id": "small-av",
-      "nom": "Small AV",
-      "couleur": "#c8a030",
-      "distanceBA": 54,
+    "avant": {
+      "id": "avant",
+      "nom": "Avant Aile",
+      "couleur": "#ffd700",
+      "distanceBA": 78,
       "capacite": 5,
       "materiaux": [
-        {
-          "nom": "Laiton",
-          "masse": 42,
-          "stock": 5
-        },
-        {
-          "nom": "Tungstène",
-          "masse": 70,
-          "stock": 2
-        }
+        {"nom": "Tungsten", "masse": 70, "stock": 2},
+        {"nom": "Laiton",   "masse": 42, "stock": 3},
+        {"nom": "Laiton",   "masse": 21, "stock": 1}
       ]
     },
-    "central": {
-      "id": "central",
-      "nom": "Central",
-      "couleur": "#3b82f6",
-      "distanceBA": 97,
-      "capacite": 5,
-      "materiaux": [
-        {
-          "nom": "Laiton",
-          "masse": 42,
-          "stock": 5
-        },
-        {
-          "nom": "Plomb",
-          "masse": 84,
-          "stock": 3
-        }
-      ]
-    },
-    "big-ar": {
-      "id": "big-ar",
-      "nom": "Big AR",
-      "couleur": "#708090",
+    "arriere": {
+      "id": "arriere",
+      "nom": "Arrière Aile",
+      "couleur": "#3fb950",
       "distanceBA": 118,
       "capacite": 5,
       "materiaux": [
-        {
-          "nom": "Laiton",
-          "masse": 126,
-          "stock": 5
-        }
+        {"nom": "Laiton", "masse": 126, "stock": 5},
+        {"nom": "Laiton", "masse": 63,  "stock": 1}
       ]
     }
   }
