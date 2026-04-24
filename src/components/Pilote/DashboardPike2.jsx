@@ -478,7 +478,7 @@ export default function DashboardPike2() {
             <div className="p2-sg">
               {matrix.map((c, i) => (
                 <div key={i}
-                  className={\p2-rb\\\\}
+                  className={`p2-rb${matrixIdx===i?' sel':''}${i===ci?' act':''}${hasTungsten(c.av?.G, c.av?.D)?' t':''}`}
                   onClick={() => setMatrixIdx(i)}
                 >{c.n}</div>
               ))}
