@@ -206,6 +206,11 @@ export default function DashboardPike2() {
   const [gpsStatus,     setGpsStatus]     = useState('')
   const repeatRef = useRef(null)
 
+  // Sync config active dans matrice
+  useEffect(() => {
+    if (tab === 'matrix') setMatrixIdx(ci)
+  }, [tab, ci])
+
   // ── Guard ─────────────────────────────────────────────────────────────────
   if (!model) return (
     <div style={{ height:'100%', display:'flex', alignItems:'center', justifyContent:'center',
