@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+﻿import { useState, useRef, useEffect } from 'react'
 import { useAppStore }   from '../../stores/appStore'
 import { useModelStore } from '../../stores/modelStore'
 import { useShallow }    from 'zustand/react/shallow'
@@ -105,7 +105,7 @@ const CSS = `
 .p2-slot { flex:1; height:100%; border-radius:3px; }
 .p2-s  { background:#1a2535; opacity:.15; border:1px dashed rgba(255,255,255,.07); }
 .p2-l  { background:linear-gradient(135deg,#c8a030,#e8b840); box-shadow:inset 0 0 10px rgba(255,215,0,.5); border:1px solid rgba(255,255,255,.3); }
-.p2-lb { background:linear-gradient(135deg,#708090,#8a9aaa); box-shadow:inset 0 0 10px rgba(0,0,0,.7); border:1px solid rgba(255,255,255,.25); }
+.p2-lb { background:linear-gradient(135deg,#a07820,#c89030); box-shadow:inset 0 0 10px rgba(200,160,48,.3); border:1px solid rgba(255,215,0,.25); }
 .p2-t  { background:linear-gradient(135deg,#2255aa,#3377cc); border:1px solid rgba(100,180,255,.3); }
 .p2-data { height:9vh; min-height:60px; flex-shrink:0; display:flex; justify-content:space-around;
   align-items:center; padding:0 12px;
@@ -166,8 +166,8 @@ const CSS = `
 .l42   { background:linear-gradient(135deg,#c8a030,#e8b840); border-color:transparent; }
 .l21   { background:linear-gradient(135deg,#8a6a10,#a07820); border-color:transparent; }
 .t70   { background:linear-gradient(135deg,#2255aa,#3377cc); border-color:transparent; }
-.l126  { background:linear-gradient(135deg,#708090,#8a9aaa); border-color:transparent; }
-.l63   { background:linear-gradient(135deg,#4a5a66,#5a6a76); border-color:transparent; }
+.l126  { background:linear-gradient(135deg,#a07820,#c89030); border-color:transparent; }
+.l63   { background:linear-gradient(135deg,#7a5810,#9a7020); border-color:transparent; }
 .p2-sep    { width:4px; background:rgba(255,255,255,.03); border-radius:2px; flex-shrink:0; }
 .p2-m-info { background:#161b22; border-radius:8px; padding:6px 10px; flex-shrink:0;
   border:1px solid #21262d; display:flex; align-items:center; gap:8px; }
@@ -517,7 +517,7 @@ export default function DashboardPike2() {
             )}
 
             <div className="p2-m-leg">
-              {[{bg:'#c8a030',lbl:'42g L'},{bg:'#8a6a10',lbl:'21g ½L'},{bg:'#2255aa',lbl:'70g T'},{bg:'#708090',lbl:'126g L'},{bg:'#4a5a66',lbl:'63g ½L'}].map(({bg,lbl}) => (
+              {[{bg:'#c8a030',lbl:'42g L'},{bg:'#8a6a10',lbl:'21g ½L'},{bg:'#2255aa',lbl:'70g T'},{bg:'#a07820',lbl:'126g L'},{bg:'#7a5810',lbl:'63g ½L'}].map(({bg,lbl}) => (
                 <div key={lbl} className="p2-m-li"><div className="p2-m-ls" style={{ background:bg }} />{lbl}</div>
               ))}
             </div>
