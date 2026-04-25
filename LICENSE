@@ -1,0 +1,45 @@
+﻿F3F Pit - MBI vNext
+Copyright (c) 2026 ACJ Technologies (Jose Carrion)
+Tous droits reserves.
+
+DEPOT ENVELOPPE SOLEAU - INPI
+Reference : 92 INPI - Demarche en ligne
+Date de depot : 25 avril 2026
+Horodatage UTC : 2026-04-25 14:41:51
+Validite : jusqu'au 25 avril 2031
+
+DROITS RESERVES - ALL RIGHTS RESERVED
+
+Le present logiciel, son code source, son interface utilisateur,
+ses algorithmes et formules de calcul (Poly4 Adaptatif, IQA v4,
+IRP/K_pente, filtre double-etage), sa documentation technique et
+tout materiel associe constituent une oeuvre originale protegee par :
+
+  - Le Code de la Propriete Intellectuelle francais (CPI)
+  - La Convention de Berne sur le droit d'auteur
+  - La Directive europeenne 2009/24/CE (protection des logiciels)
+
+OEUVRE COUVERTE
+  - F3F Pit / MBI vNext (application web PWA React/Vite)
+  - MBI HTML (generation originale - anteriorite etablie)
+  - Firmware ESP32-C3 station meteo (station_meteo_v13.ino)
+  - Algorithme Poly4 Adaptatif (coefficients terrain calibres)
+  - Formule IQA v4 (Indice Qualite Air - 5 composantes)
+  - Indice IRP (Indice Rendement Pente - 9 sites F3F calibres)
+  - Logo F3F Pit et identite visuelle ACJ Technologies
+
+INTERDICTIONS (sans autorisation ecrite prealable)
+  - Reproduction totale ou partielle du code source
+  - Adaptation ou portage des algorithmes dans un autre logiciel
+  - Commercialisation de tout produit derive
+  - Utilisation du nom F3F Pit ou MBI a des fins commerciales
+  - Suppression ou modification des presentes mentions
+
+USAGE TOLERE
+  L'utilisation personnelle non commerciale de l'application
+  deployee sur https://acjtechnologies-cpu.github.io/MBI/
+  est toleree pour les pilotes F3F en competition sportive.
+
+ACJ Technologies
+Contact : acjtechnologies@gmail.com
+GitHub  : https://github.com/acjtechnologies-cpu
