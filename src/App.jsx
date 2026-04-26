@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import DashboardPilote from './components/Pilote/DashboardPilote'
-import DashboardPike2  from './components/Pilote/DashboardPike2'
+
 import { useModelStore } from './stores/modelStore'
 import ModelManager   from './components/Config/ModelManager'
 import Poly4Component from './components/Poly4/Poly4Page'
@@ -24,7 +24,7 @@ function App() {
 
   const renderPage = () => {
     switch (activeTab) {
-      case 'pilote':  return m?.id === 'pike-precision-2' ? <DashboardPike2 /> : <DashboardPilote />
+ case 'pilote':  return <DashboardPilote />
       case 'soute':   return <ModelManager />
       case 'poly4':   return <Poly4Component />
       case 'station': return <StationPage />
