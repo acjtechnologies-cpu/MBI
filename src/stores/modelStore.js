@@ -321,23 +321,23 @@ const useModelStore = create(
         models: Object.fromEntries(Object.entries(state.models).filter(([k]) => k !== 'pike-precision-2')),
         activeModelId: state.activeModelId
       }),
-      onRehydrateStorage: () => (state) => {
-        if (state) {
-          state.setHasHydrated(true)
-          if (!state.models) {
-            state.models = { 'mamba-s': DEFAULT_MODEL, 'pike-precision-2': DEFAULT_PIKE2 }
-            state.activeModelId = 'mamba-s'
-          } else {
-            if (state.models['mamba-s'] && !state.models['mamba-s'].matrix) {
-              state.models['mamba-s'] = { ...state.models['mamba-s'], matrix: MATRIX_MAMBA, offset: state.models['mamba-s'].offset || -144 }
-            }
-            if (!state.models['pike-precision-2'] || !state.models['pike-precision-2'].matrix) {
-              state.models['pike-precision-2'] = DEFAULT_PIKE2
-            }
-          }
-        }
-      }
+     onRehydrateStorage: () => (state) => {
+  if (state) {
+    state.setHasHydrated(true)
+    if (!state.models) state.models = {}
+    // Toujours réinjecter les modèles par défaut
+    state.models['pike-precision-2'] = DEFAULT_PIKE2
+    if (!state.models['mamba-s'] || !state.models['mamba-s'].matrix) {
+      state.models['mamba-s'] = DEFAULT_MODEL
     }
+    // Si activeModelId pointe vers un modèle inexistant → reset
+    if (!state.models[state.activeModelId]) {
+      state.activeModelId = 'mamba-s'
+    }
+  }
+}
+      }
+    
   )
 )
 export default useModelStore
