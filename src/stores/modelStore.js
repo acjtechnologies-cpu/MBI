@@ -317,27 +317,20 @@ const useModelStore = create(
     {
       name: 'mbi-model-storage',
       version: 2,
-      partialize: (state) => ({
-        models: Object.fromEntries(Object.entries(state.models).filter(([k]) => k !== 'pike-precision-2')),
-        activeModelId: state.activeModelId
-      }),
-     onRehydrateStorage: () => (state) => {
-  if (state) {
-    state.setHasHydrated(true)
-    if (!state.models) state.models = {}
-    // Toujours réinjecter les modèles par défaut
-    state.models['pike-precision-2'] = DEFAULT_PIKE2
-    if (!state.models['mamba-s'] || !state.models['mamba-s'].matrix) {
-      state.models['mamba-s'] = DEFAULT_MODEL
-    }
-    // Si activeModelId pointe vers un modèle inexistant → reset
-    if (!state.models[state.activeModelId]) {
-      state.activeModelId = 'mamba-s'
-    }
-  }
-}
+     partialize: (state) => ({
+  models: state.models,
+  activeModelId: state.activeModelId
+}),
+ onRehydrateStorage: () => (state) => {
+        if (state) {
+          state.setHasHydrated(true)
+          if (!state.models) state.models = {}
+          if (!state.models['mamba-s']) state.models['mamba-s'] = DEFAULT_MODEL
+          if (!state.models['pike-precision-2']) state.models['pike-precision-2'] = DEFAULT_PIKE2
+          if (!state.models[state.activeModelId]) state.activeModelId = 'mamba-s'
+        }
       }
-    
+    }
   )
 )
 export default useModelStore
