@@ -70,7 +70,7 @@ entre l'expérience d'un pilote et la puissance de formalisation de l'IA.
 | **IQA** | Indice Qualité Air — qualité instantanée du flux |
 | **α** | Coefficient de rendement historique pilote |
 | **K_pente** | Correction d'énergie selon le site — réf. Saint Ferriol CdF 2024 |
-| **ρ/ρ₀** | Correction de densité air (altitude, température) |
+| **ρ/ρ₀** | Correction de densité air (altitude, densité) |
 
 ---
 
