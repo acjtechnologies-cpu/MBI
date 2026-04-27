@@ -2,7 +2,11 @@
 
 > *Ton pit lane. Tes données. Ta décision.*
 
----
+## Accès à l'application
+
+🚀 **[Ouvrir F3F PIT](https://acjtechnologies-cpu.github.io/MBI)**
+
+> Optimisé pour smartphone 6.5" — utilisable directement en bord de pente, sans installation.
 
 ## Pourquoi F3F PIT existe
 
