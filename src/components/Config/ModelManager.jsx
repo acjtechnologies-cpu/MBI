@@ -69,7 +69,7 @@ export default function ModelManager() {
   const soutesList = activeModel.soutes ? Object.values(activeModel.soutes) : []
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-gray-950">
+  <div className="h-full flex flex-col overflow-y-auto bg-gray-950">
       {/* Header — nom du planeur actif sans sélecteur */}
       <div className="bg-gray-900 border-b border-gray-800 p-4">
         <div className="flex items-center justify-between">

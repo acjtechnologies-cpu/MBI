@@ -207,10 +207,10 @@ export default function Poly4Page() {
 
   return (
     <div style={{
-      height: '100dvh', display: 'flex', flexDirection: 'column', touchAction: 'manipulation',
-      background: '#0b0e12', color: '#c9d1d9',
-      fontFamily: '-apple-system, system-ui, sans-serif',
-      padding: '10px', overflow: 'hidden', boxSizing: 'border-box',
+     height: '100%', display: 'flex', flexDirection: 'column', touchAction: 'manipulation',
+background: '#0b0e12', color: '#c9d1d9',
+fontFamily: '-apple-system, system-ui, sans-serif',
+padding: '10px', overflowY: 'auto', boxSizing: 'border-box',
     }}>
 
       {/* HEADER */}
