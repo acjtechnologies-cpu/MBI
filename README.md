@@ -80,4 +80,4 @@ React · Vite · Zustand · Dexie.js · ESP32-C3 · WebSocket
 
 ---
 
-*Jo — ACJ Technologies · 2026 · F3F pilot & maker*
+© Jo — ACJ Technologies · 2026 · F3F pilot & maker
