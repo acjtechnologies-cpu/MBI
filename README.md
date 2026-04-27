@@ -1,16 +1,79 @@
-# React + Vite
+# F3F PIT ✈️🏁
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> *Ton pit lane. Tes données. Ta décision.*
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Pourquoi F3F PIT existe
 
-## React Compiler
+Quand un constructeur commercialise un planeur F3F, il livre une fiche technique
+sérieuse. Masse à vide, surface alaire, positions de centrage, débattements
+conseillés. Il propose en option un kit de lest — quelques blocs de laiton ou de
+tungstène calibrés, usinés pour s'insérer dans les logements prévus. Ce kit est
+pensé pour respecter le centrage. C'est propre, c'est cohérent, c'est livrable
+dans une boîte.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Et là s'arrête la documentation.
 
-## Expanding the ESLint configuration
+Il faut comprendre ce qu'est un constructeur F3F. Ce n'est pas une grosse
+entreprise. C'est presque toujours un artisan — un passionné qui conçoit,
+fabrique, concourt et partage. Sa fierté n'est pas dans un catalogue marketing,
+elle est dans un podium, dans la légèreté d'une aile sortie de son atelier, dans
+le retour d'un pilote qui vient lui dire que le planeur vole comme jamais. Le
+circuit F3F est une petite niche, et ses constructeurs en sont à la fois les
+pourvoyeurs et les acteurs. Ils connaissent les pentes. Ils savent, dans leurs
+mains et dans leurs pouces, que la charge ne se décide pas de la même façon à
+7 m/s et à 12 m/s. Ils portent en eux une courbe de chargement — implicite,
+intuitive, construite vol après vol.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Mais cette connaissance ne sort pas dans la documentation. Non par rétention, mais
+parce que la formaliser demande un effort d'abstraction qui n'est pas dans l'ADN
+d'un pilote-artisan. Son métier c'est de sentir l'air, pas d'écrire des fonctions.
+Jusqu'ici, très peu de personnes dans ce milieu avaient pris le temps — ni
+peut-être les outils — de traduire cette expertise tacite en quelque chose
+d'exploitable par tous.
+
+## Ce que fait F3F PIT
+
+F3F PIT n'est pas né dans un laboratoire. Il n'a pas été conçu par un
+mathématicien ou un ingénieur de bureau. Il est né d'un pilote passionné — pas
+mathématicien, mais accro à la compréhension de ce qui se passe vraiment en bord
+de pente — qui a utilisé l'intelligence artificielle comme outil de formalisation.
+L'IA a permis de transformer une intuition de pilote en une fonction mathématique
+exploitable : la courbe **Poly4**, cœur du moteur de calcul **MBI** (Marter
+Ballast Interactif), ajustée sur des points de calibration réels, corrigée par la
+densité de l'air, modulée par le profil de la pente et par le rendement historique
+du pilote.
+
+Ce qui était dans les meilleures têtes du circuit est maintenant dans un algorithme.
+Ce qui se transmettait à l'oral dans le paddock est maintenant accessible sur un
+smartphone en bord de pente, en moins de dix secondes.
+
+F3F PIT ne prétend pas dépasser l'expertise des grands pilotes-constructeurs. Il
+prétend la rendre accessible — à ceux qui n'ont pas encore dix ans de circuit dans
+les pouces, à ceux qui changent de planeur, à ceux qui découvrent une nouvelle
+pente. C'est une démocratisation du savoir tacite, rendue possible par la rencontre
+entre l'expérience d'un pilote et la puissance de formalisation de l'IA.
+
+---
+
+## Moteur MBI — Concepts clés
+
+| Concept | Rôle |
+|---|---|
+| **Poly4** | Courbe masse optimale en fonction de la vitesse vent |
+| **IRP** | Indice Rendement Pente — énergie dynamique du site |
+| **IQA** | Indice Qualité Air — qualité instantanée du flux |
+| **α** | Coefficient de rendement historique pilote |
+| **K_pente** | Correction d'énergie selon le site (9 pentes calibrées) |
+| **ρ/ρ₀** | Correction de densité air (altitude, température) |
+
+---
+
+## Stack
+
+React · Vite · Zustand · Dexie.js · ESP32-C3 · WebSocket
+
+---
+
+*Jo — ACJ Technologies · 2026 · F3F pilot & maker*
