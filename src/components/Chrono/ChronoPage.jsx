@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useESPStore } from '../../stores/espStore';
 import { useAppStore } from '../../stores/appStore';
+import { syncGist, setGistToken, getGistToken } from './gistSync';
 // ── Dexie v3 — session_id sur runs ───────────────────────────────────────────
 import Dexie from 'dexie';
 const db = new Dexie('ChronoDB');
@@ -305,6 +306,11 @@ export default function ChronoPage() {
   const [editVal, setEditVal]           = useState('');
   const [showReset, setShowReset]       = useState(false);
   const [sessionId, setSessionId]       = useState(null); // null = pas encore démarré
+const [gistStatus, setGistStatus] = useState('');
+
+
+
+
 
   // ESP store
   const iqa          = useESPStore(s => s.data.iqa)   ?? 0;
@@ -404,18 +410,24 @@ export default function ChronoPage() {
     setShowReset(false);
     // Ne pas effacer IndexedDB — on garde l'historique
   }
-  function exportJSON() {
+  async function exportJSON() {
     const data = {
       export_date: new Date().toISOString(),
       session_id: sessionId,
       pilotes: pilotes.map((p, i) => ({ id: i, nom: p.nom })),
       runs,
     };
+    // Telechargement local
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = `f3f_chrono_${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
+    // Sync Gist
+    setGistStatus('syncing');
+    const result = await syncGist(data);
+    setGistStatus(result.ok ? 'ok' : 'err');
+    setTimeout(() => setGistStatus(''), 3000);
   }
   function iqaColor(v) {
     if (v >= 7.5) return '#1D9E75';
@@ -612,7 +624,12 @@ export default function ChronoPage() {
       {/* ── FOOTER ───────────────────────────────────────────────────────── */}
       <div style={{ display: 'flex', gap: 6, padding: '8px 12px 16px',
         flexShrink: 0, borderTop: '0.5px solid #1a1a1a' }}>
-        <button onClick={exportJSON} style={btnFooter}>Export JSON</button>
+        <button onClick={exportJSON} style={btnFooter}>
+          {gistStatus === 'syncing' ? '⏳ Sync...'
+           : gistStatus === 'ok'    ? '✓ Gist OK'
+           : gistStatus === 'err'   ? '✗ Erreur'
+           : '☁ Export + Gist'}
+        </button>
         <button onClick={() => setShowReset(true)} style={{ ...btnFooter, color: '#8b2020' }}>Réinit.</button>
       </div>
 
