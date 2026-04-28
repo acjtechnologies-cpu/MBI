@@ -287,6 +287,7 @@ function JournalView({ pilotes, currentSessionId, onBack }) {
           </button>
         </div>
       )}
+
     </div>
   );
 }
@@ -307,6 +308,8 @@ export default function ChronoPage() {
   const [showReset, setShowReset]       = useState(false);
   const [sessionId, setSessionId]       = useState(null); // null = pas encore démarré
 const [gistStatus, setGistStatus] = useState('');
+  const [showGistConfig, setShowGistConfig] = useState(false);
+  const [gistTokenInput, setGistTokenInput] = useState('');
 
 
 
@@ -624,6 +627,10 @@ const [gistStatus, setGistStatus] = useState('');
       {/* ── FOOTER ───────────────────────────────────────────────────────── */}
       <div style={{ display: 'flex', gap: 6, padding: '8px 12px 16px',
         flexShrink: 0, borderTop: '0.5px solid #1a1a1a' }}>
+        <button
+          onClick={() => { setGistTokenInput(getGistToken()); setShowGistConfig(true); }}
+          style={{ ...btnFooter, padding: '0 10px', flex: 'none', fontSize: 16, color: '#555' }}
+        >⚙</button>
         <button onClick={exportJSON} style={btnFooter}>
           {gistStatus === 'syncing' ? '⏳ Sync...'
            : gistStatus === 'ok'    ? '✓ Gist OK'
@@ -633,6 +640,38 @@ const [gistStatus, setGistStatus] = useState('');
         <button onClick={() => setShowReset(true)} style={{ ...btnFooter, color: '#8b2020' }}>Réinit.</button>
       </div>
 
+      {/* ── MODAL GIST CONFIG ── */}
+      {showGistConfig && (
+        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.88)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
+          <div style={{ background: '#111', border: '0.5px solid #333', borderRadius: 16,
+            padding: 24, maxWidth: 320, width: '90%' }}>
+            <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 6 }}>☁ Config Gist GitHub</div>
+            <div style={{ fontSize: 11, color: '#555', marginBottom: 14 }}>
+              Token avec scope "gist" uniquement.<br/>
+              Saisir une seule fois — stocké localement.
+            </div>
+            <input
+              value={gistTokenInput}
+              onChange={e => setGistTokenInput(e.target.value)}
+              placeholder="ghp_xxxxxxxxxxxx"
+              style={{ width: '100%', background: '#1a1a1a', border: '0.5px solid #333',
+                borderRadius: 8, padding: '10px 12px', color: '#fff', fontSize: 12,
+                boxSizing: 'border-box', marginBottom: 12 }}
+            />
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button onClick={() => setShowGistConfig(false)}
+                style={{ ...btnFooter, flex: 1, height: 44, fontSize: 13 }}>Annuler</button>
+              <button onClick={() => {
+                  setGistToken(gistTokenInput.trim());
+                  setShowGistConfig(false);
+                }}
+                style={{ ...btnFooter, flex: 1, height: 44, fontSize: 13,
+                  color: '#1D9E75', borderColor: '#1D9E7544' }}>Sauvegarder</button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* ── MODAL RESET ──────────────────────────────────────────────────── */}
       {showReset && (
         <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.85)',
