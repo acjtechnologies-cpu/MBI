@@ -161,10 +161,15 @@ export default function Poly4Page() {
     if (mode === 'vent') {
       const next = Math.max(4.0, Math.min(15.5, vent + dir * 0.5))
       setParam('vent', Math.round(next * 10) / 10)
-    } else {
-      setSiteIdx(i => (i + dir + sites.length) % sites.length)
-      setApplied(false)
-    }
+  } else {
+  const nextIdx = (siteIdx + dir + sites.length) % sites.length
+  setSiteIdx(nextIdx)
+  setApplied(false)
+  if (typeof setActiveSite === 'function') {
+    const nextSite = sites[nextIdx]
+    setActiveSite({ name: nextSite.name, irp: nextSite.irp, k: nextSite.k })
+  }
+}
   }, [mode, vent, sites.length, setParam])
 
   const startPress = (dir) => {

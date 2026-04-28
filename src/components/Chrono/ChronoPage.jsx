@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useESPStore } from '../../stores/espStore';
-
+import { useAppStore } from '../../stores/appStore';
 // ── Dexie v3 — session_id sur runs ───────────────────────────────────────────
 import Dexie from 'dexie';
 const db = new Dexie('ChronoDB');
@@ -349,18 +349,21 @@ export default function ChronoPage() {
       setElapsed(0);
       sendMarker(manche, 'PAUSE');
 
-      const newRun = {
-        id:          Date.now(),
-        pilote_id:   piloteActif,
-        manche,
-        session_id:  sessionId ?? Date.now(),
-        duree_ms,
-        iqa_snap:    iqaSnap,
-        vent_snap:   ventSnap,
-        sgrad_snap:  sGradSnap,
-        bulle_snap:  bulleSnap,
-        t_start:     t0Ref.current,
-      };
+    const newRun = {
+  id:          Date.now(),
+  pilote_id:   piloteActif,
+  manche,
+  session_id:  sessionId ?? Date.now(),
+  duree_ms,
+  iqa_snap:    iqaSnap,
+  vent_snap:   ventSnap,
+  sgrad_snap:  sGradSnap,
+  bulle_snap:  bulleSnap,
+  t_start:     t0Ref.current,
+  site:        { ...useAppStore.getState().activeSite },
+  ballast:     { ...useAppStore.getState().ballastSnap },
+  altitude:    useAppStore.getState().altitude,
+};
 
       setRuns(prev => [newRun, ...prev]);
       db.runs.add(newRun).catch(() => {});
