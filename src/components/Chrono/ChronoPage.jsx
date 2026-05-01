@@ -827,12 +827,10 @@ const [gistStatus, setGistStatus] = useState('');
           onClick={() => { setGistTokenInput(getGistToken()); setShowGistConfig(true); }}
           style={{ ...btnFooter, padding: '0 10px', flex: 'none', fontSize: 16, color: '#555' }}
         >âš™</button>
-        <button onClick={exportJSON} style={btnFooter}>
-          {gistStatus === 'syncing' ? 'â³ Sync...'
-           : gistStatus === 'ok'    ? 'âœ“ Gist OK'
-           : gistStatus === 'err'   ? 'âœ— Erreur'
-           : 'â˜ Export + Gist'}
-        </button>
+        <button onClick={shareText} style={{...btnFooter, color:'#3fb950', borderColor:'#1a3a2a'}}> Partager</button>
+          <button onClick={exportJSON} style={{...btnFooter, fontSize:10, color:'#555'}}>
+            {gistStatus === 'syncing' ? '' : gistStatus === 'ok' ? ' Gist' : gistStatus === 'err' ? '' : ' JSON'}
+          </button>
         <button onClick={() => setShowReset(true)} style={{ ...btnFooter, color: '#8b2020' }}>RÃ©init.</button>
       </div>
 
