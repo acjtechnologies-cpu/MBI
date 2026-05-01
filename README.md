@@ -70,6 +70,19 @@ entre l'expérience d'un pilote et la puissance de formalisation de l'IA.
 | **K_pente** | Correction d'énergie selon le site — réf. Saint Ferriol CdF 2024 |
 | **ρ/ρ₀** | Correction de densité air (altitude, densité) |
 
+### Philosophie : un profil par machine
+
+En F3F, aucun planeur ne se ressemble. Géométrie d'aile, sensibilité au
+ballast, plages de vitesse utiles — tout varie d'un modèle à l'autre.
+
+F3F Pit fait le choix de la précision : chaque planeur dispose de ses propres
+configurations embarquées — courbes Poly4 calibrées sur 23 points, pas de
+ballast adapté, format de soute spécifique (AV/C/AR), coefficients de
+densité ISA. L'application détecte votre machine dès le démarrage et se
+configure en conséquence.
+
+Modèles actuellement supportés : **Pike Precision 2**, **Mamba S**.
+D'autres profils peuvent être ajoutés via fichier `model.json`.
 ---
 
 ## Stack
