@@ -420,7 +420,6 @@ const [gistStatus, setGistStatus] = useState('');
     const site = lastRun?.site?.name ? `Site : ${lastRun.site.name} | K ${lastRun.site.k}` : '';
     const runsLines = runs.map(r => `M${r.manche} — ${(r.duree_ms/1000).toFixed(2)}s`).join('\n');
     const text = `🏁 F3F Pit — ${date}\n${planeur}\n${config}\n${site}\n\n${runsLines}`;
-    alert('share dispo: ' + !!navigator.share);
     if (navigator.share) {
       try { await navigator.share({ title: 'F3F Pit', text }); }
       catch(e) { if (e.name !== 'AbortError') navigator.clipboard?.writeText(text); }
