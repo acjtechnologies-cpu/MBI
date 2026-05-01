@@ -470,7 +470,7 @@ export default function DashboardPilote() {
                 {selectedParam === 'kg'     && `Pas ±g — cfg #${cfg?.n || '-'} la plus proche`}
                 {selectedParam === 'alt'    && `Pas 50m — ~${c100}g/100m à ${vent.toFixed(1)} m/s`}
                 {selectedParam === 'offset' && `Pas 42g - total: ${offsetVal >= 0 ? '+' : ''}${offsetVal}g`}
-                {selectedParam === 'vent'   && cfg && `Config #${cfg.n} - ${cfg.m}g (Î”${dm > 0 ? '+' : ''}${dm}g)`}
+                {selectedParam === 'vent'   && cfg && `Config #${cfg.n} - ${cfg.m}g (\u0394${dm > 0 ? '+' : ''}${dm}g)`}
               </div>
             </div>
           </div>
@@ -488,10 +488,10 @@ export default function DashboardPilote() {
               </div>
               <div style={{ textAlign:'right' }}>
                 <div style={{ fontSize:14, fontWeight:900, color:'#3fb950' }}>
-                  {displayCfg ? displayCfg.m + 'g' : '-}
+                  {displayCfg ? displayCfg.m + 'g' : '-'}
                 </div>
                 <div style={{ fontSize:9, color:'#8b949e' }}>
-                  Î”{displayCfg ? (displayCfg.m - targetG > 0 ? '+' : '') + (displayCfg.m - targetG) + 'g' : '-}
+                  {`Δ${displayCfg ? (displayCfg.m - targetG > 0 ? "+" : "") + (displayCfg.m - targetG) + "g" : "-"}`}
                 </div>
               </div>
             </div>
@@ -538,7 +538,7 @@ export default function DashboardPilote() {
                       Config #{displayCfg.n} - {displayCfg.m}g
                     </div>
                     <div style={{ fontSize:10, color:'#8b949e', marginTop:2 }}>
-                      CG: {displayCfg.cg} mm - Î”{(displayCfg.cg - model.cgVide).toFixed(1)}mm
+                    <div style={{ fontSize:10, color:'#8b949e', marginTop:2 }}>CG: {displayCfg.cg} mm - {(displayCfg.cg - model.cgVide).toFixed(1)}mm</div>
                     </div>
                   </div>
                   <div style={{ textAlign:'right' }}>
@@ -565,8 +565,8 @@ export default function DashboardPilote() {
               )}
               {gpsData.lat && (
                 <div style={{ fontSize:12, color:'#8b949e', marginBottom:10 }}>
-                  <div>{gpsData.lat?.toFixed(5)}- - {gpsData.lon?.toFixed(5)}-div>
-                  <div>Alt GPS: {gpsData.alt !== null ? Math.round(gpsData.alt) + ' m' : '-} - PrÃ©cision: {gpsData.accuracy} m</div>
+                  <div>{gpsData.lat?.toFixed(5)}° - {gpsData.lon?.toFixed(5)}°</div>
+                  <div>Alt GPS: {gpsData.alt !== null ? Math.round(gpsData.alt) + " m" : "-"} - Precision: {gpsData.accuracy} m</div>
                 </div>
               )}
               {gpsData.alt !== null && (
