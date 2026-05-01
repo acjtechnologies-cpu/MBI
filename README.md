@@ -26,12 +26,12 @@ elle est dans un podium, dans la légèreté d'une aile sortie de son atelier, d
 le retour d'un pilote qui vient lui dire que le planeur vole comme jamais. Le
 circuit F3F est une petite niche, et ses constructeurs en sont à la fois les
 pourvoyeurs et les acteurs. Ils connaissent les pentes. Ils savent, dans leurs
-mains et dans leurs pouces, que la charge ne se décide pas de la même façon à
+mains , que la charge ne se décide pas de la même façon à
 7 m/s et à 12 m/s. Ils portent en eux une courbe de chargement — implicite,
 intuitive, construite vol après vol.
 
 Mais cette connaissance ne sort pas dans la documentation. Non par rétention, mais
-parce que la formaliser demande un effort d'abstraction qui n'est pas dans l'ADN
+parce que la formaliser demande un effort d'abstraction qui n'est pas toujours dans l'ADN
 d'un pilote-artisan. Son métier c'est de sentir l'air, pas d'écrire des fonctions.
 Jusqu'ici, très peu de personnes dans ce milieu avaient pris le temps — ni
 peut-être les outils — de traduire cette expertise tacite en quelque chose
@@ -49,9 +49,7 @@ Ballast Interactif), ajustée sur des points de calibration réels, corrigée pa
 densité de l'air, modulée par le profil de la pente et par le rendement historique
 du pilote.
 
-Ce qui était dans les meilleures têtes du circuit est maintenant dans un algorithme.
-Ce qui se transmettait à l'oral dans le paddock est maintenant accessible sur un
-smartphone en bord de pente, en moins de dix secondes.
+Ce qui se transmettait autrefois à l’oral dans le paddock — cette expérience accumulée vol après vol dans les meilleures têtes du circuit — peut aujourd’hui être rendu accessible en quelques secondes sur un smartphone au bord de la pente. L’algorithme ne remplace ni le ressenti, ni le jugement du pilote ; il sert de point de départ cohérent, une base de décision construite à partir de cette intelligence empirique que les pilotes expérimentés portent depuis toujours dans leurs pouces.
 
 F3F PIT ne prétend pas dépasser l'expertise des grands pilotes-constructeurs. Il
 prétend la rendre accessible — à ceux qui n'ont pas encore dix ans de circuit dans
