@@ -1,22 +1,22 @@
-﻿import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useESPStore } from '../../stores/espStore';
 import { useAppStore } from '../../stores/appStore';
 import { syncGist, setGistToken, getGistToken } from './gistSync';
-// â”€â”€ Dexie v3 â€” session_id sur runs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Dexie v3 — session_id sur runs ───────────────────────────────────────────
 import Dexie from 'dexie';
 const db = new Dexie('ChronoDB');
 db.version(3).stores({
   runs: '++id, pilote_id, manche, session_id, t_start',
 }).upgrade(tx => {
-  // Migration silencieuse â€” anciens runs sans session_id restent valides
+  // Migration silencieuse — anciens runs sans session_id restent valides
   return tx.table('runs').toCollection().modify(run => {
     if (!run.session_id) run.session_id = run.t_start || 0;
   });
 });
 
-// â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Helpers ───────────────────────────────────────────────────────────────────
 function formatDuree(ms) {
-  if (ms == null || ms === 0) return 'â€”';
+  if (ms == null || ms === 0) return '—';
   return (ms / 1000).toFixed(2);
 }
 function fmtDisplay(ms) {
@@ -27,7 +27,7 @@ function fmtDisplay(ms) {
   return m > 0 ? `${m}:${sec}` : sec;
 }
 function fmtDate(ts) {
-  if (!ts) return 'â€”';
+  if (!ts) return '—';
   const d = new Date(ts);
   return d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: '2-digit' });
 }
@@ -37,7 +37,7 @@ function fmtTime(ts) {
   return d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 }
 
-// â”€â”€ Pilotes par dÃ©faut â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Pilotes par défaut ────────────────────────────────────────────────────────
 const PILOTES_DEFAULT = [
   { id: 1, nom: 'Pilote 1' },
   { id: 2, nom: 'Pilote 2' },
@@ -47,7 +47,7 @@ const PILOTES_DEFAULT = [
 ];
 const COULEURS = ['#EF9F27', '#1D9E75', '#378ADD', '#D85A30', '#7F77DD'];
 
-// â”€â”€ Composant BULLE clignotant â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Composant BULLE clignotant ────────────────────────────────────────────────
 function BulleIndicator() {
   const [visible, setVisible] = useState(true);
   useEffect(() => {
@@ -66,7 +66,7 @@ function BulleIndicator() {
   );
 }
 
-// â”€â”€ Styles partagÃ©s â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Styles partagés ───────────────────────────────────────────────────────────
 const btnMini = {
   width: 24, height: 24, background: '#1a1a1a',
   border: '0.5px solid #333', borderRadius: 6,
@@ -83,9 +83,9 @@ const btnFooter = {
   touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent',
 };
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════════════════════════════════════════════════
 // VUE JOURNAL
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════════════════════════════════════════════════
 function JournalView({ pilotes, currentSessionId, onBack }) {
   const [sessions, setSessions] = useState([]);
   const [expanded, setExpanded] = useState(null);
@@ -104,7 +104,7 @@ function JournalView({ pilotes, currentSessionId, onBack }) {
         map[sid].push(r);
       });
 
-      // Construire liste triÃ©e par date dÃ©croissante
+      // Construire liste triée par date décroissante
       const list = Object.entries(map).map(([sid, runs]) => ({
         session_id: Number(sid),
         count: runs.length,
@@ -145,187 +145,7 @@ function JournalView({ pilotes, currentSessionId, onBack }) {
     a.click();
   }
 
-  // Export groupÃ© toutes sessions
-  function exportAll() {
-    db.runs.orderBy('t_start').toArray().then(allRuns => {
-      const data = {
-        export_date: new Date().toISOString(),
-        pilotes: pilotes.map((p, i) => ({ id: i, nom: p.nom })),
-        sessions: sessions.map(s => ({
-          session_id: s.session_id,
-          session_date: fmtDate(s.session_id),
-          runs: allRuns.filter(r => r.session_id === s.session_id),
-        })),
-      };
-      const json = JSON.stringify(data, null, 2);
-      const filename = `f3f_chrono_${new Date().toISOString().slice(0, 10)}.json`;
-      if (navigator.share) {
-        try {
-          const shareFile = new File([json], filename, { type: 'application/json' });
-          await navigator.share({ title: 'F3F Pit - Session', files: [shareFile] });
-        } catch (e) {
-          if (e.name !== 'AbortError') {
-            const blob = new Blob([json], { type: 'application/json' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = filename;
-            a.click();
-          }
-        }
-      } else {
-        const blob = new Blob([json], { type: 'application/json' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = filename;
-        a.click();
-      }ate, useEffect, useRef, useCallback } from 'react';
-import { useESPStore } from '../../stores/espStore';
-import { useAppStore } from '../../stores/appStore';
-import { syncGist, setGistToken, getGistToken } from './gistSync';
-// â”€â”€ Dexie v3 â€” session_id sur runs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-import Dexie from 'dexie';
-const db = new Dexie('ChronoDB');
-db.version(3).stores({
-  runs: '++id, pilote_id, manche, session_id, t_start',
-}).upgrade(tx => {
-  // Migration silencieuse â€” anciens runs sans session_id restent valides
-  return tx.table('runs').toCollection().modify(run => {
-    if (!run.session_id) run.session_id = run.t_start || 0;
-  });
-});
-
-// â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-function formatDuree(ms) {
-  if (ms == null || ms === 0) return 'â€”';
-  return (ms / 1000).toFixed(2);
-}
-function fmtDisplay(ms) {
-  if (ms == null) return '00.00';
-  const s = ms / 1000;
-  const m = Math.floor(s / 60);
-  const sec = (s % 60).toFixed(2).padStart(5, '0');
-  return m > 0 ? `${m}:${sec}` : sec;
-}
-function fmtDate(ts) {
-  if (!ts) return 'â€”';
-  const d = new Date(ts);
-  return d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: '2-digit' });
-}
-function fmtTime(ts) {
-  if (!ts) return '';
-  const d = new Date(ts);
-  return d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-}
-
-// â”€â”€ Pilotes par dÃ©faut â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-const PILOTES_DEFAULT = [
-  { id: 1, nom: 'Pilote 1' },
-  { id: 2, nom: 'Pilote 2' },
-  { id: 3, nom: 'Pilote 3' },
-  { id: 4, nom: 'Pilote 4' },
-  { id: 5, nom: 'Pilote 5' },
-];
-const COULEURS = ['#EF9F27', '#1D9E75', '#378ADD', '#D85A30', '#7F77DD'];
-
-// â”€â”€ Composant BULLE clignotant â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-function BulleIndicator() {
-  const [visible, setVisible] = useState(true);
-  useEffect(() => {
-    const t = setInterval(() => setVisible(v => !v), 500);
-    return () => clearInterval(t);
-  }, []);
-  return (
-    <span style={{
-      fontSize: 11, fontWeight: 500, marginLeft: 4,
-      color: visible ? '#00e5cc' : 'transparent',
-      padding: '2px 8px', borderRadius: 4,
-      border: `0.5px solid ${visible ? '#00e5cc66' : 'transparent'}`,
-      letterSpacing: '0.06em',
-      transition: 'color 0.1s, border-color 0.1s',
-    }}>BULLE ASCENDANTE</span>
-  );
-}
-
-// â”€â”€ Styles partagÃ©s â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-const btnMini = {
-  width: 24, height: 24, background: '#1a1a1a',
-  border: '0.5px solid #333', borderRadius: 6,
-  color: '#888', fontSize: 14,
-  display: 'flex', alignItems: 'center', justifyContent: 'center',
-  cursor: 'pointer', padding: 0,
-  touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent',
-};
-const btnFooter = {
-  flex: 1, height: 38, background: '#141414',
-  border: '0.5px solid #2a2a2a', borderRadius: 8,
-  color: '#666', fontSize: 12, cursor: 'pointer',
-  display: 'flex', alignItems: 'center', justifyContent: 'center',
-  touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent',
-};
-
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-// VUE JOURNAL
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-function JournalView({ pilotes, currentSessionId, onBack }) {
-  const [sessions, setSessions] = useState([]);
-  const [expanded, setExpanded] = useState(null);
-  const [sessionRuns, setSessionRuns] = useState({});
-
-  // Charger toutes les sessions (groupement par session_id)
-  useEffect(() => {
-    db.runs.orderBy('t_start').toArray().then(allRuns => {
-      if (!allRuns.length) { setSessions([]); return; }
-
-      // Grouper par session_id
-      const map = {};
-      allRuns.forEach(r => {
-        const sid = r.session_id || 0;
-        if (!map[sid]) map[sid] = [];
-        map[sid].push(r);
-      });
-
-      // Construire liste triÃ©e par date dÃ©croissante
-      const list = Object.entries(map).map(([sid, runs]) => ({
-        session_id: Number(sid),
-        count: runs.length,
-        t_start: Math.min(...runs.map(r => r.t_start)),
-        t_end: Math.max(...runs.map(r => r.t_start + (r.duree_ms || 0))),
-        pilots: [...new Set(runs.map(r => r.pilote_id))],
-        best: Math.min(...runs.map(r => r.duree_ms).filter(Boolean)),
-      })).sort((a, b) => b.session_id - a.session_id);
-
-      setSessions(list);
-    }).catch(() => {});
-  }, []);
-
-  // Charger les runs d'une session au clic
-  function toggleSession(sid) {
-    if (expanded === sid) { setExpanded(null); return; }
-    setExpanded(sid);
-    if (sessionRuns[sid]) return;
-    db.runs.where('session_id').equals(sid).toArray().then(runs => {
-      setSessionRuns(prev => ({ ...prev, [sid]: runs }));
-    }).catch(() => {});
-  }
-
-  // Export JSON d'une session
-  function exportSession(sid) {
-    const runs = sessionRuns[sid] || [];
-    const data = {
-      export_date: new Date().toISOString(),
-      session_id: sid,
-      session_date: fmtDate(sid),
-      pilotes: pilotes.map((p, i) => ({ id: i, nom: p.nom })),
-      runs,
-    };
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `f3f_session_${fmtDate(sid).replace(/\//g, '-')}.json`;
-    a.click();
-  }
-
-  // Export groupÃ© toutes sessions
+  // Export groupé toutes sessions
   function exportAll() {
     db.runs.orderBy('t_start').toArray().then(allRuns => {
       const data = {
@@ -358,7 +178,7 @@ function JournalView({ pilotes, currentSessionId, onBack }) {
       {/* Header journal */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px',
         background: '#111', borderBottom: '0.5px solid #222', flexShrink: 0 }}>
-        <button onClick={onBack} style={{ ...btnMini, width: 32, fontSize: 18, color: '#60a5fa' }}>â€¹</button>
+        <button onClick={onBack} style={{ ...btnMini, width: 32, fontSize: 18, color: '#60a5fa' }}>‹</button>
         <span style={{ fontSize: 13, fontWeight: 600, color: '#ddd' }}>Journal des sessions</span>
         <span style={{ fontSize: 11, color: '#444', marginLeft: 'auto' }}>{sessions.length} sessions</span>
       </div>
@@ -367,7 +187,7 @@ function JournalView({ pilotes, currentSessionId, onBack }) {
       <div style={{ flex: 1, overflowY: 'auto', padding: '8px 12px' }}>
         {sessions.length === 0 && (
           <div style={{ textAlign: 'center', color: '#333', fontSize: 13, padding: '40px 0' }}>
-            Aucune session enregistrÃ©e
+            Aucune session enregistrée
           </div>
         )}
 
@@ -402,8 +222,8 @@ function JournalView({ pilotes, currentSessionId, onBack }) {
                     )}
                   </div>
                   <div style={{ fontSize: 10, color: '#555', marginTop: 2 }}>
-                    {fmtTime(s.t_start)} Â· {s.count} run{s.count > 1 ? 's' : ''} Â· {s.pilots.length} pilote{s.pilots.length > 1 ? 's' : ''}
-                    {s.best ? ` Â· best ${formatDuree(s.best)}s` : ''}
+                    {fmtTime(s.t_start)} · {s.count} run{s.count > 1 ? 's' : ''} · {s.pilots.length} pilote{s.pilots.length > 1 ? 's' : ''}
+                    {s.best ? ` · best ${formatDuree(s.best)}s` : ''}
                   </div>
                 </div>
 
@@ -412,11 +232,11 @@ function JournalView({ pilotes, currentSessionId, onBack }) {
                   onClick={e => { e.stopPropagation(); if (runs.length) exportSession(s.session_id); else toggleSession(s.session_id); }}
                   style={{ ...btnMini, width: 'auto', padding: '0 8px', fontSize: 10, color: '#60a5fa',
                     border: '0.5px solid #1a3a5a' }}
-                >â†“ JSON</button>
+                >↓ JSON</button>
 
                 {/* Chevron */}
                 <span style={{ color: '#444', fontSize: 14, transform: isExpanded ? 'rotate(90deg)' : 'none',
-                  transition: 'transform 0.15s' }}>â€º</span>
+                  transition: 'transform 0.15s' }}>›</span>
               </div>
 
               {/* Runs de la session */}
@@ -424,7 +244,7 @@ function JournalView({ pilotes, currentSessionId, onBack }) {
                 <div style={{ background: '#080808', border: '0.5px solid #1a1a1a',
                   borderTop: 'none', borderRadius: '0 0 8px 8px', padding: '6px 8px' }}>
                   {runs.length === 0 ? (
-                    <div style={{ color: '#333', fontSize: 11, textAlign: 'center', padding: 8 }}>Chargementâ€¦</div>
+                    <div style={{ color: '#333', fontSize: 11, textAlign: 'center', padding: 8 }}>Chargement…</div>
                   ) : (
                     runs.sort((a, b) => a.t_start - b.t_start).map((r, i) => {
                       const col = COULEURS[r.pilote_id] ?? '#888';
@@ -463,18 +283,17 @@ function JournalView({ pilotes, currentSessionId, onBack }) {
         <div style={{ padding: '8px 12px 16px', flexShrink: 0, borderTop: '0.5px solid #1a1a1a' }}>
           <button onClick={exportAll} style={{ ...btnFooter, flex: 'none', width: '100%', color: '#60a5fa',
             border: '0.5px solid #1a3a5a' }}>
-            â†“ Exporter tout le journal ({sessions.length} sessions)
+            ↓ Exporter tout le journal ({sessions.length} sessions)
           </button>
         </div>
       )}
-
     </div>
   );
 }
 
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════════════════════════════════════════════════
 // COMPOSANT PRINCIPAL
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ═══════════════════════════════════════════════════════════════════════════════
 export default function ChronoPage() {
   const [vue, setVue]                   = useState('chrono'); // 'chrono' | 'journal'
   const [pilotes, setPilotes]           = useState(PILOTES_DEFAULT);
@@ -486,10 +305,8 @@ export default function ChronoPage() {
   const [editNom, setEditNom]           = useState(null);
   const [editVal, setEditVal]           = useState('');
   const [showReset, setShowReset]       = useState(false);
-  const [sessionId, setSessionId]       = useState(null); // null = pas encore dÃ©marrÃ©
+  const [sessionId, setSessionId]       = useState(null); // null = pas encore démarré
 const [gistStatus, setGistStatus] = useState('');
-  const [showGistConfig, setShowGistConfig] = useState(false);
-  const [gistTokenInput, setGistTokenInput] = useState('');
 
 
 
@@ -517,7 +334,7 @@ const [gistStatus, setGistStatus] = useState('');
 
   const handleStartStop = useCallback(() => {
     if (!running) {
-      // START â€” crÃ©er session_id au premier run
+      // START — créer session_id au premier run
       const sid = sessionId ?? Date.now();
       if (!sessionId) setSessionId(sid);
 
@@ -591,16 +408,18 @@ const [gistStatus, setGistStatus] = useState('');
     setElapsed(0);
     setSessionId(null);
     setShowReset(false);
-    // Ne pas effacer IndexedDB â€” on garde l'historique
+    // Ne pas effacer IndexedDB — on garde l'historique
   }
   async function shareText() {
     const lastRun = runs[0];
     const date = new Date().toLocaleDateString('fr-FR');
     const planeur = lastRun?.ballast?.planeur_nom || '';
-    const config = lastRun?.ballast ? `Config #${lastRun.ballast.config}  ${lastRun.ballast.masse.toFixed(3)} kg | CG ${lastRun.ballast.cg}mm` : '';
+    const config = lastRun?.ballast
+      ? `Config #${lastRun.ballast.config} — ${lastRun.ballast.masse.toFixed(3)} kg | CG ${lastRun.ballast.cg}mm`
+      : '';
     const site = lastRun?.site?.name ? `Site : ${lastRun.site.name} | K ${lastRun.site.k}` : '';
-    const runsLines = runs.map(r => `M${r.manche}  ${(r.duree_ms/1000).toFixed(2)}s`).join('\n');
-    const text = ` F3F Pit  ${date}\n${planeur}\n${config}\n${site}\n\n${runsLines}`;
+    const runsLines = runs.map(r => `M${r.manche} — ${(r.duree_ms/1000).toFixed(2)}s`).join('\n');
+    const text = `🏁 F3F Pit — ${date}\n${planeur}\n${config}\n${site}\n\n${runsLines}`;
     if (navigator.share) {
       try { await navigator.share({ title: 'F3F Pit', text }); }
       catch(e) { if (e.name !== 'AbortError') navigator.clipboard?.writeText(text); }
@@ -609,35 +428,19 @@ const [gistStatus, setGistStatus] = useState('');
       alert('Session copiée dans le presse-papier');
     }
   }
-    async function exportJSON() {
+  async function exportJSON() {
     const data = {
       export_date: new Date().toISOString(),
       session_id: sessionId,
       pilotes: pilotes.map((p, i) => ({ id: i, nom: p.nom })),
       runs,
     };
-    const json = JSON.stringify(data, null, 2);
-    const filename = `f3f_chrono_${new Date().toISOString().slice(0, 10)}.json`;
-    if (navigator.share) {
-      try {
-        const shareFile = new File([json], filename, { type: 'application/json' });
-        await navigator.share({ title: 'F3F Pit - Session', files: [shareFile] });
-      } catch (e) {
-        if (e.name !== 'AbortError') {
-          const blob = new Blob([json], { type: 'application/json' });
-          const a = document.createElement('a');
-          a.href = URL.createObjectURL(blob);
-          a.download = filename;
-          a.click();
-        }
-      }
-    } else {
-      const blob = new Blob([json], { type: 'application/json' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = filename;
-      a.click();
-    }
+    // Telechargement local
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `f3f_chrono_${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
     // Sync Gist
     setGistStatus('syncing');
     const result = await syncGist(data);
@@ -650,7 +453,7 @@ const [gistStatus, setGistStatus] = useState('');
     return '#E24B4A';
   }
 
-  // â”€â”€ Vue Journal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Vue Journal ──────────────────────────────────────────────────────────────
   if (vue === 'journal') {
     return <JournalView pilotes={pilotes} currentSessionId={sessionId} onBack={() => setVue('chrono')} />;
   }
@@ -660,7 +463,7 @@ const [gistStatus, setGistStatus] = useState('');
       background: '#0a0a0a', color: '#fff',
       fontFamily: 'var(--font-sans, sans-serif)', overflowY: 'auto', userSelect: 'none' }}>
 
-      {/* â”€â”€ BARRE IQA + toggle vue â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── BARRE IQA + toggle vue ────────────────────────────────────────── */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 12px',
         background: '#111', borderBottom: '0.5px solid #222', flexShrink: 0 }}>
 
@@ -694,13 +497,13 @@ const [gistStatus, setGistStatus] = useState('');
           >JOURNAL</button>
           {/* Manche */}
           <span style={{ fontSize: 11, color: '#555', marginLeft: 2 }}>M</span>
-          <button onClick={() => !running && setManche(m => Math.max(1, m - 1))} style={btnMini}>âˆ’</button>
+          <button onClick={() => !running && setManche(m => Math.max(1, m - 1))} style={btnMini}>−</button>
           <span style={{ fontSize: 14, fontWeight: 500, minWidth: 20, textAlign: 'center' }}>{manche}</span>
           <button onClick={() => !running && setManche(m => Math.min(16, m + 1))} style={btnMini}>+</button>
         </div>
       </div>
 
-      {/* â”€â”€ SESSION INDICATOR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── SESSION INDICATOR ────────────────────────────────────────────── */}
       {sessionId && (
         <div style={{ padding: '3px 12px', background: '#0a0f0a', borderBottom: '0.5px solid #1a1a1a',
           flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -712,7 +515,7 @@ const [gistStatus, setGistStatus] = useState('');
         </div>
       )}
 
-      {/* â”€â”€ SÃ‰LECTEUR PILOTE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── SÉLECTEUR PILOTE ─────────────────────────────────────────────── */}
       <div style={{ display: 'flex', gap: 6, padding: '8px 12px', overflowX: 'auto',
         flexShrink: 0, scrollbarWidth: 'none' }}>
         {pilotes.map((p, i) => {
@@ -739,21 +542,21 @@ const [gistStatus, setGistStatus] = useState('');
               )}
               <div style={{ fontSize: 10, color: active ? col : '#444', marginTop: 2,
                 fontVariantNumeric: 'tabular-nums' }}>
-                {best ? formatDuree(best) : 'â€”'}
+                {best ? formatDuree(best) : '—'}
               </div>
             </div>
           );
         })}
       </div>
 
-      {/* â”€â”€ DISPLAY CHRONO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── DISPLAY CHRONO ───────────────────────────────────────────────── */}
       <div style={{ margin: '0 12px 8px', background: '#050505',
         border: `1.5px solid ${running ? couleurActif : '#1a1a1a'}`,
         borderRadius: 14, padding: '14px 16px 12px', textAlign: 'center',
         flexShrink: 0, transition: 'border-color 0.2s' }}>
         <div style={{ fontSize: 12, color: '#555', marginBottom: 4, letterSpacing: '0.08em' }}>
           {pilotes[piloteActif].nom}
-          <span style={{ color: '#333', margin: '0 6px' }}>Â·</span>
+          <span style={{ color: '#333', margin: '0 6px' }}>·</span>
           manche {manche}
         </div>
         <div style={{ fontSize: 58, fontWeight: 500, letterSpacing: -1,
@@ -763,15 +566,15 @@ const [gistStatus, setGistStatus] = useState('');
         </div>
         <div style={{ display: 'flex', justifyContent: 'center', gap: 20, fontSize: 11, color: '#444' }}>
           <span>best <span style={{ color: '#888', fontVariantNumeric: 'tabular-nums' }}>
-            {bestActif ? formatDuree(bestActif) : 'â€”'}
+            {bestActif ? formatDuree(bestActif) : '—'}
           </span></span>
           <span>IQA snap <span style={{ color: '#888' }}>
-            {runs.find(r => r.pilote_id === piloteActif)?.iqa_snap?.toFixed(2) ?? 'â€”'}
+            {runs.find(r => r.pilote_id === piloteActif)?.iqa_snap?.toFixed(2) ?? '—'}
           </span></span>
         </div>
       </div>
 
-      {/* â”€â”€ BOUTON START / STOP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── BOUTON START / STOP ──────────────────────────────────────────── */}
       <button onClick={handleStartStop} style={{
         margin: '0 12px 10px', height: 76, borderRadius: 16, border: 'none',
         background: running ? '#8b1a1a' : '#0d4a36', color: '#fff',
@@ -794,11 +597,11 @@ const [gistStatus, setGistStatus] = useState('');
         )}
       </button>
 
-      {/* â”€â”€ LISTE DES RUNS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── LISTE DES RUNS ───────────────────────────────────────────────── */}
       <div style={{ padding: '0 12px', flex: 1, overflowY: 'auto' }}>
         <div style={{ fontSize: 10, color: '#444', letterSpacing: '0.08em',
           textTransform: 'uppercase', marginBottom: 6 }}>
-          Runs â€” {runs.length}
+          Runs — {runs.length}
         </div>
         {runs.length === 0 && (
           <div style={{ textAlign: 'center', color: '#333', fontSize: 13, padding: '24px 0' }}>
@@ -825,7 +628,7 @@ const [gistStatus, setGistStatus] = useState('');
                 {formatDuree(r.duree_ms)}
               </div>
               <div style={{ fontSize: 10, color: iqaColor(r.iqa_snap ?? 0), minWidth: 30, textAlign: 'right' }}>
-                {r.iqa_snap?.toFixed(2) ?? 'â€”'}
+                {r.iqa_snap?.toFixed(2) ?? '—'}
               </div>
               {r.bulle_snap && (
                 <div style={{ fontSize: 9, color: '#00e5cc', fontWeight: 500,
@@ -836,53 +639,17 @@ const [gistStatus, setGistStatus] = useState('');
         })}
       </div>
 
-      {/* â”€â”€ FOOTER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── FOOTER ───────────────────────────────────────────────────────── */}
       <div style={{ display: 'flex', gap: 6, padding: '8px 12px 16px',
         flexShrink: 0, borderTop: '0.5px solid #1a1a1a' }}>
-        <button
-          onClick={() => { setGistTokenInput(getGistToken()); setShowGistConfig(true); }}
-          style={{ ...btnFooter, padding: '0 10px', flex: 'none', fontSize: 16, color: '#555' }}
-        >âš™</button>
-        <button onClick={shareText} style={{...btnFooter, color:'#3fb950', borderColor:'#1a3a2a'}}> Partager</button>
+        <button onClick={shareText} style={{...btnFooter, color:'#3fb950', borderColor:'#1a3a2a'}}>📤 Partager</button>
           <button onClick={exportJSON} style={{...btnFooter, fontSize:10, color:'#555'}}>
-            {gistStatus === 'syncing' ? '' : gistStatus === 'ok' ? ' Gist' : gistStatus === 'err' ? '' : ' JSON'}
+            {gistStatus === 'syncing' ? '⏳' : gistStatus === 'ok' ? '✓ Gist' : gistStatus === 'err' ? '✗' : '↓ JSON'}
           </button>
-        <button onClick={() => setShowReset(true)} style={{ ...btnFooter, color: '#8b2020' }}>RÃ©init.</button>
+        <button onClick={() => setShowReset(true)} style={{ ...btnFooter, color: '#8b2020' }}>Réinit.</button>
       </div>
 
-      {/* â”€â”€ MODAL GIST CONFIG â”€â”€ */}
-      {showGistConfig && (
-        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.88)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
-          <div style={{ background: '#111', border: '0.5px solid #333', borderRadius: 16,
-            padding: 24, maxWidth: 320, width: '90%' }}>
-            <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 6 }}>â˜ Config Gist GitHub</div>
-            <div style={{ fontSize: 11, color: '#555', marginBottom: 14 }}>
-              Token avec scope "gist" uniquement.<br/>
-              Saisir une seule fois â€” stockÃ© localement.
-            </div>
-            <input
-              value={gistTokenInput}
-              onChange={e => setGistTokenInput(e.target.value)}
-              placeholder="ghp_xxxxxxxxxxxx"
-              style={{ width: '100%', background: '#1a1a1a', border: '0.5px solid #333',
-                borderRadius: 8, padding: '10px 12px', color: '#fff', fontSize: 12,
-                boxSizing: 'border-box', marginBottom: 12 }}
-            />
-            <div style={{ display: 'flex', gap: 10 }}>
-              <button onClick={() => setShowGistConfig(false)}
-                style={{ ...btnFooter, flex: 1, height: 44, fontSize: 13 }}>Annuler</button>
-              <button onClick={() => {
-                  setGistToken(gistTokenInput.trim());
-                  setShowGistConfig(false);
-                }}
-                style={{ ...btnFooter, flex: 1, height: 44, fontSize: 13,
-                  color: '#1D9E75', borderColor: '#1D9E7544' }}>Sauvegarder</button>
-            </div>
-          </div>
-        </div>
-      )}
-      {/* â”€â”€ MODAL RESET â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── MODAL RESET ──────────────────────────────────────────────────── */}
       {showReset && (
         <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.85)',
           display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
@@ -890,8 +657,8 @@ const [gistStatus, setGistStatus] = useState('');
             padding: 24, maxWidth: 280, width: '90%', textAlign: 'center' }}>
             <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 8 }}>Nouvelle session ?</div>
             <div style={{ fontSize: 12, color: '#666', marginBottom: 20 }}>
-              Les runs actuels sont conservÃ©s dans le journal.<br />
-              L'affichage sera remis Ã  zÃ©ro.
+              Les runs actuels sont conservés dans le journal.<br />
+              L'affichage sera remis à zéro.
             </div>
             <div style={{ display: 'flex', gap: 10 }}>
               <button onClick={() => setShowReset(false)}
