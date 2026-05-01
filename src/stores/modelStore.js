@@ -103,6 +103,14 @@ const DEFAULT_MODEL = {
   surface: 59,
   offset: -144,
   version: '1.0',
+  poly4: {
+    type: 'coefficients',
+    A4: -1.728e-4,
+    A3:  8.178e-3,
+    A2: -0.14980,
+    A1:  1.34713,
+    A0: -1.19522
+  },
   matrix: MATRIX_MAMBA,
   soutes: {
     'avant-cle': {
