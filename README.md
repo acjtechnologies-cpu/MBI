@@ -44,7 +44,7 @@ mathématicien ou un ingénieur de bureau. Il est né d'un pilote passionné —
 mathématicien, mais accro à la compréhension de ce qui se passe vraiment en bord
 de pente — qui a utilisé l'intelligence artificielle comme outil de formalisation.
 L'IA a permis de transformer une intuition de pilote en une fonction mathématique
-exploitable : la courbe **Poly4**, cœur du moteur de calcul **MBI** (Marter
+exploitable : la courbe **Poly4**, cœur du moteur de calcul **MBI** (Master
 Ballast Interactif), ajustée sur des points de calibration réels, corrigée par la
 densité de l'air, modulée par le profil de la pente et par le rendement historique
 du pilote.
