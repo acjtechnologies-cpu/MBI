@@ -352,7 +352,7 @@ export default function DashboardPilote() {
               <button
                 className={`mb-gps-btn${gpsStatus === 'capturing' ? ' capturing' : ''}`}
                 onClick={e => { e.stopPropagation(); setGpsOpen(true); captureGPS() }}>
-                {gpsStatus === 'ok' ? '✅' : gpsStatus === 'err' ? '❌' : '📍'}
+                {gpsStatus === 'ok' ? '- : gpsStatus === 'err' ? '- : 'ðŸ“'}
               </button>
             </div>
 
