@@ -593,7 +593,23 @@ const [gistStatus, setGistStatus] = useState('');
     setShowReset(false);
     // Ne pas effacer IndexedDB â€” on garde l'historique
   }
-  async function exportJSON() {
+  async function shareText() {
+    const lastRun = runs[0];
+    const date = new Date().toLocaleDateString('fr-FR');
+    const planeur = lastRun?.ballast?.planeur_nom || '';
+    const config = lastRun?.ballast ? `Config #${lastRun.ballast.config}  ${lastRun.ballast.masse.toFixed(3)} kg | CG ${lastRun.ballast.cg}mm` : '';
+    const site = lastRun?.site?.name ? `Site : ${lastRun.site.name} | K ${lastRun.site.k}` : '';
+    const runsLines = runs.map(r => `M${r.manche}  ${(r.duree_ms/1000).toFixed(2)}s`).join('\n');
+    const text = ` F3F Pit  ${date}\n${planeur}\n${config}\n${site}\n\n${runsLines}`;
+    if (navigator.share) {
+      try { await navigator.share({ title: 'F3F Pit', text }); }
+      catch(e) { if (e.name !== 'AbortError') navigator.clipboard?.writeText(text); }
+    } else {
+      navigator.clipboard?.writeText(text);
+      alert('Session copiée dans le presse-papier');
+    }
+  }
+    async function exportJSON() {
     const data = {
       export_date: new Date().toISOString(),
       session_id: sessionId,
