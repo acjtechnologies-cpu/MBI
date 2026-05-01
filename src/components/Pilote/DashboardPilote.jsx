@@ -459,16 +459,16 @@ export default function DashboardPilote() {
                   <button className="mb-nav"
                     onMouseDown={() => handlePress(-1)} onMouseUp={handleRelease} onMouseLeave={handleRelease}
                     onTouchStart={e => { e.preventDefault(); handlePress(-1) }} onTouchEnd={handleRelease}
-                    onTouchCancel={handleRelease}>-/button>
+                    onTouchCancel={handleRelease}>−</button>
                   <button className="mb-nav"
                     onMouseDown={() => handlePress(1)} onMouseUp={handleRelease} onMouseLeave={handleRelease}
                     onTouchStart={e => { e.preventDefault(); handlePress(1) }} onTouchEnd={handleRelease}
-                    onTouchCancel={handleRelease}>-/button>
+                    onTouchCancel={handleRelease}>+</button>
                 </div>
               </div>
               <div className="mb-hint">
-                {selectedParam === 'kg'     && `Pas -g - cfg #${cfg?.n || '-} la plus proche`}
-                {selectedParam === 'alt'    && `Pas 50m - ~-{c100}g/100m Ã  ${vent.toFixed(1)} m/s`}
+                {selectedParam === 'kg'     && `Pas ±g — cfg #${cfg?.n || '-'} la plus proche`}
+                {selectedParam === 'alt'    && `Pas 50m — ~${c100}g/100m à ${vent.toFixed(1)} m/s`}
                 {selectedParam === 'offset' && `Pas 42g - total: ${offsetVal >= 0 ? '+' : ''}${offsetVal}g`}
                 {selectedParam === 'vent'   && cfg && `Config #${cfg.n} - ${cfg.m}g (Î”${dm > 0 ? '+' : ''}${dm}g)`}
               </div>
