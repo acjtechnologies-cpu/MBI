@@ -45,6 +45,7 @@ export default function Poly4Page() {
   // ── Stores ────────────────────────────────────────────────────────────────
   const vent          = useAppStore(s => s.params?.vent ?? 8.0)
   const setParam      = useAppStore(s => s.setParam)
+  const setOffset     = useAppStore(s => s.setOffset)
   const altitude      = useAppStore(s => s.altitude ?? 0)
   const offsetStore   = useAppStore(s => s.offset ?? -144)
   const activeSite    = useAppStore(s => s.activeSite)
@@ -77,7 +78,9 @@ export default function Poly4Page() {
   const currentSite = sites[siteIdx] ?? sites[6]
   const kPente      = currentSite?.k ?? 1.00
   const rho         = useMemo(() => rhoAlt(altitude), [altitude])
-  const offsetKg    = useMemo(() => model?.masse_ref_8ms ? (model.masse_ref_8ms - P4_REF_8MS) : (model?.offset ?? offsetStore) / 1000, [model, offsetStore])
+  const offsetADN   = model?.masse_ref_8ms ? (model.masse_ref_8ms - P4_REF_8MS) : 0
+  const offsetTerrain = offsetStore / 1000
+  const offsetKg    = offsetADN + offsetTerrain
 
   // ── masseFinale = poly4(vent) × rho(alt) × K_pente + offset/1000 ─────────
   const masseFinale = useMemo(() =>
@@ -89,7 +92,7 @@ export default function Poly4Page() {
   const chartData = useMemo(() => ({
     aeroRef:  V_RANGE.map(v => aeromod(v)),
     neutre:   V_RANGE.map(v => poly4(v) * kPente),
-    adaptive: V_RANGE.map(v => poly4(v) * rho * kPente + offsetKg),
+    adaptive: V_RANGE.map(v => poly4(v) * rho * kPente + offsetADN),
     dense:    V_RANGE.map(v => poly4(v) * rho * 1.05 * kPente),
     leger:    V_RANGE.map(v => poly4(v) * rho * 0.95 * kPente),
     massePt:  poly4(vent) * rho * kPente + offsetKg,
@@ -161,16 +164,18 @@ export default function Poly4Page() {
     if (mode === 'vent') {
       const next = Math.max(4.0, Math.min(15.5, vent + dir * 0.5))
       setParam('vent', Math.round(next * 10) / 10)
-  } else {
-  const nextIdx = (siteIdx + dir + sites.length) % sites.length
-  setSiteIdx(nextIdx)
-  setApplied(false)
-  if (typeof setActiveSite === 'function') {
-    const nextSite = sites[nextIdx]
-    setActiveSite({ name: nextSite.name, irp: nextSite.irp, k: nextSite.k })
-  }
-}
-  }, [mode, vent, sites.length, setParam])
+    } else if (mode === 'offset') {
+      setOffset(Math.max(-500, Math.min(500, offsetStore + dir * 42)))
+    } else {
+      const nextIdx = (siteIdx + dir + sites.length) % sites.length
+      setSiteIdx(nextIdx)
+      setApplied(false)
+      if (typeof setActiveSite === 'function') {
+        const nextSite = sites[nextIdx]
+        setActiveSite({ name: nextSite.name, irp: nextSite.irp, k: nextSite.k })
+      }
+    }
+  }, [mode, vent, sites.length, setParam, offsetStore, setOffset])
 
   const startPress = (dir) => {
     handleChange(dir)
@@ -284,6 +289,7 @@ padding: '10px', overflowY: 'auto', boxSizing: 'border-box',
             {[
               { id: 'vent',   label: 'Vent',    val: `${vent.toFixed(1)} m/s` },
               { id: 'kpente', label: 'K Pente', val: kPente.toFixed(3) },
+              { id: 'offset', label: 'Offset', val: (offsetStore >= 0 ? '+' : '') + offsetStore + 'g' },
             ].map(tab => (
               <div key={tab.id} onClick={() => setMode(tab.id)} style={{
                 flex: 1, cursor: 'pointer', borderRadius: 10, padding: '10px 12px',
