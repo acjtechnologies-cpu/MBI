@@ -210,8 +210,8 @@ export default function DashboardPilote() {
   const cgClass       = Math.abs(cgD) < 0.5 ? 'neutre' : cgD < 0 ? 'avant' : 'arriere'
   const c100          = Math.round((m0kg - getMasseAlt(m0kg, 100)) * 1000)
   const ventLabel     = altitude > 0
-    ? `VENT m/s - ${model.nom} - Ï -{altCorrection}g`
-    : `VENT m/s - ${model.nom}`
+    ? `VENT m/s — ${model.nom} — ρ -${altCorrection}g`
+    : `VENT m/s — ${model.nom}`
   const displayCfg    = matrixIdx !== null ? matrix[matrixIdx] : cfg
 
   // -”€ Sync ballastSnap -”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-
@@ -333,11 +333,11 @@ export default function DashboardPilote() {
         {/* Onglets */}
         <div className="mb-tabs">
           <button className={`mb-tab${tab === 'calc' ? ' on' : ''}`} onClick={() => setTab('calc')}>
-            - CALCULATEUR
+            ⚖️ CALCULATEUR
           </button>
           {matrix.length > 0 && (
             <button className={`mb-tab${tab === 'matrix' ? ' on' : ''}`} onClick={() => setTab('matrix')}>
-              ðŸ“‹ MATRICE
+            📋 MATRICE
             </button>
           )}
         </div>
@@ -394,8 +394,8 @@ export default function DashboardPilote() {
                   <span className="mb-ab-val">{altitude} m</span>
                 </div>
                 <div style={{ textAlign:'center', flex:1 }}>
-                  <span className="mb-ab-lbl">DÃ‰DUIT</span>
-                  <span className="mb-ab-val">-altCorrection} g</span>
+                  <span className="mb-ab-lbl">DÉDUIT</span>
+                  <span className="mb-ab-val">{altCorrection}g</span>
                 </div>
                 <div style={{ textAlign:'center', flex:1 }}>
                   <span className="mb-ab-lbl">FINALE</span>
@@ -424,7 +424,7 @@ export default function DashboardPilote() {
                   {m0kg.toFixed(3)}
                 </div>
                 <div style={{ fontSize:9, color:'#8b949e', marginTop:3 }}>
-                  Poly4{altitude > 0 ? <span style={{ color:'#a78bfa' }}> -kgVal.toFixed(3)}</span> : ''}
+                  Poly4{altitude > 0 ? <span style={{ color:'#a78bfa' }}> →{kgVal.toFixed(3)}</span> : ''}
                 </div>
               </div>
               <div className={`mb-cg ${cgClass}`} style={{ textAlign:'center' }}>
@@ -460,11 +460,11 @@ export default function DashboardPilote() {
                   <button className="mb-nav"
                     onMouseDown={() => handlePress(-1)} onMouseUp={handleRelease} onMouseLeave={handleRelease}
                     onTouchStart={e => { e.preventDefault(); handlePress(-1) }} onTouchEnd={handleRelease}
-                    onTouchCancel={handleRelease}>−</button>
+                    onTouchCancel={handleRelease}>▼</button>
                   <button className="mb-nav"
                     onMouseDown={() => handlePress(1)} onMouseUp={handleRelease} onMouseLeave={handleRelease}
                     onTouchStart={e => { e.preventDefault(); handlePress(1) }} onTouchEnd={handleRelease}
-                    onTouchCancel={handleRelease}>+</button>
+                    onTouchCancel={handleRelease}>▲</button>
                 </div>
               </div>
               <div className="mb-hint">
@@ -482,7 +482,7 @@ export default function DashboardPilote() {
           <div className="mb-matrix">
             <div className="mb-m-hdr">
               <div>
-                <div style={{ fontSize:13, fontWeight:800 }}>ðŸŽ¯ {model.nom} - Matrice</div>
+                <div style={{ fontSize:13, fontWeight:800 }}>🎯 {model.nom} — Matrice</div>
                 <div style={{ fontSize:9, color:'#8b949e', marginTop:1 }}>
                   {matrix.length} configs - cible {targetG}g
                 </div>
