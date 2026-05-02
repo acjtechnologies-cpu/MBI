@@ -5,6 +5,7 @@ import Chart from 'chart.js/auto'
 
 // ─── Poly4 coefficients ────────────────────────────────────────────────────
 // Référence : poly4(8.0) = 3.474 kg @ alt=0m K=1.00 offset=0
+const P4_REF_8MS = 3.474
 const A4 = -1.728e-4
 const A3 =  8.178e-3
 const A2 = -0.14980
@@ -76,7 +77,7 @@ export default function Poly4Page() {
   const currentSite = sites[siteIdx] ?? sites[6]
   const kPente      = currentSite?.k ?? 1.00
   const rho         = useMemo(() => rhoAlt(altitude), [altitude])
-  const offsetKg    = useMemo(() => (model?.offset ?? offsetStore) / 1000, [model, offsetStore])
+  const offsetKg    = useMemo(() => model?.masse_ref_8ms ? (model.masse_ref_8ms - P4_REF_8MS) : (model?.offset ?? offsetStore) / 1000, [model, offsetStore])
 
   // ── masseFinale = poly4(vent) × rho(alt) × K_pente + offset/1000 ─────────
   const masseFinale = useMemo(() =>
@@ -104,7 +105,7 @@ export default function Poly4Page() {
         labels: V_RANGE,
         datasets: [
           { label: 'Aéromod',   data: [], borderColor: '#ff4b91',                  borderWidth: 1.8, pointRadius: 0, tension: 0.1, fill: false, order: 6 },
-          { label: 'P4 neutre', data: [], borderColor: 'rgba(232,234,240,0.55)',   borderWidth: 2,   pointRadius: 0, tension: 0.3, fill: false, order: 4 },
+          
           { label: 'P4 adapt',  data: [], borderColor: '#4a9eff',                  borderWidth: 3,   pointRadius: 0, tension: 0.3,
             fill: { target: 1, above: 'rgba(74,158,255,0.07)', below: 'rgba(255,75,145,0.07)' }, order: 3 },
           { label: 'Dense',     data: [], borderColor: '#ffb74d',                  borderWidth: 1.5, pointRadius: 0, tension: 0.3, borderDash: [5,4], fill: false, order: 5 },
@@ -147,12 +148,11 @@ export default function Poly4Page() {
     const ch = chartInst.current
     if (!ch) return
     ch.data.datasets[0].data = chartData.aeroRef
-    ch.data.datasets[1].data = chartData.neutre
-    ch.data.datasets[2].data = chartData.adaptive
-    ch.data.datasets[3].data = chartData.dense
-    ch.data.datasets[4].data = chartData.leger
-    ch.data.datasets[5].data = [{ x: vent, y: chartData.massePt }]
-    ch.data.datasets[6].data = [{ x: vent, y: 2.0 }, { x: vent, y: 5.0 }]
+    ch.data.datasets[1].data = chartData.adaptive
+    ch.data.datasets[2].data = chartData.dense
+    ch.data.datasets[3].data = chartData.leger
+    ch.data.datasets[4].data = [{ x: vent, y: chartData.massePt }]
+    ch.data.datasets[5].data = [{ x: vent, y: 2.0 }, { x: vent, y: 5.0 }]
     ch.update('none')
   }, [chartData, vent])
 
@@ -257,7 +257,7 @@ padding: '10px', overflowY: 'auto', boxSizing: 'border-box',
         <div style={{ display: 'flex', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
           {[
             { color: '#ff4b91',                label: 'Aéromod' },
-            { color: 'rgba(232,234,240,0.55)', label: 'P4 neutre' },
+            
             { color: '#4a9eff',                label: 'P4 adapt' },
             { color: '#ffb74d',                label: 'Dense' },
             { color: '#ce93d8',                label: 'Léger' },
