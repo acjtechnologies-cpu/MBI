@@ -42,6 +42,7 @@ const DEFAULT_PIKE2 = {
   cgVide: 97.0,
   surface: 55,
   offset: 1,
+  masse_ref_8ms: 3.474,
   version: '1.0',
   poly4: {
     type: 'table',
@@ -102,6 +103,7 @@ const DEFAULT_MODEL = {
   cgVide: 102,
   surface: 59,
   offset: -144,
+  masse_ref_8ms: 3.330,
   version: '1.0',
   poly4: {
     type: 'coefficients',

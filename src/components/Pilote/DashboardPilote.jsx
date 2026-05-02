@@ -11,6 +11,7 @@ function poly4Fallback(v) {
 }
 
 // -”€ Poly4 table (Pike - interpolation depuis model.poly4) -”€-”€-”€-”€-”€-”€-”€-”€-”€-
+const P4_REF_8MS = 3.474 // Poly4(8.0) reference Pike 0m K=1.00
 function getMasse0m(v, p4) {
   if (!p4) return poly4Fallback(v)
   if (p4.type === 'coefficients') {
@@ -193,7 +194,7 @@ export default function DashboardPilote() {
   const vent          = params.vent
   const m0kg          = getMasse0m(vent, model.poly4)  // - lit model.poly4 si dispo
   const mAltkg        = getMasseAlt(m0kg, altitude)
-  const modelOffset   = parseFloat(model.offset) || 0
+  const modelOffset   = model.masse_ref_8ms ? Math.round((model.masse_ref_8ms - P4_REF_8MS) * 1000) : (parseFloat(model.offset) || 0)
   const offsetVal     = parseFloat(offset) || 0
   const kPente        = activeSite?.k ?? 1.00
   const altCorrection = Math.round((m0kg - mAltkg) * 1000)

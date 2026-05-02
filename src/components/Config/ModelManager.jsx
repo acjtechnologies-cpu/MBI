@@ -142,7 +142,7 @@ export default function ModelManager() {
 }
 
 function ModelInfoCard({ model, isEditing, onEdit, onSave, onCancel }) {
-  const [formData, setFormData] = useState({ nom: model?.nom || '', drapeau: model?.drapeau || '🛩️', masseVide: model?.masseVide || 2500, cgVide: model?.cgVide || 100, surface: model?.surface || 59 })
+  const [formData, setFormData] = useState({ nom: model?.nom || '', drapeau: model?.drapeau || '🛩️', masseVide: model?.masseVide || 2500, cgVide: model?.cgVide || 100, surface: model?.surface || 59, masse_ref_8ms: model?.masse_ref_8ms || 3.474 })
   if (!model) return null
   if (isEditing) {
     return (
@@ -175,6 +175,11 @@ function ModelInfoCard({ model, isEditing, onEdit, onSave, onCancel }) {
             <input type="number" step="0.1" value={formData.surface} onChange={(e) => setFormData({...formData, surface: parseFloat(e.target.value) || 0})} className="w-full bg-gray-900 border border-gray-600 rounded px-3 py-2 text-white font-semibold" />
           </div>
         </div>
+            <div class="col-span-2" style={{gridColumn:'span 2'}}>
+              <label style={{fontSize:11,color:'#9ca3af',display:'block',marginBottom:4}}>Masse ref 8 m/s (kg) — ADN planeur</label>
+              <input type="number" step="0.001" value={formData.masse_ref_8ms} onChange={(e) => setFormData({...formData, masse_ref_8ms: parseFloat(e.target.value) || 3.474})} style={{width:'100%',background:'#111827',border:'1px solid #16a34a',borderRadius:6,padding:'8px 12px',color:'#4ade80',fontWeight:700}} />
+              <div style={{fontSize:10,color:'#6b7280',marginTop:3}}>Offset vs Pike : {Math.round((formData.masse_ref_8ms - 3.474) * 1000)}g</div>
+            </div>
       </div>
     )
   }
