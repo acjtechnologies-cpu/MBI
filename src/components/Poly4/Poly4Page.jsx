@@ -165,7 +165,7 @@ export default function Poly4Page() {
       const next = Math.max(4.0, Math.min(15.5, vent + dir * 0.5))
       setParam('vent', Math.round(next * 10) / 10)
     } else if (mode === 'offset') {
-      setOffset(Math.max(-500, Math.min(500, offsetStore + dir * 42)))
+      const next42 = offsetStore + dir * 42; const nextOff = (offsetStore !== 0 && Math.sign(next42) !== Math.sign(offsetStore)) ? 0 : Math.max(-500, Math.min(500, next42)); setOffset(nextOff)
     } else {
       const nextIdx = (siteIdx + dir + sites.length) % sites.length
       setSiteIdx(nextIdx)
