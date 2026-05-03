@@ -556,7 +556,7 @@ export default function DashboardPilote() {
         {gpsOpen && (
           <div className="mb-overlay" onClick={() => setGpsOpen(false)}>
             <div className="mb-overlay-box" onClick={e => e.stopPropagation()}>
-              <div style={{ fontSize:15, fontWeight:800, marginBottom:12 }}>ðŸ“ Position GPS</div>
+              <div style={{ fontSize:15, fontWeight:800, marginBottom:12 }}>📍 Position GPS</div>
               {gpsStatus === 'capturing' && (
                 <div style={{ color:'#8b949e', fontSize:13, marginBottom:8 }}>Localisation en cours...</div>
               )}
@@ -572,7 +572,7 @@ export default function DashboardPilote() {
                   style={{ background:'#1a73e8', border:'none', color:'#fff', borderRadius:8,
                     padding:'10px 16px', cursor:'pointer', fontWeight:700, fontSize:13,
                     width:'100%', marginBottom:8, touchAction:'manipulation' }}>
-                  - Utiliser {Math.round(gpsData.alt)} m
+                  📍 Utiliser {Math.round(gpsData.alt)} m
                 </button>
               )}
               <button
