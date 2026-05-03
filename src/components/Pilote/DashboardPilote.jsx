@@ -2,6 +2,7 @@
 import { useAppStore } from '../../stores/appStore'
 import { useShallow } from 'zustand/react/shallow'
 import { useModelStore } from '../../stores/modelStore'
+import MatriceInteractive from './MatriceInteractive'
 
 // -”€ Poly4 fallback (Mamba - pas de model.poly4) -”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-
 const P4 = { A4:-1.728e-4, A3:8.178e-3, A2:-0.14980, A1:1.34713, A0:-1.19522, vMin:4.05, vMax:15.30 }
@@ -169,6 +170,7 @@ export default function DashboardPilote() {
   const [kgManuel,      setKgManuel]      = useState(null)
   const [tab,           setTab]           = useState('calc')
   const [matrixIdx,     setMatrixIdx]     = useState(null)
+  const [cfgAppliquee,  setCfgAppliquee]  = useState(null)
   const [gpsStatus,     setGpsStatus]     = useState('')
   const [gpsOpen,       setGpsOpen]       = useState(false)
   const [gpsData,       setGpsData]       = useState({ lat:null, lon:null, alt:null, accuracy:null })
@@ -199,7 +201,9 @@ export default function DashboardPilote() {
   const kPente        = activeSite?.k ?? 1.00
   const altCorrection = Math.round((m0kg - mAltkg) * 1000)
   const targetGAuto   = Math.max(model.masseVide, Math.round(mAltkg * kPente * 1000 + modelOffset + offsetVal))
-  const targetG       = kgManuel !== null
+  const targetG       = cfgAppliquee !== null
+    ? cfgAppliquee
+    : kgManuel !== null
     ? Math.max(model.masseVide, Math.round(kgManuel * 1000))
     : targetGAuto
   const kgVal         = targetG / 1000
@@ -218,6 +222,8 @@ export default function DashboardPilote() {
   useEffect(() => {
     if (tab === 'matrix' && ci >= 0) setMatrixIdx(ci)
   }, [tab, ci])
+
+  useEffect(() => { setCfgAppliquee(null) }, [params.vent])
 
   useEffect(() => {
     if (cfg && model && setBallastSnap) {
@@ -473,85 +479,18 @@ export default function DashboardPilote() {
           </div>
         )}
 
-        {/* -”€ TAB MATRICE -”€ */}
+        {/* TAB MATRICE */}
         {tab === 'matrix' && matrix.length > 0 && (
-          <div className="mb-matrix">
-            <div className="mb-m-hdr">
-              <div>
-                <div style={{ fontSize:13, fontWeight:800 }}>🎯 {model.nom} — Matrice</div>
-                <div style={{ fontSize:9, color:'#8b949e', marginTop:1 }}>
-                  {matrix.length} configs - cible {targetG}g
-                </div>
-              </div>
-              <div style={{ textAlign:'right' }}>
-                <div style={{ fontSize:14, fontWeight:900, color:'#3fb950' }}>
-                  {displayCfg ? displayCfg.m + 'g' : '-'}
-                </div>
-                <div style={{ fontSize:9, color:'#8b949e' }}>
-                  {`Δ${displayCfg ? (displayCfg.m - targetG > 0 ? "+" : "") + (displayCfg.m - targetG) + "g" : "-"}`}
-                </div>
-              </div>
-            </div>
-
-            <div className="mb-sg">
-              {matrix.map((row, i) => (
-                <div key={i}
-                  className={`mb-rb${matrixIdx === i ? ' sel' : i === ci ? ' near' : ''}`}
-                  onClick={() => setMatrixIdx(matrixIdx === i ? null : i)}>
-                  {row.n}
-                </div>
-              ))}
-            </div>
-
-            <div className="mb-m-soutes">
-              {soutes.map((soute, idx) => {
-                const cap         = soute.capacite || 3
-                const colors      = [
-                  { border: 'rgba(255,215,0,.4)',    label: 'rgba(255,200,80,.9)' },
-                  { border: 'rgba(26,115,232,.45)',  label: 'rgba(100,170,255,.9)' },
-                  { border: 'rgba(63,185,80,.4)',    label: 'rgba(63,185,80,.9)' },
-                ]
-                const col = colors[idx] || colors[0]
-                return (
-                  <div key={idx} className="mb-m-row-wrap">
-                    <div className="mb-m-lbl" style={{ color: col.label }}>
-                      {soute.nom}
-                    </div>
-                    <div className="mb-m-row">
-                      <div className="mb-m-side mb-m-side-l" style={{ border: `1.5px solid ${col.border}` }}>
-                        {renderMatSide('G', idx, cap, displayCfg)}
-                      </div>
-                      <div className="mb-m-side" style={{ border: `1.5px solid ${col.border}` }}>
-                        {renderMatSide('D', idx, cap, displayCfg)}
-                      </div>
-                    </div>
-                  </div>
-                )
-              })}
-              {displayCfg && (
-                <div className="mb-m-info">
-                  <div style={{ flex:1 }}>
-                    <div style={{ fontSize:12, fontWeight:800, color:'#fff' }}>
-                      Config #{displayCfg.n} - {displayCfg.m}g
-                    </div>
-                    <div style={{ fontSize:10, color:'#8b949e', marginTop:2 }}>
-                    <div style={{ fontSize:10, color:'#8b949e', marginTop:2 }}>CG: {displayCfg.cg} mm - {(displayCfg.cg - model.cgVide).toFixed(1)}mm</div>
-                    </div>
-                  </div>
-                  <div style={{ textAlign:'right' }}>
-                    <div style={{
-                      fontSize:11, fontWeight:700,
-                      color: Math.abs(displayCfg.m - targetG) <= 30 ? '#3fb950' : '#f0a500'
-                    }}>
-                      {displayCfg.m - targetG > 0 ? '+' : ''}{displayCfg.m - targetG}g vs cible
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+          <MatriceInteractive
+            model={model}
+            soutes={soutes}
+            matrix={matrix}
+            MAT_KEYS={MAT_KEYS}
+            ci={ci}
+            targetGAuto={targetGAuto}
+            onAppliquer={(masse) => { setCfgAppliquee(masse); setTab('calc') }}
+          />
         )}
-
         {/* -”€ GPS OVERLAY -”€ */}
         {gpsOpen && (
           <div className="mb-overlay" onClick={() => setGpsOpen(false)}>

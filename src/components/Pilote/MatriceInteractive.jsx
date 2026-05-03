@@ -1,31 +1,6 @@
 ﻿import { useState, useMemo } from 'react'
 
-// Calcul CG depuis blocs custom
-function calcCG(model, soutes, customSlots) {
-  let mom = model.masseVide * model.cgVide
-  let tot = model.masseVide
-  soutes.forEach(s => {
-    ;(customSlots[s.id] || []).forEach(b => {
-      mom += b.masse * s.distanceBA
-      tot += b.masse
-    })
-  })
-  return tot > model.masseVide ? mom / tot : model.cgVide
-}
-
-function calcMasse(model, soutes, customSlots) {
-  let m = model.masseVide
-  soutes.forEach(s => { (customSlots[s.id] || []).forEach(b => { m += b.masse }) })
-  return m
-}
-
-const COLORS = [
-  { border: 'rgba(255,215,0,.4)',   label: 'rgba(255,200,80,.9)' },
-  { border: 'rgba(26,115,232,.45)', label: 'rgba(100,170,255,.9)' },
-  { border: 'rgba(63,185,80,.4)',   label: 'rgba(63,185,80,.9)' },
-]
-
-function matClsFromNom(nom) {
+function matCls(nom) {
   if (!nom) return ''
   const n = nom.toLowerCase()
   if (n.includes('plomb'))  return 'p'
@@ -33,86 +8,98 @@ function matClsFromNom(nom) {
   return 'l'
 }
 
-function isNewFormat(side) { return Array.isArray(side) }
+function calcCG(model, soutes, slots) {
+  let mom = model.masseVide * model.cgVide, tot = model.masseVide
+  soutes.forEach(s => {
+    const G = slots[s.id]?.G || [], D = slots[s.id]?.D || []
+    ;[...G,...D].forEach(b => { mom += b.masse * s.distanceBA; tot += b.masse })
+  })
+  return tot > model.masseVide ? mom / tot : model.cgVide
+}
 
-export default function MatriceInteractive({ model, soutes, matrix, MAT_KEYS, ci, targetG, setOffset, offsetVal }) {
+function calcMasse(model, soutes, slots) {
+  let m = model.masseVide
+  soutes.forEach(s => {
+    const G = slots[s.id]?.G||[], D = slots[s.id]?.D||[]
+    ;[...G,...D].forEach(b => { m += b.masse })
+  })
+  return m
+}
+
+function slotsFromCfg(soutes, MAT_KEYS, row) {
+  const slots = {}
+  soutes.forEach((s, i) => {
+    const b = row[MAT_KEYS[i]||'av'] || {}
+    const mat = s.materiaux?.[0] || { nom:'Laiton', masse:71 }
+    if (Array.isArray(b.G)) {
+      slots[s.id] = { G: b.G.map(x=>({...x})), D: (b.D||[]).map(x=>({...x})) }
+    } else {
+      slots[s.id] = {
+        G: Array.from({length:b.G||0}, ()=>({nom:b.matG||mat.nom, masse:mat.masse})),
+        D: Array.from({length:b.D||0}, ()=>({nom:b.matD||mat.nom, masse:mat.masse}))
+      }
+    }
+  })
+  return slots
+}
+
+const COLORS = [
+  { border:'rgba(255,215,0,.4)',   label:'rgba(255,200,80,.9)' },
+  { border:'rgba(26,115,232,.45)', label:'rgba(100,170,255,.9)' },
+  { border:'rgba(63,185,80,.4)',   label:'rgba(63,185,80,.9)' },
+]
+
+const NAV_BTN = {
+  flex:1, height:38, borderRadius:8, border:'1px solid #30363d',
+  background:'#161b22', color:'#fff', fontSize:22, fontWeight:900,
+  cursor:'pointer', touchAction:'manipulation', display:'flex',
+  alignItems:'center', justifyContent:'center',
+  WebkitTapHighlightColor:'transparent'
+}
+
+export default function MatriceInteractive({ model, soutes, matrix, MAT_KEYS, ci, targetGAuto, onAppliquer }) {
   const [matrixIdx,   setMatrixIdx]   = useState(null)
   const [customSlots, setCustomSlots] = useState(null)
 
-  const displayCfg = matrixIdx !== null ? matrix[matrixIdx] : (ci >= 0 ? matrix[ci] : null)
-  const isHors     = customSlots !== null
+  const selectedIdx = matrixIdx !== null ? matrixIdx : ci
+  const displayCfg  = selectedIdx >= 0 && selectedIdx < matrix.length ? matrix[selectedIdx] : null
+  const isEditing   = customSlots !== null
 
   const masseCustom = useMemo(() => customSlots ? calcMasse(model, soutes, customSlots) : null, [customSlots, model, soutes])
-  const cgCustom    = useMemo(() => customSlots ? calcCG(model, soutes, customSlots) : null, [customSlots, model, soutes])
+  const cgCustom    = useMemo(() => customSlots ? calcCG(model, soutes, customSlots)    : null, [customSlots, model, soutes])
 
-  const masseAff = isHors ? masseCustom : displayCfg?.m ?? null
-  const cgAff    = isHors ? cgCustom    : displayCfg?.cg ?? null
-  const dm       = masseAff !== null ? masseAff - targetG : 0
+  const masseAff = isEditing ? masseCustom : displayCfg?.m ?? null
+  const cgAff    = isEditing ? cgCustom    : displayCfg?.cg ?? null
+  const dm       = masseAff !== null ? masseAff - targetGAuto : 0
 
-  function initFromCfg(row) {
-    if (!row) return
-    const slots = {}
-    soutes.forEach((s, i) => {
-      const matKey = MAT_KEYS[i] || 'av'
-      const b = row[matKey] || {}
-      const mat = s.materiaux?.[0] || { nom: 'Laiton', masse: 71 }
-      if (isNewFormat(b.G)) {
-        slots[s.id] = [...(b.G || []), ...(b.D || [])]
-      } else {
-        const n = (b.G || 0) + (b.D || 0)
-        slots[s.id] = Array.from({ length: n }, () => ({ ...mat }))
-      }
-    })
-    setCustomSlots(slots)
+  function startEdit() {
+    if (displayCfg) setCustomSlots(slotsFromCfg(soutes, MAT_KEYS, displayCfg))
   }
 
-  function addBloc(sid) {
-    const soute = soutes.find(s => s.id === sid)
-    const mat   = soute?.materiaux?.[0] || { nom: 'Laiton', masse: 71 }
+  function addBloc(souteId, side) {
+    const s   = soutes.find(x => x.id === souteId)
+    const mat = s?.materiaux?.[0] || {nom:'Laiton', masse:71}
+    const cap = s?.capacite || 5
     setCustomSlots(prev => {
-      const c = { ...(prev || {}) }
-      if ((c[sid] || []).length >= (soute?.capacite || 5)) return prev
-      c[sid] = [...(c[sid] || []), { ...mat }]
-      return c
+      const cur = prev[souteId][side]
+      if (cur.length >= cap) return prev
+      return {...prev, [souteId]: {...prev[souteId], [side]: [...cur, {...mat}]}}
     })
   }
 
-  function removeBloc(sid) {
+  function removeBloc(souteId, side) {
     setCustomSlots(prev => {
-      if (!prev?.[sid]?.length) return prev
-      const c = { ...prev }
-      c[sid] = c[sid].slice(0, -1)
-      return c
+      const cur = prev[souteId][side]
+      if (!cur.length) return prev
+      return {...prev, [souteId]: {...prev[souteId], [side]: cur.slice(0,-1)}}
     })
   }
 
-  function renderSide(side, nom, cap) {
-    const slots = []
-    if (isNewFormat(side)) {
-      for (let i = 0; i < cap; i++)
-        slots.push(<div key={i} className={`mb-m-slot${i < side.length ? ' ' + matClsFromNom(side[i]?.nom) : ''}`} />)
-    } else {
-      const n = side || 0
-      for (let i = 0; i < cap; i++)
-        slots.push(<div key={i} className={`mb-m-slot${i < n ? ' ' + matClsFromNom(nom) : ''}`} />)
-    }
-    return slots
-  }
-
-  function getSides(souteIdx, row) {
-    const matKey = MAT_KEYS[souteIdx] || 'av'
-    const b = row ? (row[matKey] || {}) : {}
-    const capG = isNewFormat(b.G) ? (b.G||[]).length : (b.G||0)
-    const capD = isNewFormat(b.D) ? (b.D||[]).length : (b.D||0)
-    const cap  = Math.max(capG, capD, 3)
-    return { G: b.G, D: b.D, nomG: b.matG||'', nomD: b.matD||'', cap }
-  }
-
-  function renderCustomSlots(souteIdx, cap, sid) {
-    const blocs = customSlots?.[sid] || []
-    return Array.from({ length: cap }).map((_, i) => (
-      <div key={i} className={`mb-m-slot${i < blocs.length ? ' ' + matClsFromNom(blocs[i]?.nom) : ''}`} />
-    ))
+  function renderSideSlots(blocs, cap, isLeft) {
+    return Array.from({length: cap}).map((_, i) => {
+      const bi = isLeft ? (cap - 1 - i) : i
+      return <div key={i} className={`mb-m-slot${bi < blocs.length ? ' '+matCls(blocs[bi]?.nom) : ''}`} />
+    })
   }
 
   return (
@@ -120,18 +107,16 @@ export default function MatriceInteractive({ model, soutes, matrix, MAT_KEYS, ci
       {/* Header */}
       <div className="mb-m-hdr">
         <div>
-          <div style={{ fontSize:13, fontWeight:800 }}>🎯 {model.nom} — Matrice</div>
-          <div style={{ fontSize:9, color:'#8b949e', marginTop:1 }}>
-            {matrix.length} configs - cible {targetG}g
+          <div style={{fontSize:13, fontWeight:800}}>🎯 {model.nom} — Matrice</div>
+          <div style={{fontSize:9, color:'#8b949e', marginTop:1}}>
+            {matrix.length} configs · cible {targetGAuto}g
           </div>
         </div>
-        <div style={{ textAlign:'right' }}>
-          <div style={{ fontSize:14, fontWeight:900, color: dm > 0 ? '#3fb950' : dm < 0 ? '#f85149' : '#8b949e' }}>
-            {masseAff ? masseAff + 'g' : '-'}
+        <div style={{textAlign:'right'}}>
+          <div style={{fontSize:14, fontWeight:900, color: Math.abs(dm)<=30?'#3fb950':dm>0?'#f0a500':'#f85149'}}>
+            {masseAff ? masseAff+'g' : '-'}
           </div>
-          <div style={{ fontSize:9, color:'#8b949e' }}>
-            {masseAff ? `Δ${dm > 0 ? '+' : ''}${dm}g` : '-'}
-          </div>
+          <div style={{fontSize:9, color:'#8b949e'}}>Δ{dm>0?'+':''}{dm}g</div>
         </div>
       </div>
 
@@ -139,84 +124,86 @@ export default function MatriceInteractive({ model, soutes, matrix, MAT_KEYS, ci
       <div className="mb-sg">
         {matrix.map((row, i) => (
           <div key={i}
-            className={`mb-rb${matrixIdx === i ? ' sel' : i === ci ? ' near' : ''}`}
-            onClick={() => { setMatrixIdx(matrixIdx === i ? null : i); setCustomSlots(null) }}>
+            className={`mb-rb${selectedIdx===i?' sel':i===ci?' near':''}`}
+            onClick={() => { setMatrixIdx(selectedIdx===i?null:i); setCustomSlots(null) }}>
             {row.n}
           </div>
         ))}
       </div>
 
-      {/* Slots visuels */}
+      {/* Soutes */}
       <div className="mb-m-soutes">
         {soutes.map((soute, idx) => {
-          const cap = soute.capacite || 3
-          const col = COLORS[idx] || COLORS[0]
+          const col     = COLORS[idx] || COLORS[0]
+          const cap     = soute.capacite || 5
+          const matKey  = MAT_KEYS[idx] || 'av'
+          const b       = displayCfg ? (displayCfg[matKey]||{}) : {}
+          const bG = isEditing ? (customSlots[soute.id]?.G||[])
+            : Array.isArray(b.G) ? b.G : Array.from({length:b.G||0},()=>({nom:b.matG||'Laiton'}))
+          const bD = isEditing ? (customSlots[soute.id]?.D||[])
+            : Array.isArray(b.D) ? b.D : Array.from({length:b.D||0},()=>({nom:b.matD||'Laiton'}))
+          const mat = soute.materiaux?.[0] || {nom:'Laiton', masse:71}
+
           return (
             <div key={idx} className="mb-m-row-wrap">
-              <div className="mb-m-lbl" style={{ color: col.label }}>{soute.nom}</div>
+              <div className="mb-m-lbl" style={{color:col.label}}>{soute.nom}</div>
               <div className="mb-m-row">
-                {(() => {
-                  const sides = getSides(idx, displayCfg)
-                  const blocs = customSlots?.[soute.id] || []
-                  const half  = Math.ceil(blocs.length / 2)
-                  return (<>
-                    <div className="mb-m-side mb-m-side-l" style={{ border: `1.5px solid ${col.border}` }}>
-                      {isHors ? blocs.slice(0,half).map((b,i)=><div key={i} className={`mb-m-slot ${matClsFromNom(b.nom)}`}/>) : renderSide(sides.G, sides.nomG, sides.cap)}
-                    </div>
-                    <div className="mb-m-side" style={{ border: `1.5px solid ${col.border}` }}>
-                      {isHors ? blocs.slice(half).map((b,i)=><div key={i} className={`mb-m-slot ${matClsFromNom(b.nom)}`}/>) : renderSide(sides.D, sides.nomD, sides.cap)}
-                    </div>
-                  </>)
-                })()}
+                <div className="mb-m-side mb-m-side-l" style={{border:`1.5px solid ${col.border}`}}>
+                  {renderSideSlots(bG, cap, false)}
+                </div>
+                <div className="mb-m-side" style={{border:`1.5px solid ${col.border}`}}>
+                  {renderSideSlots(bD, cap, false)}
+                </div>
               </div>
-              {/* Boutons +/- en mode édition */}
-              {isHors && (
-                <div style={{ display:'flex', alignItems:'center', gap:6, padding:'2px 0' }}>
-                  <button onClick={() => removeBloc(soute.id)} style={{ width:30, height:30, borderRadius:6, border:'1px solid #444', background:'#1c2128', color:'#fff', fontSize:18, cursor:'pointer', touchAction:'manipulation' }}>-</button>
-                  <div style={{ flex:1, textAlign:'center', fontSize:10, color:'#8b949e' }}>
-                    {(customSlots?.[soute.id]||[]).length} × {soute.materiaux?.[0]?.masse||71}g
+              {isEditing && (
+                <div style={{display:'flex', gap:6, marginTop:2}}>
+                  <div style={{flex:1, display:'flex', gap:3, alignItems:'center'}}>
+                    <button style={NAV_BTN} onClick={()=>removeBloc(soute.id,'G')}>▼</button>
+                    <div style={{flex:1, textAlign:'center', fontSize:9, color:'#8b949e'}}>{bG.length}×{mat.masse}g</div>
+                    <button style={NAV_BTN} onClick={()=>addBloc(soute.id,'G')}>▲</button>
                   </div>
-                  <button onClick={() => addBloc(soute.id)} style={{ width:30, height:30, borderRadius:6, border:'1px solid #444', background:'#1c2128', color:'#fff', fontSize:18, cursor:'pointer', touchAction:'manipulation' }}>+</button>
+                  <div style={{flex:1, display:'flex', gap:3, alignItems:'center'}}>
+                    <button style={NAV_BTN} onClick={()=>removeBloc(soute.id,'D')}>▼</button>
+                    <div style={{flex:1, textAlign:'center', fontSize:9, color:'#8b949e'}}>{bD.length}×{mat.masse}g</div>
+                    <button style={NAV_BTN} onClick={()=>addBloc(soute.id,'D')}>▲</button>
+                  </div>
                 </div>
               )}
             </div>
           )
         })}
 
-        {/* Footer masse/CG */}
-        <div className="mb-m-info" style={{ flexDirection:'column', gap:6 }}>
-          <div style={{ display:'flex', justifyContent:'space-between', width:'100%' }}>
+        {/* Footer */}
+        <div className="mb-m-info" style={{flexDirection:'column', gap:6}}>
+          <div style={{display:'flex', justifyContent:'space-between', width:'100%'}}>
             <div>
-              <div style={{ fontSize:18, fontWeight:900, color:'#3fb950' }}>
-                {masseAff ? (masseAff/1000).toFixed(3) + ' kg' : '-'}
+              <div style={{fontSize:20, fontWeight:900, color:'#3fb950'}}>
+                {masseAff ? (masseAff/1000).toFixed(3)+' kg' : '—'}
               </div>
-              <div style={{ fontSize:9, color: isHors ? '#f0a500' : '#8b949e' }}>
-                {isHors ? '⚠ Hors matrice' : displayCfg ? `cfg #${displayCfg.n}` : '-'}
+              <div style={{fontSize:9, color:isEditing?'#f0a500':'#8b949e'}}>
+                {isEditing ? '⚠ Hors matrice' : displayCfg ? `cfg #${displayCfg.n}` : '—'}
               </div>
             </div>
-            <div style={{ textAlign:'right' }}>
-              <div style={{ fontSize:18, fontWeight:900, color:'#58a6ff' }}>
-                {cgAff?.toFixed(1) ?? '-'} mm
+            <div style={{textAlign:'right'}}>
+              <div style={{fontSize:20, fontWeight:900, color:'#58a6ff'}}>
+                {cgAff?.toFixed(1)??'—'} mm
               </div>
-              <div style={{ fontSize:9, color:'#8b949e' }}>CG</div>
+              <div style={{fontSize:9, color:'#8b949e'}}>CG</div>
             </div>
           </div>
-          <div style={{ display:'flex', gap:6, width:'100%' }}>
-            {displayCfg && !customSlots && (
-              <button onClick={() => initFromCfg(displayCfg)} style={{ flex:1, height:36, background:'#1a3a5a', border:'1px solid #1a73e8', borderRadius:8, color:'#60a5fa', fontSize:12, fontWeight:700, cursor:'pointer', touchAction:'manipulation' }}>
+          <div style={{display:'flex', gap:6, width:'100%'}}>
+            {!isEditing && displayCfg && (
+              <button onClick={startEdit} style={{flex:1, height:36, background:'#1a3a5a', border:'1px solid #1a73e8', borderRadius:8, color:'#60a5fa', fontSize:12, fontWeight:700, cursor:'pointer', touchAction:'manipulation'}}>
                 ✏️ Éditer
               </button>
             )}
-            {customSlots && (
-              <button onClick={() => setCustomSlots(null)} style={{ width:36, height:36, background:'#1c2128', border:'1px solid #444', borderRadius:8, color:'#8b949e', fontSize:14, cursor:'pointer', touchAction:'manipulation' }}>
+            {isEditing && (
+              <button onClick={()=>setCustomSlots(null)} style={{width:36, height:36, background:'#1c2128', border:'1px solid #444', borderRadius:8, color:'#8b949e', fontSize:14, cursor:'pointer', touchAction:'manipulation'}}>
                 ✕
               </button>
             )}
-            {masseAff && (
-              <button onClick={() => {
-                const delta = masseAff - targetG
-                setOffset(Math.max(-500, Math.min(500, offsetVal + delta)))
-              }} style={{ flex:1, height:36, background:'#0d4a36', border:'1px solid #238636', borderRadius:8, color:'#3fb950', fontSize:12, fontWeight:700, cursor:'pointer', touchAction:'manipulation' }}>
+            {displayCfg && (
+              <button onClick={()=>onAppliquer(masseAff??displayCfg.m)} style={{flex:1, height:36, background:'#0d4a36', border:'1px solid #238636', borderRadius:8, color:'#3fb950', fontSize:12, fontWeight:700, cursor:'pointer', touchAction:'manipulation'}}>
                 ✓ APPLIQUER
               </button>
             )}
