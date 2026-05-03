@@ -411,20 +411,16 @@ export default function DashboardPilote() {
                   {(cfg ? cfg.m / 1000 : kgVal).toFixed(3)}
                 </div>
                 <div style={{ fontSize:9, color:'#8b949e', marginTop:3 }}>
-                  {cfg ? `cfg #${cfg.n}` : 'Poly4'}
-                  {dm !== 0 && cfg && (
-                    <span style={{ color: dm > 0 ? '#3fb950' : '#f85149' }}>
-                      {' '}({dm > 0 ? '+' : ''}{dm}g)
-                    </span>
-                  )}
+                  {cfg ? `cfg #${cfg.n}` : '-'}
+                  
                 </div>
               </div>
               <div style={{ textAlign:'center' }}>
-                <div style={{ fontSize:26, fontWeight:900, color:'#8b949e', lineHeight:1 }}>
-                  {m0kg.toFixed(3)}
+                <div style={{ fontSize:26, fontWeight:900, color: dm === 0 ? '#8b949e' : dm > 0 ? '#3fb950' : '#f85149', lineHeight:1 }}>
+                  {cfg ? (dm > 0 ? '+' : '') + dm + 'g' : '—'}
                 </div>
                 <div style={{ fontSize:9, color:'#8b949e', marginTop:3 }}>
-                  Poly4{altitude > 0 ? <span style={{ color:'#a78bfa' }}> →{kgVal.toFixed(3)}</span> : ''}
+                  Δ config vs cible
                 </div>
               </div>
               <div className={`mb-cg ${cgClass}`} style={{ textAlign:'center' }}>
