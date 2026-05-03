@@ -78,7 +78,7 @@ export default function Poly4Page() {
   const currentSite = sites[siteIdx] ?? sites[6]
   const kPente      = currentSite?.k ?? 1.00
   const rho         = useMemo(() => rhoAlt(altitude), [altitude])
-  const offsetADN   = model?.masse_ref_8ms ? (model.masse_ref_8ms - P4_REF_8MS) : 0
+  const offsetADN   = (model?.masse_ref_8ms || P4_REF_8MS) - P4_REF_8MS
   const offsetTerrain = offsetStore / 1000
   const offsetKg    = offsetADN + offsetTerrain
 

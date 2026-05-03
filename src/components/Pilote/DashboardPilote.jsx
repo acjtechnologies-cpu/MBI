@@ -194,7 +194,7 @@ export default function DashboardPilote() {
   const vent          = params.vent
   const m0kg          = getMasse0m(vent, model.poly4)  // - lit model.poly4 si dispo
   const mAltkg        = getMasseAlt(m0kg, altitude)
-  const modelOffset   = model.masse_ref_8ms ? Math.round((model.masse_ref_8ms - P4_REF_8MS) * 1000) : (parseFloat(model.offset) || 0)
+  const modelOffset   = Math.round(((model.masse_ref_8ms || P4_REF_8MS) - P4_REF_8MS) * 1000)
   const offsetVal     = parseFloat(offset) || 0
   const kPente        = activeSite?.k ?? 1.00
   const altCorrection = Math.round((m0kg - mAltkg) * 1000)
