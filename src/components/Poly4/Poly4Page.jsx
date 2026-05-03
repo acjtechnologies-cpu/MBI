@@ -91,7 +91,6 @@ export default function Poly4Page() {
   // ── Courbes ───────────────────────────────────────────────────────────────
   const chartData = useMemo(() => ({
     aeroRef:  V_RANGE.map(v => aeromod(v)),
-    neutre:   V_RANGE.map(v => poly4(v) * kPente),
     adaptive: V_RANGE.map(v => poly4(v) * rho * kPente + offsetADN),
     dense:    V_RANGE.map(v => poly4(v) * rho * 1.05 * kPente),
     leger:    V_RANGE.map(v => poly4(v) * rho * 0.95 * kPente),
