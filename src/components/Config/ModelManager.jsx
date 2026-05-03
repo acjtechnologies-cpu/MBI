@@ -193,10 +193,14 @@ function ModelInfoCard({ model, isEditing, onEdit, onSave, onCancel }) {
         <div className="text-3xl mb-1">{model.drapeau}</div>
         <div className="text-xl font-bold text-white">{model.nom}</div>
       </div>
-      <div className="grid grid-cols-3 gap-3 text-sm">
-        <div className="text-center"><div className="text-gray-400">Masse vide</div><div className="text-white font-semibold">{model.masseVide}g</div></div>
-        <div className="text-center"><div className="text-gray-400">CG vide</div><div className="text-white font-semibold">{model.cgVide}mm</div></div>
-        <div className="text-center"><div className="text-gray-400">Surface</div><div className="text-white font-semibold">{model.surface}dm²</div></div>
+      <div className="grid grid-cols-2 gap-3 text-sm">
+          <div className="text-center"><div className="text-gray-400">Masse vide</div><div className="text-white font-semibold">{model.masseVide}g</div></div>
+          <div className="text-center"><div className="text-gray-400">CG / Surface</div><div className="text-white font-semibold">{model.cgVide}mm · {model.surface}dm²</div></div>
+          <div className="col-span-2 text-center" style={{borderTop:'1px solid #374151',paddingTop:6,marginTop:2}}>
+            <div className="text-gray-400" style={{fontSize:10}}>ADN planeur — Masse 8m/s</div>
+            <div style={{color:'#4ade80',fontWeight:700,fontSize:16}}>{(model.masse_ref_8ms||3.474).toFixed(3)} kg</div>
+            <div style={{fontSize:9,color:'#6b7280'}}>{Math.round(((model.masse_ref_8ms||3.474)-3.474)*1000)>0?'+':''}{Math.round(((model.masse_ref_8ms||3.474)-3.474)*1000)}g vs Pike ref</div>
+          </div>
       </div>
     </div>
   )
