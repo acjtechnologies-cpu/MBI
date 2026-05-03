@@ -45,7 +45,7 @@ function findNearest(matrix, tg) {
   return best
 }
 
-// -”€ DÃ©tection format slots -”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€
+// -”€ Détection format slots -”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€
 // Ancien format Mamba : cfg.av = { G: 2, D: 1, matG: 'Laiton', matD: 'Laiton' }
 // Nouveau format Pike : cfg.av = { G: [{nom:'Laiton', masse:42},...], D: [...] }
 function isNewFormat(side) {
@@ -61,7 +61,7 @@ function getMatKeys(nbSoutes) {
   return ['av']
 }
 
-// -”€ Couleur slot selon matÃ©riau -”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-
+// -”€ Couleur slot selon matériau -”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-
 function slotClsFromNom(nom) {
   if (!nom) return 'mb-slot mb-s'
   const n = nom.toLowerCase()
@@ -181,7 +181,7 @@ export default function DashboardPilote() {
     </div>
   )
 
-  // -”€ DonnÃ©es modÃ¨le -”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-
+  // -”€ Données modèle -”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-
   const matrix  = model.matrix || []
   const soutes  = model.soutes
     ? Object.values(model.soutes).sort((a, b) => a.distanceBA - b.distanceBA)
@@ -246,7 +246,7 @@ export default function DashboardPilote() {
         <div key={i} className={i < side.length ? slotClsFromNom(side[i]?.nom) : 'mb-slot mb-s'} />
       ))
     } else {
-      // Ancien format Mamba : entier + nom matÃ©riau
+      // Ancien format Mamba : entier + nom matériau
       const n   = (side || 0)
       const nom = sideKey === 'G' ? (b.matG || '') : (b.matD || '')
       return Array.from({ length: cap }).map((_, i) => (
@@ -293,7 +293,7 @@ export default function DashboardPilote() {
     )
   }
 
-  // -”€ ContrÃ´les -”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€
+  // -”€ Contrôles -”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€
   function selectParam(p) {
     setSelectedParam(p)
     if (p !== 'kg') setKgManuel(null)
@@ -437,7 +437,7 @@ export default function DashboardPilote() {
               </div>
             </div>
 
-            {/* ContrÃ´les */}
+            {/* Contrôles */}
             <div className="mb-ctrl">
               <div className="mb-ctrl-grid">
                 <div className="mb-ctrl-left">
