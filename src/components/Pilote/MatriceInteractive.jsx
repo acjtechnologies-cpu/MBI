@@ -111,8 +111,8 @@ export default function MatriceInteractive({ model, soutes, matrix, MAT_KEYS, ci
 
   function addBloc(souteId, side) {
     const s = soutes.find(x => x.id === souteId)
-    const existing = customSlots[souteId]?.[side] || []
-    const mat = existing.length > 0 ? existing[existing.length-1] : (s?.materiaux?.[0] || {nom:'Laiton', masse:71})
+    const base = baseSlots?.[souteId]?.[side] || []
+    const mat = base.length > 0 ? base[base.length-1] : (s?.materiaux?.[0] || {nom:'Laiton', masse:71})
     const cap = s?.capacite || 5
     setCustomSlots(prev => {
       const cur = prev[souteId][side]
@@ -188,13 +188,13 @@ export default function MatriceInteractive({ model, soutes, matrix, MAT_KEYS, ci
               {isEditing && (
                 <div style={{display:'flex', gap:6, marginTop:2}}>
                   <div style={{flex:1, display:'flex', gap:3, alignItems:'center'}}>
-                    <button style={NAV_BTN} onClick={()=>removeBloc(soute.id,'G')}>{'\u25bc'}</button>
-                    <div style={{flex:1, textAlign:'center', fontSize:9, color:'#8b949e'}}>{bG.length}{'\u00d7'}{mat.masse}g</div>
                     <button style={NAV_BTN} onClick={()=>addBloc(soute.id,'G')}>{'\u25b2'}</button>
+                    <div style={{flex:1, textAlign:'center', fontSize:9, color:'#8b949e'}}>{bG.length}{'\u00d7'}{bG[0]?.masse||mat.masse}g</div>
+                    <button style={NAV_BTN} onClick={()=>removeBloc(soute.id,'G')}>{'\u25bc'}</button>
                   </div>
                   <div style={{flex:1, display:'flex', gap:3, alignItems:'center'}}>
                     <button style={NAV_BTN} onClick={()=>removeBloc(soute.id,'D')}>{'\u25bc'}</button>
-                    <div style={{flex:1, textAlign:'center', fontSize:9, color:'#8b949e'}}>{bD.length}{'\u00d7'}{mat.masse}g</div>
+                    <div style={{flex:1, textAlign:'center', fontSize:9, color:'#8b949e'}}>{bD.length}{'\u00d7'}{bD[0]?.masse||mat.masse}g</div>
                     <button style={NAV_BTN} onClick={()=>addBloc(soute.id,'D')}>{'\u25b2'}</button>
                   </div>
                 </div>
