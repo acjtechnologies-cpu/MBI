@@ -338,6 +338,13 @@ const useModelStore = create(
           if (!state.models['mamba-s']) state.models['mamba-s'] = DEFAULT_MODEL
           if (!state.models['pike-precision-2']) state.models['pike-precision-2'] = DEFAULT_PIKE2
           if (!state.models[state.activeModelId]) state.activeModelId = 'mamba-s'
+          // Migration masse_ref_8ms — force valeurs builtin
+          const BUILTIN_REF = { 'pike-precision-2': 3.474, 'mamba-s': 3.330 }
+          Object.entries(BUILTIN_REF).forEach(([id, ref]) => {
+            if (state.models[id] && state.models[id].masse_ref_8ms !== ref) {
+              state.models[id].masse_ref_8ms = ref
+            }
+          })
         }
       }
     }
