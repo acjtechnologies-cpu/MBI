@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import DashboardPilote from './components/Pilote/DashboardPilote'
 
 import { useModelStore } from './stores/modelStore'
@@ -9,11 +9,11 @@ import ChronoPage     from './components/Chrono/ChronoPage'
 import WelcomePage    from './pages/WelcomePage'
 
 const TABS = [
-  { id: 'pilote',  label: 'Pilotage' },
-  { id: 'soute',   label: 'Soute' },
-  { id: 'poly4',   label: 'Poly4' },
-  { id: 'station', label: 'Station' },
-  { id: 'chrono',  label: 'Chrono' },
+  { id: 'pilote',  label: 'Pilotage', icon: '🎯' },
+  { id: 'soute',   label: 'Soute',    icon: '📦' },
+  { id: 'poly4',   label: 'Poly4',    icon: '📈' },
+  { id: 'station', label: 'Station',  icon: '📡' },
+  { id: 'chrono',  label: 'Chrono',   icon: '⏱' },
 ]
 
 function App() {
@@ -36,22 +36,24 @@ function App() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100dvh', overflow: 'hidden', background: '#0b0e12' }}>
 
-      <nav style={{ display: 'flex', flexShrink: 0, height: 44, background: '#161b22', borderBottom: '1px solid #21262d', zIndex: 999 }}>
-        {TABS.map(({ id, label }) => (
+      <nav style={{ display: 'flex', flexShrink: 0, height: 48, background: '#161b22', borderBottom: '1px solid #21262d', zIndex: 999 }}>
+        {TABS.map(({ id, label, icon }) => (
           <button
             key={id}
             onClick={() => setActiveTab(id)}
             style={{
               flex: 1, border: 'none', background: 'none',
               color: activeTab === id ? '#58a6ff' : '#4a5568',
-              fontSize: 10, fontWeight: 700, cursor: 'pointer',
+              fontSize: 11, fontWeight: 700, cursor: 'pointer',
               borderBottom: activeTab === id ? '2px solid #58a6ff' : '2px solid transparent',
               WebkitTapHighlightColor: 'transparent',
               touchAction: 'manipulation',
               padding: 0,
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 1,
             }}
           >
-            {label}
+            <span style={{ fontSize: 14, lineHeight: 1 }}>{icon}</span>
+            <span>{label}</span>
           </button>
         ))}
       </nav>
