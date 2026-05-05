@@ -410,31 +410,34 @@ export default function DashboardPilote() {
               </div>
             )}
 
-            {/* Data bar */}
+            {/* Data bar — Pente + Charge alaire + CG */}
             <div className="mb-data">
-              <div style={{ textAlign:'center' }}>
-                <div style={{ fontSize:26, fontWeight:900, color:'#8b949e', lineHeight:1 }}>
-                  {(cfg ? cfg.m / 1000 : kgVal).toFixed(3)}
+              <div style={{ textAlign:'center', flex:1 }}>
+                <div style={{ fontSize:9, color:'#8b949e', fontWeight:700, letterSpacing:0.5, marginBottom:2 }}>PENTE</div>
+                <div style={{ fontSize:14, fontWeight:800, color: activeSite?.name ? '#58a6ff' : '#4a5568', lineHeight:1.2 }}>
+                  {activeSite?.name || 'Aucune'}
                 </div>
-                <div style={{ fontSize:9, color:'#8b949e', marginTop:3 }}>
-                  {cfg ? `cfg #${cfg.n}` : '-'}
-                  
-                </div>
-              </div>
-              <div style={{ textAlign:'center' }}>
-                <div style={{ fontSize:26, fontWeight:900, color: dm === 0 ? '#8b949e' : dm > 0 ? '#3fb950' : '#f85149', lineHeight:1 }}>
-                  {cfg ? (dm > 0 ? '+' : '') + dm + 'g' : '—'}
-                </div>
-                <div style={{ fontSize:9, color:'#8b949e', marginTop:3 }}>
-                  Δ config vs cible
+                <div style={{ fontSize:9, color:'#4a5568', marginTop:2 }}>
+                  K {kPente.toFixed(3)}
                 </div>
               </div>
-              <div className={`mb-cg ${cgClass}`} style={{ textAlign:'center' }}>
-                <div style={{ fontSize:26, fontWeight:900, lineHeight:1 }}>
+              <div style={{ textAlign:'center', flex:1 }}>
+                <div style={{ fontSize:9, color:'#8b949e', fontWeight:700, letterSpacing:0.5, marginBottom:2 }}>CHARGE</div>
+                <div style={{ fontSize:22, fontWeight:900, color:'#ffb74d', lineHeight:1 }}>
+                  {(kgVal * 1000 / (model.surface || 59)).toFixed(1)}
+                </div>
+                <div style={{ fontSize:9, color:'#4a5568', marginTop:2 }}>
+                  g/dm²
+                </div>
+              </div>
+              <div className={`mb-cg ${cgClass}`} style={{ textAlign:'center', flex:1 }}>
+                <div style={{ fontSize:9, color:'#8b949e', fontWeight:700, letterSpacing:0.5, marginBottom:2 }}>CG</div>
+                <div style={{ fontSize:22, fontWeight:900, lineHeight:1 }}>
                   {cfg ? cfg.cg.toFixed(1) : model.cgVide}
+                  {cgD !== 0 && <span style={{ fontSize:12, fontWeight:700, marginLeft:3 }}>{cgD > 0 ? '+' : ''}{cgD.toFixed(1)}mm</span>}
                 </div>
-                <div style={{ fontSize:9, color:'#8b949e', marginTop:3 }}>
-                  CG mm {cgD !== 0 && `${cgD > 0 ? '+' : ''}${cgD.toFixed(1)}`}
+                <div style={{ fontSize:9, color:'#4a5568', marginTop:2 }}>
+                  Cible {model.cgVide}mm
                 </div>
               </div>
             </div>
