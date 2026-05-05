@@ -22,3 +22,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Patch/diag temporaires
+patch_*.cjs
+diag_*.cjs
+fix_*.cjs
+scan_*.cjs
+solve_*.cjs
+analyse_*.cjs
