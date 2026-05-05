@@ -313,10 +313,10 @@ const [gistStatus, setGistStatus] = useState('');
 
 
   // ESP store
-  const iqa          = useESPStore(s => s.data.iqa)   ?? 0;
-  const vent         = useESPStore(s => s.data.spd)   ?? 0;
-  const sGrad        = useESPStore(s => s.data.sGrad) ?? 0;
-  const bulle        = useESPStore(s => s.data.bulle) ?? false;
+  const iqa          = useESPStore(s => s.data.IQA)   ?? 0;
+  const vent         = useESPStore(s => s.data.SPD)   ?? 0;
+  const sGrad        = useESPStore(s => s.data.S_GRAD) ?? 0;
+  const bulle        = useESPStore(s => s.data.BULLE) ?? false;
   const sendMarker   = useESPStore(s => s.sendMarker);
   const espConnected = useESPStore(s => s.connected);
   const sdActive     = useESPStore(s => s.sdActive);

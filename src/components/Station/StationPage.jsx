@@ -1,6 +1,6 @@
 ﻿import { useRef, useEffect } from 'react'
-import { useESPStore, flushBulleVibration } from '../../espStore'
-import { useAppStore } from '../../appStore'
+import { useESPStore, flushBulleVibration } from '../../stores/espStore'
+import { useAppStore } from '../../stores/appStore'
 
 // NoSleep -- empeche la mise en veille via interaction tactile
 // Fonctionne en HTTP sur Android Chrome

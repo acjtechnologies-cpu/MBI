@@ -1,227 +1,253 @@
+/**
+ * MBI vNext - ESP32 Store v12 (consolide)
+ * WebSocket persistante globale -- survit aux changements d'onglet
+ * IQA v4 : S_GRAD NTC + detection bulle ascendante F3F
+ * Vibration : 3 impulsions courtes quand bulle detectee
+ * sendMarker / closeSD / SET_TIME pour ChronoPage
+ */
 import { create } from 'zustand'
+import { ESP32_CONFIG } from '../constants'
 
-// ═══════════════════════════════════════════════════════════════════
-// _ws hors React — architecture validée anti-freeze Android
-// Ne jamais stocker le WebSocket dans le state Zustand
-// (setState sur ws → re-renders → gel touch sur Android)
-// ═══════════════════════════════════════════════════════════════════
-let _ws              = null
-let _reconnectTimer  = null
-let _heartbeatTimer  = null
+const WS_URL = 'ws://192.168.4.1:81'
 
-const ESP_CONFIG = {
-  wsUrl:             'ws://192.168.4.1:81',
-  httpUrl:           'http://192.168.4.1',
-  reconnectDelay:    2000,
-  heartbeatInterval: 5000,
-  timeout:           10000,
+let _ws = null
+let _demoTimer = null
+let _prevBulle = false
+let _bullePending = false
+let _wakeLock = null
+
+async function acquireWakeLock() {
+  if (!('wakeLock' in navigator)) return
+  try {
+    _wakeLock = await navigator.wakeLock.request('screen')
+    _wakeLock.addEventListener('release', () => { _wakeLock = null })
+  } catch(e) {}
 }
 
-// ── Helper envoi robuste ─────────────────────────────────────────
-function wsSend(obj) {
-  if (_ws && _ws.readyState === WebSocket.OPEN) {
-    try {
-      _ws.send(JSON.stringify(obj))
-      return true
-    } catch (e) {
-      console.error('[ESP] send error', e)
-    }
+function releaseWakeLock() {
+  if (_wakeLock) { try { _wakeLock.release() } catch(e) {} _wakeLock = null }
+}
+
+// Reacquiert le wake lock si la page redevient visible
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && (_ws || _demoTimer)) {
+    acquireWakeLock()
   }
-  return false
+})
+
+function vibreBulle() {
+  if (!navigator.vibrate) return
+  try {
+    const ok = navigator.vibrate([120, 60, 120, 60, 120])
+    if (!ok) _bullePending = true
+  } catch(e) { _bullePending = true }
+}
+
+// Appeler sur chaque interaction utilisateur (touchstart/click)
+export function flushBulleVibration() {
+  if (_bullePending && navigator.vibrate) {
+    navigator.vibrate([120, 60, 120, 60, 120])
+    _bullePending = false
+  }
 }
 
 export const useESPStore = create((set, get) => ({
-  // ── ÉTAT (minimal — pas de ws ici) ──────────────────────────────
-  connected:   false,
-  connecting:  false,
-  mode:        null,   // 'websocket' | 'http' | null
-  lastUpdate:  null,
-  error:       null,
-  sdActive:    false,  // état carte SD reçu de l'ESP32
 
-  // ── DONNÉES CAPTEURS ────────────────────────────────────────────
+  connected: false,
+  wsStatus: 'off',
+  lastUpdate: null,
+  error: null,
+  demo: false,
+  sdActive: false,
+
   data: {
-    iqa:         null,
-    spd:         null,
-    temperature: null,
-    pression:    null,
-    humidity:    null,
-    rho:         null,
-    bulle:       false,
-    sGrad:       null,
-    sHeli:       null,
-    sTurb:       null,
-    vbat:        null,
+    IQA: 0, SPD: 0, SPD_AVG: 0, SPD_PITOT: 0, SPD_ANEMO: 0,
+    ALIGN: 0, TURB: 0, HELI: 0, COH: 0,
+    GRAD_C: 0,
+    ANG: 0, SERVO: 0,
+    TEMP: 15, PRES: 1013.25, HUM: 50, ALT: 0, RHO: 1.225, VBAT: 11.1,
+    S_TURB: 0, S_VIT: 0, S_HELI: 0, S_GRAD: 0, S_COH: 0, S_COH_STAR: 0,
+    BULLE: 0,
   },
 
-  // ── BUFFER HISTORIQUE ────────────────────────────────────────────
-  buffer:     [],
-  bufferSize: 100,
+  turbBuf: Array(60).fill(0),
+  turbSigma: 0,
+  pid: { kp: 1.2, ki: 0.05, kd: 0.30 },
 
-  // ── CONNEXION WEBSOCKET ─────────────────────────────────────────
-  connectWebSocket: () => {
-    if (_ws || get().connected) return
+  _setStatus: (wsStatus) => set({ wsStatus, connected: wsStatus === 'live' }),
 
-    set({ connecting: true, error: null })
+  _handleData: (incoming, setAltitude) => {
+    const next = { ...get().data, ...incoming }
+    set(s => ({
+      data: next,
+      lastUpdate: Date.now(),
+      error: null,
+      sdActive: incoming.SD !== undefined ? !!incoming.SD : s.sdActive,
+    }))
 
+    // Altitude -> appStore partage
+    if (incoming.ALT !== undefined && incoming.ALT > 0 && setAltitude) {
+      setAltitude(Math.round(incoming.ALT))
+    }
+
+    // Vibration bulle -- front montant uniquement
+    const bulleNow = incoming.BULLE === 1
+    if (bulleNow && !_prevBulle) {
+      vibreBulle()
+    }
+    _prevBulle = bulleNow
+
+    // Buffer oscillogramme TURB
+    if (incoming.TURB !== undefined) {
+      const buf = [...get().turbBuf, incoming.TURB]
+      if (buf.length > 60) buf.shift()
+      const mean  = buf.reduce((a, b) => a + b, 0) / buf.length
+      const sigma = Math.sqrt(buf.reduce((a, b) => a + (b - mean) ** 2, 0) / buf.length)
+      set({ turbBuf: buf, turbSigma: sigma })
+    }
+  },
+
+  wsConnect: (setAltitude) => {
+    if (_ws) { try { _ws.close() } catch (e) {} }
+    get()._setStatus('connecting')
     try {
-      const socket = new WebSocket(ESP_CONFIG.wsUrl)
-      _ws = socket
-
-      socket.onopen = () => {
-        set({ connected: true, connecting: false, mode: 'websocket', error: null })
-
-        // Sync horloge — ESP32 reçoit {"cmd":"SET_TIME","epoch":...}
-        wsSend({ cmd: 'SET_TIME', epoch: Math.floor(Date.now() / 1000) })
-
-        // Heartbeat
-        _heartbeatTimer = setInterval(() => {
-          wsSend({ type: 'ping' })
-        }, ESP_CONFIG.heartbeatInterval)
-      }
-
-      socket.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data)
-          get().updateData(data)
-        } catch (e) {
-          console.error('[ESP] parse error', e)
+      _ws = new WebSocket(WS_URL)
+      _ws.onopen = () => {
+        get()._setStatus('live')
+        acquireWakeLock()
+        // Sync horloge ESP32
+        if (_ws && _ws.readyState === WebSocket.OPEN) {
+          try { _ws.send(JSON.stringify({ cmd: 'SET_TIME', epoch: Math.floor(Date.now() / 1000) })) } catch(e) {}
         }
       }
-
-      socket.onerror = () => {
-        set({ error: 'WebSocket error' })
+      _ws.onclose   = () => get()._setStatus('off')
+      _ws.onerror   = () => {
+        get()._setStatus('err')
+        setTimeout(() => get()._setStatus('off'), 2000)
       }
-
-      socket.onclose = () => {
-        _ws = null
-        if (_heartbeatTimer) { clearInterval(_heartbeatTimer); _heartbeatTimer = null }
-        set({ connected: false, connecting: false, mode: null })
-        // Reconnexion auto
-        _reconnectTimer = setTimeout(() => get().connectWebSocket(), ESP_CONFIG.reconnectDelay)
+      _ws.onmessage = (e) => {
+        try { get()._handleData(JSON.parse(e.data), setAltitude) } catch (_) {}
       }
-
-    } catch (e) {
-      _ws = null
-      set({ connecting: false, error: e.message })
-      get().connectHTTP()
-    }
+    } catch (_) { get()._setStatus('err') }
   },
 
-  // ── DÉCONNEXION ─────────────────────────────────────────────────
-  disconnectWebSocket: () => {
-    if (_reconnectTimer) { clearTimeout(_reconnectTimer);  _reconnectTimer = null }
-    if (_heartbeatTimer) { clearInterval(_heartbeatTimer); _heartbeatTimer = null }
-    if (_ws) { _ws.close(); _ws = null }
-    set({ connected: false, connecting: false, mode: null })
+  wsStop: () => {
+    if (_ws) { try { _ws.close() } catch (e) {} }
+    _ws = null
+    _prevBulle = false
+    releaseWakeLock()
+    get()._setStatus('off')
   },
 
-  // ── CONNEXION HTTP (fallback polling) ───────────────────────────
-  connectHTTP: async () => {
-    set({ connecting: true, mode: 'http', error: null })
-
-    const poll = async () => {
-      if (get().mode !== 'http') return
-      try {
-        const r = await fetch(`${ESP_CONFIG.httpUrl}/data`, {
-          signal: AbortSignal.timeout(ESP_CONFIG.timeout),
-        })
-        if (!r.ok) throw new Error('HTTP error')
-        const data = await r.json()
-        get().updateData(data)
-        set({ connected: true, connecting: false, error: null })
-      } catch (e) {
-        set({ error: e.message })
-      }
-      setTimeout(poll, 1000)
-    }
-
-    poll()
-  },
-
-  // ── UPDATE DONNÉES CAPTEURS ─────────────────────────────────────
-  // Mappe les champs JSON ESP32 (IQA, SPD, TEMP…) vers le store
-  updateData: (raw) => {
-    const now = Date.now()
-
-    set(state => {
-      const d = {
-        iqa:         raw.IQA         ?? state.data.iqa,
-        spd:         raw.SPD         ?? state.data.spd,
-        temperature: raw.TEMP        ?? state.data.temperature,
-        pression:    raw.PRES        ?? state.data.pression,
-        humidity:    raw.HUM         ?? state.data.humidity,
-        rho:         raw.RHO         ?? state.data.rho,
-        bulle:       raw.BULLE !== undefined ? !!raw.BULLE : state.data.bulle,
-        sGrad:       raw.S_GRAD      ?? state.data.sGrad,
-        sHeli:       raw.S_HELI      ?? state.data.sHeli,
-        sTurb:       raw.S_TURB      ?? state.data.sTurb,
-        vbat:        raw.VBAT        ?? state.data.vbat,
-      }
-
-      const newBuffer = [
-        ...state.buffer,
-        { timestamp: now, ...d },
-      ].slice(-state.bufferSize)
-
-      return {
-        data:       d,
-        buffer:     newBuffer,
-        lastUpdate: now,
-        sdActive:   raw.SD !== undefined ? !!raw.SD : state.sdActive,
-      }
-    })
-  },
-
-  // ── COMMANDES ESP32 ─────────────────────────────────────────────
-
-  // Marker de run — {"cmd":"MARKER","run":N,"state":"START|PAUSE"}
-  // Appelé depuis ChronoPage sur START et STOP
+  // ── Commandes ESP32 (ChronoPage) ──────────────────────────────
   sendMarker: (run, state) => {
-    const ok = wsSend({ cmd: 'MARKER', run, state })
-    if (!ok) console.warn(`[ESP] sendMarker ${state} RUN ${run} — non connecté`)
+    if (_ws && _ws.readyState === WebSocket.OPEN) {
+      try { _ws.send(JSON.stringify({ cmd: 'MARKER', run, state })) } catch(e) {}
+    }
   },
 
-  // Fermeture propre SD — {"cmd":"CLOSE_SD"}
-  closeSD: () => wsSend({ cmd: 'CLOSE_SD' }),
-
-  // Commande générique (PID, etc.)
-  sendCommand: (command) => {
-    if (get().mode === 'websocket') return wsSend(command)
-    if (get().mode === 'http') {
-      fetch(`${ESP_CONFIG.httpUrl}/command`, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify(command),
-      }).catch(e => console.error('[ESP] HTTP command failed', e))
+  closeSD: () => {
+    if (_ws && _ws.readyState === WebSocket.OPEN) {
+      try { _ws.send(JSON.stringify({ cmd: 'CLOSE_SD' })) } catch(e) {}
     }
-    return false
   },
 
-  // Nettoyer le buffer
-  clearBuffer: () => set({ buffer: [] }),
+  // ── PID Servo ─────────────────────────────────────────────────
+  sendPid: () => {
+    const { pid, wsStatus } = get()
+    if (_ws && wsStatus === 'live') _ws.send(JSON.stringify(pid))
+  },
 
-  // Statistiques buffer
-  getBufferStats: () => {
-    const { buffer } = get()
-    if (!buffer.length) return null
-    const stat = (key) => {
-      const vals = buffer.map(d => d[key]).filter(v => v != null)
-      if (!vals.length) return null
-      return {
-        min: Math.min(...vals),
-        max: Math.max(...vals),
-        avg: vals.reduce((a, b) => a + b, 0) / vals.length,
-        count: vals.length,
-      }
-    }
-    return {
-      iqa:      stat('iqa'),
-      spd:      stat('spd'),
-      temp:     stat('temperature'),
-      duration: buffer.length > 1
-        ? buffer[buffer.length - 1].timestamp - buffer[0].timestamp
-        : 0,
-    }
+  setPid: (k, step) => {
+    const prev = get().pid
+    set({ pid: { ...prev, [k]: Math.max(0, parseFloat((prev[k] + step).toFixed(3))) } })
+  },
+
+  // ── Mode Demo ─────────────────────────────────────────────────
+  startDemo: (setAltitude) => {
+    if (_demoTimer) clearInterval(_demoTimer)
+    set({ demo: true })
+    acquireWakeLock()
+    let t = 0
+    _demoTimer = setInterval(() => {
+      t++
+      const spd    = 8 + 3 * Math.sin(t * 0.08) + (Math.random() - 0.5) * 1.5
+      const turb   = 0.01 + 0.05 * Math.abs(Math.sin(t * 0.11)) + Math.random() * 0.015
+      const ang    = 12 * Math.sin(t * 0.12) + (Math.random() - 0.5) * 4
+
+      const phase  = t % 15
+      const bulle_phase = phase >= 6 && phase <= 9
+
+      const grad_c = bulle_phase
+        ? 0.08 + Math.random() * 0.04
+        : -0.03 + (Math.random() - 0.5) * 0.04
+
+      const s_heli_raw = bulle_phase
+        ? 0.55 + Math.random() * 0.25
+        : 0.20 + Math.random() * 0.40
+
+      const s_grad = 1 / (1 + Math.exp(-8 * grad_c))
+      const s_heli = parseFloat(s_heli_raw.toFixed(3))
+      const s_turb = parseFloat((bulle_phase ? 0.75 + Math.random()*0.2 : 0.3 + Math.random()*0.4).toFixed(3))
+      const s_vit  = parseFloat((bulle_phase ? 0.70 + Math.random()*0.2 : 0.35 + Math.random()*0.35).toFixed(3))
+      const bulle  = (s_grad > 0.65 && s_heli > 0.50) ? 1 : 0
+
+      const iqa_raw = (0.35*s_turb + 0.30*s_vit + 0.20*s_heli + 0.15*s_grad) * 10
+      const iqa = parseFloat(Math.min(9.8, Math.max(2.0, iqa_raw)).toFixed(2))
+
+      get()._handleData({
+        IQA:       iqa,
+        SPD:       parseFloat(Math.max(2, spd).toFixed(1)),
+        SPD_AVG:   parseFloat((spd * 0.95).toFixed(1)),
+        SPD_PITOT: parseFloat((spd + 0.3).toFixed(1)),
+        SPD_ANEMO: parseFloat((spd - 0.2).toFixed(1)),
+        ALIGN:     parseFloat((0.65 + 0.25 * Math.random()).toFixed(2)),
+        TURB:      parseFloat(turb.toFixed(4)),
+        HELI:      parseFloat((bulle_phase ? 3 + Math.random()*5 : 8 + Math.random()*14).toFixed(1)),
+        COH:       parseFloat((0.06 + Math.random() * 0.05).toFixed(3)),
+        GRAD_C:    parseFloat(grad_c.toFixed(4)),
+        ANG:       parseFloat(ang.toFixed(1)),
+        SERVO:     parseFloat((ang * 0.85).toFixed(1)),
+        TEMP:      parseFloat((14.2 + 0.15 * Math.sin(t * 0.02)).toFixed(1)),
+        PRES:      parseFloat((918.3 + Math.random() * 0.4).toFixed(1)),
+        HUM:       Math.round(62 + Math.random() * 2),
+        ALT: 724, RHO: 1.081,
+        VBAT:      parseFloat((11.4 - t * 0.001).toFixed(2)),
+        S_TURB:    s_turb,
+        S_VIT:     s_vit,
+        S_HELI:    s_heli,
+        S_GRAD:    parseFloat(s_grad.toFixed(3)),
+        S_COH:     parseFloat((0.80 + 0.15 * Math.random()).toFixed(3)),
+        S_COH_STAR: parseFloat((0.82 + 0.13 * Math.random()).toFixed(3)),
+        BULLE:     bulle,
+      }, setAltitude)
+    }, 1000)
+  },
+
+  stopDemo: () => {
+    if (_demoTimer) clearInterval(_demoTimer)
+    _demoTimer = null
+    _prevBulle = false
+    releaseWakeLock()
+    set({ demo: false })
+  },
+
+  isOnline: () => {
+    const { connected, lastUpdate } = get()
+    if (!connected || !lastUpdate) return false
+    return (Date.now() - lastUpdate) < (ESP32_CONFIG.OFFLINE_TIMEOUT_MS || 5000)
+  },
+
+  getAge: () => {
+    const { lastUpdate } = get()
+    if (!lastUpdate) return null
+    return Math.floor((Date.now() - lastUpdate) / 1000)
+  },
+
+  reset: () => {
+    get().wsStop()
+    get().stopDemo()
+    set({ connected: false, wsStatus: 'off', lastUpdate: null, error: null, demo: false,
+          sdActive: false, turbBuf: Array(60).fill(0), turbSigma: 0 })
   },
 }))
