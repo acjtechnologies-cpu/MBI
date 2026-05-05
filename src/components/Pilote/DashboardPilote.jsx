@@ -85,7 +85,7 @@ const CSS = `
 .mb-tab{flex:1;padding:8px 0;border-radius:8px 8px 0 0;border:none;cursor:pointer;font-size:13px;font-weight:700;background:#1a1f2a;color:#8b949e;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .mb-tab.on{background:#161b22;color:#fff;border-bottom:2px solid #3fb950}
 .mb-calc{display:flex;flex-direction:column;flex:1;padding:6px;min-height:0}
-.mb-vent{height:9vh;background:linear-gradient(135deg,#0e4429,#1a5a3a);border-radius:12px;text-align:center;border:2px solid #238636;display:flex;flex-direction:column;justify-content:center;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.4);margin-bottom:6px;flex-shrink:0;position:relative;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.mb-vent{height:7vh;background:linear-gradient(135deg,#0e4429,#1a5a3a);border-radius:12px;text-align:center;border:2px solid #238636;display:flex;flex-direction:column;justify-content:center;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.4);margin-bottom:6px;flex-shrink:0;position:relative;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .mb-vent.active{background:linear-gradient(135deg,#1a73e8,#1557b0);border-color:#fff;box-shadow:0 0 20px rgba(26,115,232,.7)}
 .mb-vent-val{font-size:36px;font-weight:900;line-height:1}
 .mb-vent-lbl{font-size:11px;font-weight:700;opacity:.95;margin-top:2px;letter-spacing:1px}
@@ -95,7 +95,7 @@ const CSS = `
 .mb-baro{flex-grow:1;display:flex;flex-direction:column;justify-content:space-evenly;padding:4px 0;min-height:0}
 .mb-row-wrap{display:flex;flex-direction:column;gap:2px}
 .mb-row-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;padding-left:6px}
-.mb-row{display:flex;justify-content:center;gap:5px;height:13vh;max-height:90px}
+.mb-row{display:flex;justify-content:center;gap:5px;height:10vh;max-height:70px}
 .mb-side{display:flex;gap:2px;width:48%;border-radius:6px;padding:2px;background:rgba(255,255,255,.02)}
 .mb-side-l{flex-direction:row-reverse}
 .mb-slot{flex:1;height:100%;border-radius:3px}
@@ -103,7 +103,7 @@ const CSS = `
 .mb-l{background:linear-gradient(135deg,#c8a030,#e8b840);box-shadow:inset 0 0 10px rgba(255,215,0,.5);border:1px solid rgba(255,255,255,.3)}
 .mb-p{background:linear-gradient(135deg,#708090,#8a9aaa);box-shadow:inset 0 0 10px rgba(0,0,0,.7);border:1px solid rgba(255,255,255,.25)}
 .mb-t{background:linear-gradient(135deg,#2255aa,#3377cc);border:1px solid rgba(100,180,255,.3)}
-.mb-data{height:9vh;min-height:60px;flex-shrink:0;display:flex;justify-content:space-around;align-items:center;padding:0 12px;background:linear-gradient(135deg,rgba(255,255,255,.05),rgba(255,255,255,.02));border-radius:10px;margin:4px 0}
+.mb-data{height:7vh;min-height:50px;flex-shrink:0;display:flex;justify-content:space-around;align-items:center;padding:0 12px;background:linear-gradient(135deg,rgba(255,255,255,.05),rgba(255,255,255,.02));border-radius:10px;margin:4px 0}
 .mb-cg{padding:7px 12px;border-radius:8px;background:rgba(59,130,246,.2);border:1px solid rgba(59,130,246,.4)}
 .mb-cg.neutre{background:rgba(74,222,128,.2);border-color:rgba(74,222,128,.5)}
 .mb-cg.avant{background:rgba(251,191,36,.2);border-color:rgba(251,191,36,.5)}
@@ -111,7 +111,7 @@ const CSS = `
 .mb-alt{display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.25);border-radius:8px;padding:4px 12px;margin:2px 0;min-height:28px}
 .mb-ab-lbl{font-size:9px;color:#8b949e;font-weight:700;letter-spacing:.5px;display:block}
 .mb-ab-val{font-size:14px;font-weight:900;color:#a78bfa}
-.mb-ctrl{height:32vh;min-height:220px;flex-shrink:0;background:#0d1117;border-radius:12px;padding:10px;border:1px solid #30363d;display:flex;flex-direction:column;gap:8px}
+.mb-ctrl{height:26vh;min-height:185px;flex-shrink:0;background:#0d1117;border-radius:12px;padding:10px;border:1px solid #30363d;display:flex;flex-direction:column;gap:8px}
 .mb-ctrl-grid{display:grid;grid-template-columns:1fr 1.4fr;gap:10px;flex-grow:1}
 .mb-ctrl-left{display:grid;grid-template-rows:1fr 1fr;gap:6px}
 .mb-ctrl-top2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
