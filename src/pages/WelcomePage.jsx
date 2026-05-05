@@ -1,4 +1,4 @@
-﻿import { useState } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { useModelStore } from '../stores/modelStore'
 import pikeImg from '../assets/pike_precision2.png'
 import mambaImg from '../assets/mamba_s.png'
@@ -37,7 +37,7 @@ function GliderBrowser({ onClose, onImport }) {
   const [importing, setImporting] = useState(null)
   const [error, setError] = useState(null)
 
-  useState(() => {
+  useEffect(() => {
     fetch(INDEX_URL)
       .then(r => r.json())
       .then(data => { setList(data.planeurs || []); setLoading(false) })
@@ -169,7 +169,7 @@ export default function WelcomePage({ onSelect }) {
           <div style={{fontSize:11,color:'rgba(255,255,255,0.82)',letterSpacing:3,marginTop:5}}>BALLAST · MÉTÉO · CHRONO · IQA</div>
           <div style={{marginTop:14,background:'rgba(255,255,255,0.18)',border:'1px solid rgba(255,255,255,0.32)',borderRadius:20,padding:'5px 14px',display:'flex',alignItems:'center',gap:7}}>
             <div style={{width:7,height:7,borderRadius:'50%',background:'#6eff88'}} />
-            <span style={{color:'rgba(255,255,255,0.88)',fontSize:11,letterSpacing:1}}>F3F-STATION · ESP32 v12</span>
+            <span style={{color:'rgba(255,255,255,0.88)',fontSize:11,letterSpacing:1}}>F3F-STATION · ESP32 v13</span>
           </div>
         </div>
 

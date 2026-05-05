@@ -50,7 +50,7 @@ export default function Poly4Page() {
   const offsetStore   = useAppStore(s => s.offset ?? -144)
   const activeSite    = useAppStore(s => s.activeSite)
   const setActiveSite = useAppStore(s => s.setActiveSite)
-  const model         = useModelStore(s => s.model)
+  const model         = useModelStore(s => s.models?.[s.activeModelId] ?? null)
 
   // ── State local ───────────────────────────────────────────────────────────
   const [mode, setMode]     = useState('vent')
