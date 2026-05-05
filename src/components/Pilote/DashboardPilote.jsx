@@ -301,6 +301,7 @@ export default function DashboardPilote() {
 
   // -”€ Contrôles -”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€
   function selectParam(p) {
+    if (p === 'kg' && cfgAppliquee !== null) return
     setSelectedParam(p)
     if (p !== 'kg') setKgManuel(null)
   }
@@ -443,13 +444,13 @@ export default function DashboardPilote() {
             </div>
 
             {/* Contrôles */}
-            <div className="mb-ctrl">
+            <div className="mb-ctrl" style={cfgAppliquee !== null ? { boxShadow: '0 0 12px rgba(88,166,255,0.5)', borderColor: '#58a6ff', transition: 'box-shadow 0.4s, border-color 0.4s' } : { transition: 'box-shadow 0.4s, border-color 0.4s' }}>
               <div className="mb-ctrl-grid">
                 <div className="mb-ctrl-left">
                   <div className="mb-ctrl-top2">
-                    <button className={`mb-mode-btn${selectedParam === 'kg' ? ' active' : ''}`} onClick={() => selectParam('kg')}>
+                    <button className={`mb-mode-btn${selectedParam === 'kg' ? ' active' : ''}`} onClick={() => selectParam('kg')} style={cfgAppliquee !== null ? { opacity: 0.35, pointerEvents: 'none' } : {}}>
                       <div className="mb-mode-val">{kgVal.toFixed(3)}</div>
-                      <div className="mb-mode-lbl">KG</div>
+                      <div className="mb-mode-lbl">{cfgAppliquee !== null ? '🔒 KG' : 'KG'}</div>
                     </button>
                     <button className={`mb-mode-btn${selectedParam === 'alt' ? ' active-alt' : ''}`} onClick={() => selectParam('alt')}>
                       <div className="mb-mode-val">{altitude}</div>
@@ -491,7 +492,7 @@ export default function DashboardPilote() {
             MAT_KEYS={MAT_KEYS}
             ci={ci}
             targetGAuto={targetGAuto}
-            onAppliquer={(masse) => { setCfgAppliquee(masse); setTab('calc') }}
+            onAppliquer={(masse) => { setCfgAppliquee(masse); setSelectedParam('vent'); setTab('calc') }}
           />
         )}
         {/* -”€ GPS OVERLAY -”€ */}
