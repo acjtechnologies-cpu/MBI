@@ -131,9 +131,9 @@ const CSS = `
 .mb-rb.sel{background:#1a2744;border-color:#1a73e8;color:#fff}
 .mb-rb.near{border-color:#3fb950}
 .mb-m-soutes{flex:1;display:flex;flex-direction:column;gap:4px;min-height:0;overflow-y:auto}
-.mb-m-row-wrap{display:flex;flex-direction:column;gap:2px}
-.mb-m-lbl{font-size:9px;font-weight:700;letter-spacing:.5px;padding-left:4px}
-.mb-m-row{display:flex;gap:5px;height:11vh;max-height:80px}
+.mb-m-row-wrap{display:flex;flex-direction:column;flex:1}
+.mb-m-lbl{font-size:8px;font-weight:700;letter-spacing:.5px;padding-left:4px;line-height:1;margin:1px 0}
+.mb-m-row{display:flex;gap:4px;flex:1}
 .mb-m-side{flex:1;display:flex;gap:2px;border-radius:6px;padding:3px;background:rgba(255,255,255,.02)}
 .mb-m-side-l{flex-direction:row-reverse}
 .mb-m-slot{flex:1;border-radius:4px;background:rgba(255,255,255,.04);border:1px solid #1e2530}
