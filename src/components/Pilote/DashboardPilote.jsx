@@ -84,7 +84,7 @@ const CSS = `
 .mb-tabs{display:flex;gap:4px;padding:6px 6px 0;height:42px;flex-shrink:0}
 .mb-tab{flex:1;padding:8px 0;border-radius:8px 8px 0 0;border:none;cursor:pointer;font-size:13px;font-weight:700;background:#1a1f2a;color:#8b949e;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .mb-tab.on{background:#161b22;color:#fff;border-bottom:2px solid #3fb950}
-.mb-calc{display:flex;flex-direction:column;flex:1;padding:6px;min-height:0}
+.mb-calc{display:flex;flex-direction:column;flex:1;padding:4px;min-height:0}
 .mb-vent{height:7vh;background:linear-gradient(135deg,#0e4429,#1a5a3a);border-radius:12px;text-align:center;border:2px solid #238636;display:flex;flex-direction:column;justify-content:center;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.4);margin-bottom:6px;flex-shrink:0;position:relative;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .mb-vent.active{background:linear-gradient(135deg,#1a73e8,#1557b0);border-color:#fff;box-shadow:0 0 20px rgba(26,115,232,.7)}
 .mb-vent-val{font-size:36px;font-weight:900;line-height:1}
@@ -92,10 +92,10 @@ const CSS = `
 .mb-gps-btn{position:absolute;right:10px;top:50%;transform:translateY(-50%);width:38px;height:38px;border-radius:50%;background:#065f46;border:2px solid #34d399;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .mb-gps-btn.capturing{background:#1a3a8f;border-color:#60a5fa;animation:mbpulse 1s infinite}
 @keyframes mbpulse{0%,100%{opacity:1}50%{opacity:.5}}
-.mb-baro{flex-grow:1;display:flex;flex-direction:column;justify-content:space-evenly;padding:4px 0;min-height:0}
-.mb-row-wrap{display:flex;flex-direction:column;gap:2px}
-.mb-row-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;padding-left:6px}
-.mb-row{display:flex;justify-content:center;gap:5px;height:10vh;max-height:70px}
+.mb-baro{flex:1;display:flex;flex-direction:column;padding:0;min-height:0}
+.mb-row-wrap{display:flex;flex-direction:column;flex:1}
+.mb-row-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;padding-left:6px}
+.mb-row{display:flex;justify-content:center;gap:4px;flex:1}
 .mb-side{display:flex;gap:2px;width:48%;border-radius:6px;padding:2px;background:rgba(255,255,255,.02)}
 .mb-side-l{flex-direction:row-reverse}
 .mb-slot{flex:1;height:100%;border-radius:3px}
@@ -103,11 +103,11 @@ const CSS = `
 .mb-l{background:linear-gradient(135deg,#c8a030,#e8b840);box-shadow:inset 0 0 10px rgba(255,215,0,.5);border:1px solid rgba(255,255,255,.3)}
 .mb-p{background:linear-gradient(135deg,#708090,#8a9aaa);box-shadow:inset 0 0 10px rgba(0,0,0,.7);border:1px solid rgba(255,255,255,.25)}
 .mb-t{background:linear-gradient(135deg,#2255aa,#3377cc);border:1px solid rgba(100,180,255,.3)}
-.mb-data{height:7vh;min-height:50px;flex-shrink:0;display:flex;justify-content:space-around;align-items:center;padding:0 12px;background:linear-gradient(135deg,rgba(255,255,255,.05),rgba(255,255,255,.02));border-radius:10px;margin:4px 0}
-.mb-cg{padding:7px 12px;border-radius:8px;background:rgba(59,130,246,.2);border:1px solid rgba(59,130,246,.4)}
-.mb-cg.neutre{background:rgba(74,222,128,.2);border-color:rgba(74,222,128,.5)}
-.mb-cg.avant{background:rgba(251,191,36,.2);border-color:rgba(251,191,36,.5)}
-.mb-cg.arriere{background:rgba(248,113,113,.2);border-color:rgba(248,113,113,.5)}
+.mb-data{min-height:50px;flex-shrink:0;display:flex;justify-content:space-around;align-items:center;padding:8px 12px;background:#0d1117;border:1px solid #30363d;border-radius:12px;margin:4px 0}
+
+
+
+
 .mb-alt{display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.25);border-radius:8px;padding:4px 12px;margin:2px 0;min-height:28px}
 .mb-ab-lbl{font-size:9px;color:#8b949e;font-weight:700;letter-spacing:.5px;display:block}
 .mb-ab-val{font-size:14px;font-weight:900;color:#a78bfa}
@@ -338,16 +338,7 @@ export default function DashboardPilote() {
       <div className="mb-app" translate="no">
 
         {/* Onglets */}
-        <div className="mb-tabs">
-          <button className={`mb-tab${tab === 'calc' ? ' on' : ''}`} onClick={() => setTab('calc')}>
-            ⚖️ CALCULATEUR
-          </button>
-          {matrix.length > 0 && (
-            <button className={`mb-tab${tab === 'matrix' ? ' on' : ''}`} onClick={() => setTab('matrix')}>
-            📋 MATRICE
-            </button>
-          )}
-        </div>
+
 
         {/* -”€ TAB CALCULATEUR -”€ */}
         {tab === 'calc' && (
@@ -431,7 +422,7 @@ export default function DashboardPilote() {
                   g/dm²
                 </div>
               </div>
-              <div className={`mb-cg ${cgClass}`} style={{ textAlign:'center', flex:1 }}>
+              <div style={{ textAlign:'center', flex:1, color: cgClass === 'neutre' ? '#4ade80' : cgClass === 'avant' ? '#fbbf24' : cgClass === 'arriere' ? '#f87171' : '#8b949e' }}>
                 <div style={{ fontSize:9, color:'#8b949e', fontWeight:700, letterSpacing:0.5, marginBottom:2 }}>CG</div>
                 <div style={{ fontSize:22, fontWeight:900, lineHeight:1 }}>
                   {cfg ? cfg.cg.toFixed(1) : model.cgVide}
@@ -473,11 +464,19 @@ export default function DashboardPilote() {
                     onTouchCancel={handleRelease}>▲</button>
                 </div>
               </div>
-              <div className="mb-hint">
-                {selectedParam === 'kg'     && `Pas ±g — cfg #${cfg?.n || '-'} la plus proche`}
-                {selectedParam === 'alt'    && `Pas 50m — ~${c100}g/100m à ${vent.toFixed(1)} m/s`}
-                {selectedParam === 'offset' && `Pas 42g - total: ${offsetVal >= 0 ? '+' : ''}${offsetVal}g`}
-                {selectedParam === 'vent'   && cfg && `Config #${cfg.n} - ${cfg.m}g (\u0394${dm > 0 ? '+' : ''}${dm}g)`}
+              <div style={{ display:'flex', gap:4 }}>
+                <button
+                  onClick={() => setTab('calc')}
+                  style={{ flex:1, padding:'6px 0', borderRadius:6, border: tab === 'calc' ? '1px solid #3fb950' : '1px solid #30363d', background: tab === 'calc' ? '#161b22' : 'transparent', color: tab === 'calc' ? '#fff' : '#4a5568', fontSize:11, fontWeight:700, cursor:'pointer', touchAction:'manipulation', WebkitTapHighlightColor:'transparent' }}>
+                  CALCULATEUR
+                </button>
+                {matrix.length > 0 && (
+                  <button
+                    onClick={() => setTab('matrix')}
+                    style={{ flex:1, padding:'6px 0', borderRadius:6, border: tab === 'matrix' ? '1px solid #3fb950' : '1px solid #30363d', background: tab === 'matrix' ? '#161b22' : 'transparent', color: tab === 'matrix' ? '#fff' : '#4a5568', fontSize:11, fontWeight:700, cursor:'pointer', touchAction:'manipulation', WebkitTapHighlightColor:'transparent' }}>
+                    MATRICE
+                  </button>
+                )}
               </div>
             </div>
           </div>
