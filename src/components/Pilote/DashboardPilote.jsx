@@ -197,7 +197,7 @@ export default function DashboardPilote() {
     ? Math.max(model.masseVide, Math.round(kgManuel * 1000))
     : targetGAuto
   const kgVal         = targetG / 1000
-  const ci            = matrix.length > 0 ? findNearest(matrix, targetG) : -1
+  const ci            = matrix.length > 0 && targetG > model.masseVide ? findNearest(matrix, targetG) : -1
   const cfg           = ci >= 0 ? matrix[ci] : null
   const dm            = cfg ? cfg.m - targetG : 0
   const cgD           = cfg ? cfg.cg - model.cgVide : 0
