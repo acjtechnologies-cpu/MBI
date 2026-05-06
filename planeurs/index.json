@@ -1,4 +1,4 @@
-{
+﻿{
   "version": "1.0",
   "planeurs": [
     {
@@ -20,6 +20,16 @@
       "masseVide": 2332,
       "description": "Planeur F3F international, Poly4 calibré",
       "url": "planeurs/pike-precision-2.json"
+    },
+    {
+      "id": "freestyler-7",
+      "nom": "Freestyler 7",
+      "drapeau": "🇩🇪",
+      "constructeur": "TUD",
+      "strategie": "complementaire",
+      "masseVide": 2550,
+      "description": "Planeur F3F allemand, matrice 9 configs T238/L140",
+      "url": "planeurs/freestyler-7.json"
     }
   ]
 }

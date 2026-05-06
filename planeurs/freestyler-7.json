@@ -1,0 +1,274 @@
+{
+  "id": "freestyler-7",
+  "nom": "Freestyler 7",
+  "version": "1.0",
+  "drapeau": "🇩🇪",
+  "constructeur": "TUD",
+  "strategie": "complementaire",
+  "masseVide": 2550,
+  "cgVide": 104.0,
+  "surface": 54.3,
+  "masse_ref_8ms": 2.9,
+  "offset": 0,
+  "poly4": {
+    "type": "fallback",
+    "A4": -0.0001728,
+    "A3": 0.008178,
+    "A2": -0.1498,
+    "A1": 1.34713,
+    "A0": -1.19522
+  },
+  "matrix": [
+    {
+      "m": 2823,
+      "cg": 102.7,
+      "av": {
+        "G": 0,
+        "D": 0,
+        "matG": "Laiton",
+        "matD": "Laiton"
+      },
+      "c": {
+        "G": 0,
+        "D": 0,
+        "matG": "Laiton",
+        "matD": "Laiton"
+      },
+      "ar": {
+        "G": 1,
+        "D": 0,
+        "matG": "Tungsten",
+        "matD": "Tungsten"
+      },
+      "n": 1
+    },
+    {
+      "m": 2965,
+      "cg": 101.5,
+      "av": {
+        "G": 0,
+        "D": 0,
+        "matG": "Laiton",
+        "matD": "Laiton"
+      },
+      "c": {
+        "G": 0,
+        "D": 1,
+        "matG": "Laiton",
+        "matD": "Laiton"
+      },
+      "ar": {
+        "G": 1,
+        "D": 0,
+        "matG": "Tungsten",
+        "matD": "Tungsten"
+      },
+      "n": 2
+    },
+    {
+      "m": 3076,
+      "cg": 103.8,
+      "av": {
+        "G": 0,
+        "D": 0,
+        "matG": "Laiton",
+        "matD": "Laiton"
+      },
+      "c": {
+        "G": 0,
+        "D": 0,
+        "matG": "Laiton",
+        "matD": "Laiton"
+      },
+      "ar": {
+        "G": 1,
+        "D": 1,
+        "matG": "Tungsten",
+        "matD": "Tungsten"
+      },
+      "n": 3
+    },
+    {
+      "m": 3309,
+      "cg": 103.7,
+      "av": {
+        "G": 0,
+        "D": 0,
+        "matG": "Laiton",
+        "matD": "Laiton"
+      },
+      "c": {
+        "G": 0,
+        "D": 0,
+        "matG": "Laiton",
+        "matD": "Laiton"
+      },
+      "ar": {
+        "G": 1,
+        "D": 2,
+        "matG": "Tungsten",
+        "matD": "Tungsten"
+      },
+      "n": 4
+    },
+    {
+      "m": 3544,
+      "cg": 104.3,
+      "av": {
+        "G": 0,
+        "D": 0,
+        "matG": "Laiton",
+        "matD": "Laiton"
+      },
+      "c": {
+        "G": 0,
+        "D": 0,
+        "matG": "Laiton",
+        "matD": "Laiton"
+      },
+      "ar": {
+        "G": 2,
+        "D": 2,
+        "matG": "Tungsten",
+        "matD": "Tungsten"
+      },
+      "n": 5
+    },
+    {
+      "m": 3780,
+      "cg": 104.6,
+      "av": {
+        "G": 0,
+        "D": 0,
+        "matG": "Laiton",
+        "matD": "Laiton"
+      },
+      "c": {
+        "G": 0,
+        "D": 0,
+        "matG": "Laiton",
+        "matD": "Laiton"
+      },
+      "ar": {
+        "G": 2,
+        "D": 3,
+        "matG": "Tungsten",
+        "matD": "Tungsten"
+      },
+      "n": 6
+    },
+    {
+      "m": 4014,
+      "cg": 104.8,
+      "av": {
+        "G": 0,
+        "D": 0,
+        "matG": "Laiton",
+        "matD": "Laiton"
+      },
+      "c": {
+        "G": 0,
+        "D": 0,
+        "matG": "Laiton",
+        "matD": "Laiton"
+      },
+      "ar": {
+        "G": 3,
+        "D": 3,
+        "matG": "Tungsten",
+        "matD": "Tungsten"
+      },
+      "n": 7
+    },
+    {
+      "m": 4151,
+      "cg": 104.2,
+      "av": {
+        "G": 0,
+        "D": 0,
+        "matG": "Laiton",
+        "matD": "Laiton"
+      },
+      "c": {
+        "G": 0,
+        "D": 1,
+        "matG": "Laiton",
+        "matD": "Laiton"
+      },
+      "ar": {
+        "G": 3,
+        "D": 3,
+        "matG": "Tungsten",
+        "matD": "Tungsten"
+      },
+      "n": 8
+    },
+    {
+      "m": 4293,
+      "cg": 103.7,
+      "av": {
+        "G": 1,
+        "D": 0,
+        "matG": "Laiton",
+        "matD": "Laiton"
+      },
+      "c": {
+        "G": 0,
+        "D": 1,
+        "matG": "Laiton",
+        "matD": "Laiton"
+      },
+      "ar": {
+        "G": 3,
+        "D": 3,
+        "matG": "Tungsten",
+        "matD": "Tungsten"
+      },
+      "n": 9
+    }
+  ],
+  "soutes": {
+    "avant": {
+      "id": "avant",
+      "nom": "Avant Clé",
+      "couleur": "#ffd700",
+      "distanceBA": 75,
+      "capacite": 1,
+      "materiaux": [
+        {
+          "nom": "Laiton",
+          "masse": 140,
+          "stock": 1
+        }
+      ]
+    },
+    "centrale": {
+      "id": "centrale",
+      "nom": "Centrale Clé",
+      "couleur": "#58a6ff",
+      "distanceBA": 88,
+      "capacite": 1,
+      "materiaux": [
+        {
+          "nom": "Laiton",
+          "masse": 140,
+          "stock": 1
+        }
+      ]
+    },
+    "arriere": {
+      "id": "arriere",
+      "nom": "Arrière Aile",
+      "couleur": "#3fb950",
+      "distanceBA": 112,
+      "capacite": 3,
+      "materiaux": [
+        {
+          "nom": "Tungsten",
+          "masse": 238,
+          "stock": 3
+        }
+      ]
+    }
+  }
+}
