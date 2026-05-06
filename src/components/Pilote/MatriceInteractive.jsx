@@ -1,11 +1,11 @@
 ﻿import { useState, useMemo } from 'react'
 
-function matCls(nom) {
-  if (!nom) return ''
+function slotCls(nom) {
+  if (!nom) return 'mb-slot mb-s'
   const n = nom.toLowerCase()
-  if (n.includes('plomb')) return 'p'
-  if (n.includes('tungst')) return 't'
-  return 'l'
+  if (n.includes('plomb')) return 'mb-slot mb-p'
+  if (n.includes('tungst')) return 'mb-slot mb-t'
+  return 'mb-slot mb-l'
 }
 
 function calcMasse(model, soutes, slots) {
@@ -132,7 +132,7 @@ export default function MatriceInteractive({ model, soutes, matrix, MAT_KEYS, ci
   function renderSideSlots(blocs, cap, isLeft) {
     return Array.from({length: cap}).map((_, i) => {
       const bi = isLeft ? (cap - 1 - i) : i
-      return <div key={i} className={`mb-m-slot${bi < blocs.length ? ' '+matCls(blocs[bi]?.nom) : ''}`} />
+      return <div key={i} className={bi < blocs.length ? slotCls(blocs[bi]?.nom) : 'mb-slot mb-s'} />
     })
   }
 

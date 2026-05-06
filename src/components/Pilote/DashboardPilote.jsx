@@ -70,13 +70,7 @@ function slotClsFromNom(nom) {
   if (n.includes('tungst')) return 'mb-slot mb-t'
   return 'mb-slot mb-l'
 }
-function matClsFromNom(nom) {
-  if (!nom) return ''
-  const n = nom.toLowerCase()
-  if (n.includes('plomb'))  return 'p'
-  if (n.includes('tungst')) return 't'
-  return 'l'
-}
+
 
 // -”€ CSS -”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-
 const CSS = `
@@ -98,11 +92,11 @@ const CSS = `
 .mb-row{display:flex;justify-content:center;gap:4px;flex:1}
 .mb-side{display:flex;gap:2px;width:48%;border-radius:6px;padding:2px;background:rgba(255,255,255,.02)}
 .mb-side-l{flex-direction:row-reverse}
-.mb-slot{flex:1;height:100%;border-radius:3px}
+.mb-slot{flex:1;height:100%;border-radius:4px;background:rgba(255,255,255,.04);border:1px solid #1e2530}
 .mb-s{background:#1a2535;opacity:.15;border:1px dashed rgba(255,255,255,.07)}
-.mb-l{background:linear-gradient(135deg,#c8a030,#e8b840);box-shadow:inset 0 0 10px rgba(255,215,0,.5);border:1px solid rgba(255,255,255,.3)}
-.mb-p{background:linear-gradient(135deg,#708090,#8a9aaa);box-shadow:inset 0 0 10px rgba(0,0,0,.7);border:1px solid rgba(255,255,255,.25)}
-.mb-t{background:linear-gradient(135deg,#2255aa,#3377cc);border:1px solid rgba(100,180,255,.3)}
+.mb-l{background:linear-gradient(135deg,#c8a030,#e8b840);box-shadow:inset 0 0 10px rgba(255,200,0,.5);border:1px solid rgba(255,255,255,.3)}
+.mb-p{background:linear-gradient(135deg,#708090,#8a9aaa);box-shadow:inset 0 0 10px rgba(100,170,255,.3);border:1px solid rgba(255,255,255,.25)}
+.mb-t{background:linear-gradient(135deg,#2255aa,#3377cc);box-shadow:inset 0 0 10px rgba(100,170,255,.3);border:1px solid rgba(100,180,255,.3)}
 .mb-data{min-height:50px;flex-shrink:0;display:flex;justify-content:space-around;align-items:center;padding:8px 12px;background:#0d1117;border:1px solid #30363d;border-radius:12px;margin:4px 0}
 
 
@@ -136,10 +130,6 @@ const CSS = `
 .mb-m-row{display:flex;gap:4px;flex:1}
 .mb-m-side{flex:1;display:flex;gap:2px;border-radius:6px;padding:3px;background:rgba(255,255,255,.02)}
 .mb-m-side-l{flex-direction:row-reverse}
-.mb-m-slot{flex:1;border-radius:4px;background:rgba(255,255,255,.04);border:1px solid #1e2530}
-.mb-m-slot.l{background:linear-gradient(135deg,#c8a030,#e8b840);border-color:transparent}
-.mb-m-slot.p{background:linear-gradient(135deg,#708090,#8a9aaa);border-color:transparent}
-.mb-m-slot.t{background:linear-gradient(135deg,#2255aa,#3377cc);border-color:transparent}
 .mb-m-info{background:#161b22;border-radius:8px;padding:6px 10px;flex-shrink:0;border:1px solid #21262d;display:flex;align-items:center;gap:8px}
 .mb-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;display:flex;align-items:flex-end;justify-content:center}
 .mb-overlay-box{width:100%;max-width:420px;background:#0d1117;border-radius:16px 16px 0 0;border:1px solid #30363d;padding:16px;max-height:85vh;overflow-y:auto}
@@ -269,14 +259,14 @@ export default function DashboardPilote() {
     if (isNewFormat(side)) {
       // Nouveau format Pike
       return Array.from({ length: cap }).map((_, i) => (
-        <div key={i} className={`mb-m-slot${i < side.length ? ' ' + matClsFromNom(side[i]?.nom) : ''}`} />
+        <div key={i} className={i < side.length ? slotClsFromNom(side[i]?.nom) : 'mb-slot mb-s'} />
       ))
     } else {
       // Ancien format Mamba
       const n   = (side || 0)
       const nom = sideKey === 'G' ? (b.matG || '') : (b.matD || '')
       return Array.from({ length: cap }).map((_, i) => (
-        <div key={i} className={`mb-m-slot${i < n ? ' ' + matClsFromNom(nom) : ''}`} />
+        <div key={i} className={i < n ? slotClsFromNom(nom) : 'mb-slot mb-s'} />
       ))
     }
   }
