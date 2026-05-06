@@ -92,6 +92,9 @@ export default function MatriceInteractive({ model, soutes, matrix, MAT_KEYS, ci
   const cgIsSafe = cgResult ? cgResult.isSafe : true
   const dm = masseAff !== null ? masseAff - targetGAuto : 0
   const deltaCG = cgAff !== null ? cgAff - model.cgVide : 0
+  const faiMax = Math.round((model.surface || 57) * 75)
+  const chargeAl = masseAff ? (masseAff / (model.surface || 57)).toFixed(1) : null
+  const isFaiOver = masseAff > faiMax
   const deltaNorm = Math.abs(deltaCG) / CG_TOLERANCE
   const cgColor = deltaNorm <= 0.3 ? '#3fb950' : deltaNorm <= 0.7 ? '#f0a500' : '#f85149'
 
@@ -206,11 +209,11 @@ export default function MatriceInteractive({ model, soutes, matrix, MAT_KEYS, ci
         <div className="mb-m-info" style={{flexDirection:'column', gap:6}}>
           <div style={{display:'flex', justifyContent:'space-between', width:'100%'}}>
             <div>
-              <div style={{fontSize:20, fontWeight:900, color:'#3fb950'}}>
+              <div style={{fontSize:20, fontWeight:900, color: isFaiOver ? '#f85149' : '#3fb950'}}>
                 {masseAff ? (masseAff/1000).toFixed(3)+' kg' : '\u2014'}
               </div>
-              <div style={{fontSize:9, color:isEditing?'#f0a500':'#8b949e'}}>
-                {isEditing ? '\u26a0 Hors matrice' : displayCfg ? `cfg #${displayCfg.n}` : '\u2014'}
+              <div style={{fontSize:9, color:isFaiOver?'#f85149':isEditing?'#f0a500':'#8b949e'}}>
+                {isEditing ? '\u26a0 Hors matrice' : displayCfg ? `cfg #${displayCfg.n}` : '\u2014'}{chargeAl && ` \u00b7 ${chargeAl} g/dm\u00b2`}{isFaiOver && ' \u26d4 FAI'}
               </div>
             </div>
             <div style={{textAlign:'right'}}>
