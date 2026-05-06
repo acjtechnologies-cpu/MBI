@@ -1,4 +1,4 @@
-﻿{
+{
   "planeurs": [
     {
       "id": "pike-precision-2",
@@ -7,6 +7,14 @@
       "masseVide": 2332,
       "drapeau": "🇩🇪",
       "url": "planeurs/pike-precision-2.json"
+    },
+    {
+      "id": "freestyler-7",
+      "nom": "Freestyler 7",
+      "constructeur": "TUD",
+      "masseVide": 2550,
+      "drapeau": "🇩🇪",
+      "url": "planeurs/freestyler-7.json"
     }
   ]
 }
