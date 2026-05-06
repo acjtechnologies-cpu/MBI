@@ -92,8 +92,8 @@ export default function Poly4Page() {
   const chartData = useMemo(() => ({
     aeroRef:  V_RANGE.map(v => aeromod(v)),
     adaptive: V_RANGE.map(v => poly4(v) * rho * kPente + offsetADN),
-    dense:    V_RANGE.map(v => poly4(v) * rho * 1.05 * kPente),
-    leger:    V_RANGE.map(v => poly4(v) * rho * 0.95 * kPente),
+    dense:    V_RANGE.map(v => poly4(v) * rho * 1.05 * kPente + offsetADN),
+    leger:    V_RANGE.map(v => poly4(v) * rho * 0.95 * kPente + offsetADN),
     massePt:  poly4(vent) * rho * kPente + offsetKg,
   }), [vent, rho, kPente, offsetKg])
 
