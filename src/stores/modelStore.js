@@ -101,9 +101,9 @@ const DEFAULT_MODEL = {
   drapeau: '🇫🇷',
   masseVide: 2550,
   cgVide: 102,
-  surface: 59,
+  surface: 57,
   offset: -144,
-  masse_ref_8ms: 3.330,
+  masse_ref_8ms: 3.413,
   version: '1.0',
   poly4: {
     type: 'coefficients',
