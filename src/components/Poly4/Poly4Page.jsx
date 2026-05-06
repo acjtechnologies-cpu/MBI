@@ -174,7 +174,7 @@ export default function Poly4Page() {
         setActiveSite({ name: nextSite.name, irp: nextSite.irp, k: nextSite.k })
       }
     }
-  }, [mode, vent, sites.length, setParam, offsetStore, setOffset])
+  }, [mode, vent, sites, siteIdx, setParam, offsetStore, setOffset, setActiveSite])
 
   const startPress = (dir) => {
     handleChange(dir)
