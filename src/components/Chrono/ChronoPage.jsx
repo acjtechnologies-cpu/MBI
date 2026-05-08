@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+﻿import { useState, useEffect, useRef, useCallback } from 'react';
 import { useESPStore } from '../../stores/espStore';
 import { useAppStore } from '../../stores/appStore';
+import { useIrpStore } from '../../stores/irpStore';
 import { syncGist, setGistToken, getGistToken } from './gistSync';
 // ── Dexie v3 — session_id sur runs ───────────────────────────────────────────
 import Dexie from 'dexie';
@@ -318,6 +319,10 @@ const [gistStatus, setGistStatus] = useState('');
   const sGrad        = useESPStore(s => s.data.S_GRAD) ?? 0;
   const bulle        = useESPStore(s => s.data.BULLE) ?? false;
   const sendMarker   = useESPStore(s => s.sendMarker);
+  const addIrpRun    = useIrpStore(s => s.addRun);
+  const kActuel      = useIrpStore(s => s.kActuel);
+  const irpVal       = useIrpStore(s => s.irp);
+  const nbIrpRuns    = useIrpStore(s => s.nbRuns);
   const espConnected = useESPStore(s => s.connected);
   const sdActive     = useESPStore(s => s.sdActive);
 
@@ -348,7 +353,7 @@ const [gistStatus, setGistStatus] = useState('');
       cancelAnimationFrame(rafRef.current);
       const duree_ms  = Date.now() - t0Ref.current;
       const iqaSnap   = iqa;
-      const ventSnap  = vent;
+      const ventSnap  = vent > 0 ? vent : (useAppStore.getState().params?.vent || 8.0);
       const sGradSnap = sGrad;
       const bulleSnap = isBulleRef.current;
       setRunning(false);
@@ -373,6 +378,7 @@ const [gistStatus, setGistStatus] = useState('');
 
       setRuns(prev => [newRun, ...prev]);
       db.runs.add(newRun).catch(() => {});
+      addIrpRun(newRun);
       if (navigator.vibrate) navigator.vibrate([30, 50, 80]);
     }
   }, [running, iqa, vent, sGrad, piloteActif, manche, tick, sendMarker, sessionId]);
@@ -557,7 +563,7 @@ const [gistStatus, setGistStatus] = useState('');
         <div style={{ fontSize: 12, color: '#555', marginBottom: 4, letterSpacing: '0.08em' }}>
           {pilotes[piloteActif].nom}
           <span style={{ color: '#333', margin: '0 6px' }}>·</span>
-          manche {manche}
+          manche {manche}{kActuel && <span style={{ fontSize:10, color:'#58a6ff', marginLeft:6 }}>K {kActuel} ({nbIrpRuns}r)</span>}
         </div>
         <div style={{ fontSize: 58, fontWeight: 500, letterSpacing: -1,
           color: running ? couleurActif : '#fff', fontVariantNumeric: 'tabular-nums',
