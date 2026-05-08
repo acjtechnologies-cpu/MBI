@@ -197,6 +197,8 @@ export default function DashboardPilote() {
     ? Math.max(model.masseVide, Math.round(kgManuel * 1000))
     : targetGAuto
   const kgVal         = targetG / 1000
+  const faiMax         = Math.round((model.surface || 57) * 75)
+  const isFaiOver      = targetG > faiMax
   const ci            = matrix.length > 0 && targetG > model.masseVide ? findNearest(matrix, targetG) : -1
   const cfg           = ci >= 0 ? matrix[ci] : null
   const dm            = cfg ? cfg.m - targetG : 0
@@ -308,10 +310,11 @@ export default function DashboardPilote() {
   function doChange(dir) {
     switch (selectedParam) {
       case 'vent':
+        if (dir > 0 && vent >= 15.5) { setSelectedParam('kg'); setKgManuel(kgVal); break }
         dir > 0 ? incrementParam('vent') : decrementParam('vent'); break
       case 'kg': {
         const base = kgManuel !== null ? kgManuel : kgVal
-        setKgManuel(parseFloat(Math.max(model.masseVide / 1000, Math.min(6.0, base + dir * 0.010)).toFixed(3)))
+        setKgManuel(parseFloat(Math.max(model.masseVide / 1000, base + dir * 0.010).toFixed(3)))
         break
       }
       case 'offset':
@@ -405,11 +408,11 @@ export default function DashboardPilote() {
               </div>
               <div style={{ textAlign:'center', flex:1 }}>
                 <div style={{ fontSize:9, color:'#8b949e', fontWeight:700, letterSpacing:0.5, marginBottom:2 }}>CHARGE</div>
-                <div style={{ fontSize:22, fontWeight:900, color:'#ffb74d', lineHeight:1 }}>
+                <div style={{ fontSize:22, fontWeight:900, color: isFaiOver ? '#f85149' : '#ffb74d', lineHeight:1 }}>
                   {(kgVal * 1000 / (model.surface || 59)).toFixed(1)}
                 </div>
                 <div style={{ fontSize:9, color:'#4a5568', marginTop:2 }}>
-                  g/dm²
+                  {isFaiOver ? '⛔ FAI' : 'g/dm²'}
                 </div>
               </div>
               <div style={{ textAlign:'center', flex:1, color: cgClass === 'neutre' ? '#4ade80' : cgClass === 'avant' ? '#fbbf24' : cgClass === 'arriere' ? '#f87171' : '#8b949e' }}>

@@ -44,7 +44,7 @@ altitude: 0,
         set((state) => {
           const step = key === 'vent' ? 0.1 : 1
           return {
-            params: { ...state.params, [key]: state.params[key] + step },
+            params: { ...state.params, [key]: key === 'vent' ? Math.min(15.5, +(state.params[key] + step).toFixed(1)) : state.params[key] + step },
           }
         }),
 
