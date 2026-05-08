@@ -39,6 +39,8 @@ const DEFAULT_SITES = [
   { name: 'Serra de Busa',      irp: 124, k: 0.850 },
 ]
 
+import { useIrpStore } from '../../stores/irpStore'
+
 const V_RANGE = Array.from({ length: 226 }, (_, i) => 4.0 + i * 0.05)
 
 export default function Poly4Page() {
@@ -48,6 +50,11 @@ export default function Poly4Page() {
   const setOffset     = useAppStore(s => s.setOffset)
   const altitude      = useAppStore(s => s.altitude ?? 0)
   const offsetStore   = useAppStore(s => s.offset ?? -144)
+  const irpK          = useIrpStore(s => s.kActuel)
+  const irpVal        = useIrpStore(s => s.irp)
+  const irpTrend      = useIrpStore(s => s.trend)
+  const irpNbRuns     = useIrpStore(s => s.nbRuns)
+  const iqaHybrid     = useIrpStore(s => s.iqaHybrid)
   const activeSite    = useAppStore(s => s.activeSite)
   const setActiveSite = useAppStore(s => s.setActiveSite)
   const model         = useModelStore(s => s.models?.[s.activeModelId] ?? null)
@@ -75,7 +82,9 @@ export default function Poly4Page() {
   const pressTimer = useRef(null)
 
   // ── Dérivés ───────────────────────────────────────────────────────────────
-  const currentSite = sites[siteIdx] ?? sites[6]
+  const liveSite = irpK ? { name: 'IRP LIVE', irp: irpVal, k: irpK, live: true } : null
+  const allSites = liveSite ? [liveSite, ...sites] : sites
+  const currentSite = allSites[siteIdx] ?? allSites[Math.min(6, allSites.length - 1)]
   const kPente      = currentSite?.k ?? 1.00
   const rho         = useMemo(() => rhoAlt(altitude), [altitude])
   const offsetADN   = (model?.masse_ref_8ms || P4_REF_8MS) - P4_REF_8MS
@@ -166,15 +175,15 @@ export default function Poly4Page() {
     } else if (mode === 'offset') {
       const next42 = offsetStore + dir * 42; const nextOff = (offsetStore !== 0 && Math.sign(next42) !== Math.sign(offsetStore)) ? 0 : Math.max(-500, Math.min(500, next42)); setOffset(nextOff)
     } else {
-      const nextIdx = (siteIdx + dir + sites.length) % sites.length
+      const nextIdx = (siteIdx + dir + allSites.length) % allSites.length
       setSiteIdx(nextIdx)
       setApplied(false)
       if (typeof setActiveSite === 'function') {
-        const nextSite = sites[nextIdx]
+        const nextSite = allSites[nextIdx]
         setActiveSite({ name: nextSite.name, irp: nextSite.irp, k: nextSite.k })
       }
     }
-  }, [mode, vent, sites, siteIdx, setParam, offsetStore, setOffset, setActiveSite])
+  }, [mode, vent, sites, allSites, siteIdx, setParam, offsetStore, setOffset, setActiveSite])
 
   const startPress = (dir) => {
     handleChange(dir)
@@ -235,7 +244,7 @@ padding: '10px', overflowY: 'auto', boxSizing: 'border-box',
             {currentSite?.name ?? '—'}
           </div>
           <div style={{ fontSize: '0.65rem', color: '#4a5568' }}>
-            K {kPente.toFixed(3)} · IRP {currentSite?.irp ?? '—'}
+            K {kPente.toFixed(3)} · IRP {currentSite?.irp ?? '—'}{currentSite?.live && <span style={{ color:'#f0883e', marginLeft:6 }}>● LIVE ({irpNbRuns}r)</span>}
             {applied && <span style={{ color: '#39d353', marginLeft: 8 }}>✓ ACTIVÉ</span>}
           </div>
         </div>
@@ -287,7 +296,7 @@ padding: '10px', overflowY: 'auto', boxSizing: 'border-box',
           <div style={{ display: 'flex', gap: 6 }}>
             {[
               { id: 'vent',   label: 'Vent',    val: `${vent.toFixed(1)} m/s` },
-              { id: 'kpente', label: 'K Pente', val: kPente.toFixed(3) },
+              { id: 'kpente', label: currentSite?.live ? 'K Live' : 'K Pente', val: kPente.toFixed(3) },
               { id: 'offset', label: 'Offset', val: (offsetStore >= 0 ? '+' : '') + offsetStore + 'g' },
             ].map(tab => (
               <div key={tab.id} onClick={() => setMode(tab.id)} style={{
