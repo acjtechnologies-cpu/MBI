@@ -32,6 +32,18 @@ function getMasse0m(v, p4) {
   return T.masse[0]
 }
 
+function ventFromMasse(targetKg, p4, kPente, modelOff, offVal, alt) {
+  let lo = 4.0, hi = 15.5
+  for (let i = 0; i < 30; i++) {
+    const mid = (lo + hi) / 2
+    const m0 = getMasse0m(mid, p4)
+    const mAlt = getMasseAlt(m0, alt)
+    const tg = mAlt * kPente + modelOff / 1000 + offVal / 1000
+    if (tg < targetKg) lo = mid; else hi = mid
+  }
+  return +((lo + hi) / 2).toFixed(1)
+}
+
 function getMasseAlt(m0, alt) {
   if (alt <= 0) return m0
   return m0 * Math.pow(1 - (0.0065 * alt) / 288.15, 5.25588)
@@ -140,7 +152,7 @@ export default function DashboardPilote() {
   const {
     params, offset, activeSite,
     setOffset, setBallastSnap,
-    incrementParam, decrementParam,
+    incrementParam, decrementParam, setParam,
   } = useAppStore(useShallow(s => ({
     params:         s.params,
     offset:         s.offset,
@@ -148,6 +160,7 @@ export default function DashboardPilote() {
     setOffset:      s.setOffset,
     setBallastSnap: s.setBallastSnap,
     incrementParam: s.incrementParam,
+    setParam:       s.setParam,
     decrementParam: s.decrementParam,
   })))
 
@@ -314,7 +327,10 @@ export default function DashboardPilote() {
         dir > 0 ? incrementParam('vent') : decrementParam('vent'); break
       case 'kg': {
         const base = kgManuel !== null ? kgManuel : kgVal
-        setKgManuel(parseFloat(Math.max(model.masseVide / 1000, base + dir * 0.010).toFixed(3)))
+        const nextKg = parseFloat(Math.max(model.masseVide / 1000, base + dir * 0.010).toFixed(3))
+        setKgManuel(nextKg)
+        const syncVent = ventFromMasse(nextKg, model.poly4, kPente, modelOffset, offsetVal, altitude)
+        if (syncVent >= 4.0 && syncVent <= 15.5) setParam('vent', syncVent)
         break
       }
       case 'offset':
