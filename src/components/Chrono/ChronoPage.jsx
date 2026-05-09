@@ -320,6 +320,14 @@ const [gistStatus, setGistStatus] = useState('');
   const bulle        = useESPStore(s => s.data.BULLE) ?? false;
   const sendMarker   = useESPStore(s => s.sendMarker);
   const addIrpRun    = useIrpStore(s => s.addRun);
+  const loadIrpRuns  = useIrpStore(s => s.loadRuns);
+
+  // Charger tous les runs Dexie dans irpStore au montage
+  useEffect(() => {
+    db.runs.toArray().then(allRuns => {
+      if (allRuns.length >= 2) loadIrpRuns(allRuns)
+    }).catch(() => {})
+  }, [])
   const kActuel      = useIrpStore(s => s.kActuel);
   const irpVal       = useIrpStore(s => s.irp);
   const nbIrpRuns    = useIrpStore(s => s.nbRuns);

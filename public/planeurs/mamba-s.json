@@ -1,0 +1,79 @@
+{
+  "id": "mamba-s",
+  "nom": "Mamba S",
+  "drapeau": "🇫🇷",
+  "constructeur": "Baudis",
+  "masseVide": 2550,
+  "cgVide": 102,
+  "surface": 57,
+  "offset": -144,
+  "masse_ref_8ms": 3.413,
+  "version": "1.0",
+  "poly4": {
+    "type": "coefficients",
+    "A4": -0.0001728,
+    "A3": 0.008178,
+    "A2": -0.1498,
+    "A1": 1.34713,
+    "A0": -1.19522
+  },
+  "soutes": {
+    "avant-cle": {
+      "id": "avant-cle",
+      "nom": "Avant Clé",
+      "couleur": "#6b7280",
+      "distanceBA": 80,
+      "capacite": 3,
+      "materiaux": [
+        {
+          "nom": "Laiton",
+          "masse": 71,
+          "stock": 3
+        }
+      ]
+    },
+    "centrale-cle": {
+      "id": "centrale-cle",
+      "nom": "Centrale Clé",
+      "couleur": "#3b82f6",
+      "distanceBA": 102,
+      "capacite": 3,
+      "materiaux": [
+        {
+          "nom": "Laiton",
+          "masse": 71,
+          "stock": 0
+        },
+        {
+          "nom": "Plomb",
+          "masse": 88,
+          "stock": 3
+        }
+      ]
+    },
+    "arriere-aile": {
+      "id": "arriere-aile",
+      "nom": "Arrière Aile",
+      "couleur": "#6b7280",
+      "distanceBA": 129,
+      "capacite": 4,
+      "materiaux": [
+        {
+          "nom": "Laiton",
+          "masse": 71,
+          "stock": 4
+        },
+        {
+          "nom": "Lourd",
+          "masse": 200,
+          "stock": 0
+        },
+        {
+          "nom": "Tres lourd",
+          "masse": 300,
+          "stock": 0
+        }
+      ]
+    }
+  }
+}

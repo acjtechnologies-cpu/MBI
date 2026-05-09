@@ -9,6 +9,14 @@
       "url": "planeurs/pike-precision-2.json"
     },
     {
+      "id": "mamba-s",
+      "nom": "Mamba S",
+      "constructeur": "Baudis",
+      "masseVide": 2550,
+      "drapeau": "🇫🇷",
+      "url": "planeurs/mamba-s.json"
+    },
+    {
       "id": "freestyler-7",
       "nom": "Freestyler 7",
       "constructeur": "TUD",
