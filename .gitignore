@@ -30,3 +30,5 @@ fix_*.cjs
 scan_*.cjs
 solve_*.cjs
 analyse_*.cjs
+
+.vite/
