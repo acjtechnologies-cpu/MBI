@@ -2,6 +2,7 @@
 import { useAppStore } from '../../stores/appStore'
 import { useShallow } from 'zustand/react/shallow'
 import { useModelStore } from '../../stores/modelStore'
+import GliderBrowser from '../GliderBrowser'
 import MatriceInteractive from './MatriceInteractive'
 
 // -”€ Poly4 fallback (Mamba - pas de model.poly4) -”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-
@@ -172,6 +173,9 @@ export default function DashboardPilote() {
   const [selectedParam, setSelectedParam] = useState('vent')
   const [kgManuel,      setKgManuel]      = useState(null)
   const [tab,           setTab]           = useState('calc')
+  const [showBrowser,  setShowBrowser]   = useState(false)
+  const importModel    = useModelStore(s => s.importModel)
+  const setActiveModel = useModelStore(s => s.setActiveModel)
   const [matrixIdx,     setMatrixIdx]     = useState(null)
   const [cfgAppliquee,  setCfgAppliquee]  = useState(null)
   const [gpsStatus,     setGpsStatus]     = useState('')
@@ -475,9 +479,9 @@ export default function DashboardPilote() {
               </div>
               <div style={{ display:'flex', gap:4 }}>
                 <button
-                  onClick={() => setTab('calc')}
-                  style={{ flex:1, padding:'6px 0', borderRadius:6, border: tab === 'calc' ? '1px solid #3fb950' : '1px solid #30363d', background: tab === 'calc' ? '#161b22' : 'transparent', color: tab === 'calc' ? '#fff' : '#4a5568', fontSize:11, fontWeight:700, cursor:'pointer', touchAction:'manipulation', WebkitTapHighlightColor:'transparent' }}>
-                  CALCULATEUR
+                  onClick={() => setShowBrowser(true)}
+                  style={{ flex:1, padding:'6px 0', borderRadius:6, border: '1px solid #30363d', background: 'transparent', color: '#58a6ff', fontSize:11, fontWeight:700, cursor:'pointer', touchAction:'manipulation', WebkitTapHighlightColor:'transparent' }}>
+                  PLANEUR
                 </button>
                 {matrix.length > 0 && (
                   <button
@@ -489,6 +493,18 @@ export default function DashboardPilote() {
               </div>
             </div>
           </div>
+        )}
+
+        {/* MODAL PLANEUR */}
+        {showBrowser && (
+          <GliderBrowser
+            onClose={() => setShowBrowser(false)}
+            onImport={(data) => {
+              if (importModel) importModel(data)
+              if (setActiveModel) setActiveModel(data.id)
+              setShowBrowser(false)
+            }}
+          />
         )}
 
         {/* TAB MATRICE */}
