@@ -1,4 +1,4 @@
-/**
+﻿/**
  * IRP Store — Calcul IRP/K temps réel depuis les runs ChronoPage
  *
  * Formules :
@@ -70,7 +70,7 @@ export const useIrpStore = create((set, get) => ({
 
     // Filtrer les runs valides (avec durée et vent)
     const valid = runs.filter(r =>
-      r.duree_ms > 0 && r.duree_ms < 120000 && // < 2 min = run valide
+      r.duree_ms > 20000 && r.duree_ms < 120000 && // < 2 min = run valide
       r.vent_snap > 0
     )
 
