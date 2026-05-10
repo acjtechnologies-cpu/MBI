@@ -60,18 +60,21 @@ export default function Poly4Page() {
   const model         = useModelStore(s => s.models?.[s.activeModelId] ?? null)
 
   // ── State local ───────────────────────────────────────────────────────────
-  const [mode, setMode]     = useState('vent')
+  const mode            = useAppStore(s => s.poly4Mode ?? 'vent')
+  const setMode         = useAppStore(s => s.setPoly4Mode)
   const [sites, setSites]   = useState(() => {
     try {
       return JSON.parse(localStorage.getItem('mbi_sites') || 'null') || DEFAULT_SITES
     } catch { return DEFAULT_SITES }
   })
-  const [siteIdx, setSiteIdx] = useState(() => {
+  const siteIdxRaw      = useAppStore(s => s.poly4SiteIdx)
+  const setSiteIdx      = useAppStore(s => s.setPoly4SiteIdx)
+  const siteIdx = siteIdxRaw ?? (() => {
     if (!activeSite?.name) return 6
     const idx = (JSON.parse(localStorage.getItem('mbi_sites') || 'null') || DEFAULT_SITES)
       .findIndex(s => s.name === activeSite.name)
     return idx >= 0 ? idx : 6
-  })
+  })()
   const [newName, setNewName] = useState('')
   const [newK,    setNewK]    = useState('')
   const [newIrp,  setNewIrp]  = useState('')

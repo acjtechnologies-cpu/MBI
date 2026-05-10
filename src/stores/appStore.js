@@ -23,7 +23,9 @@ const useAppStore = create(
       lievre: 38.0,     // Chrono li�vre
 
       // Offset
-      offset: 0,        // Offset en grammes
+      offset: 0,
+      poly4Mode: 'vent',
+      poly4SiteIdx: 6,        // Offset en grammes
  activeSite: { name: '', irp: 171, k: 1.000 },
       k_up: 1.00,
       alpha: 1.00,
@@ -35,6 +37,8 @@ altitude: 0,
 
       // Actions param�tres m�t�o
       setActiveSite: (site) => set({ activeSite: site }),
+      setPoly4Mode: (v) => set({ poly4Mode: v }),
+      setPoly4SiteIdx: (v) => set({ poly4SiteIdx: v }),
       setParam: (key, value) =>
         set((state) => ({
           params: { ...state.params, [key]: value },
@@ -115,6 +119,8 @@ altitude: 0,
         ballastSnap: state.ballastSnap,
         k_up: state.k_up,
         alpha: state.alpha,
+        poly4Mode: state.poly4Mode,
+        poly4SiteIdx: state.poly4SiteIdx,
         altitude: state.altitude   
       }),
     }
