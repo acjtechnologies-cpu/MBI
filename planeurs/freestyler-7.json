@@ -233,7 +233,7 @@
       "nom": "Avant Clé",
       "couleur": "#ffd700",
       "distanceBA": 75,
-      "capacite": 1,
+      "capacite": 3,
       "materiaux": [
         {
           "nom": "Laiton",
@@ -247,7 +247,7 @@
       "nom": "Centrale Clé",
       "couleur": "#58a6ff",
       "distanceBA": 88,
-      "capacite": 1,
+      "capacite": 3,
       "materiaux": [
         {
           "nom": "Laiton",
