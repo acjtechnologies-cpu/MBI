@@ -75,9 +75,7 @@ export default function Poly4Page() {
       .findIndex(s => s.name === activeSite.name)
     return idx >= 0 ? idx : 6
   })()
-  const [newName, setNewName] = useState('')
-  const [newK,    setNewK]    = useState('')
-  const [newIrp,  setNewIrp]  = useState('')
+  // IRP LIVE values read from irpStore (fed by ChronoPage)
   const [applied, setApplied] = useState(false)
 
   const chartRef   = useRef(null)
@@ -198,33 +196,16 @@ export default function Poly4Page() {
   // Si formulaire rempli (nom + K > 0) → crée + sauve site + active
   // Sinon → active le site navigué vers appStore (Pilotage en bénéficie)
   function handleApply() {
-    let siteToApply = currentSite
-    const kVal   = parseFloat(newK)
-    const irpVal = parseInt(newIrp)
-
-    if (newName.trim() && !isNaN(kVal) && kVal > 0) {
-      const entry   = { name: newName.trim(), irp: isNaN(irpVal) ? 0 : irpVal, k: kVal }
-      const updated = [...sites, entry]
-      setSites(updated)
-      localStorage.setItem('mbi_sites', JSON.stringify(updated))
-      setSiteIdx(updated.length - 1)
-      siteToApply = entry
-      setNewName(''); setNewK(''); setNewIrp('')
-    }
-
-    if (typeof setActiveSite === 'function') {
-      setActiveSite({ name: siteToApply.name, irp: siteToApply.irp, k: siteToApply.k })
+    const site = currentSite
+    if (typeof setActiveSite === 'function' && site) {
+      setActiveSite({ name: site.name, irp: site.irp, k: site.k })
     }
     setApplied(true)
     setTimeout(() => setApplied(false), 2500)
   }
 
   const masseColor = masseFinale > 4.5 ? '#ffb74d' : masseFinale < 2.5 ? '#ff4b91' : '#39d353'
-  const btnLabel   = applied
-    ? '✓ PENTE ACTIVÉE'
-    : (newName.trim() && parseFloat(newK) > 0)
-      ? '+ SAUVER & ACTIVER'
-      : 'APPLIQUER'
+  const btnLabel   = applied ? '✓ PENTE ACTIVÉE' : 'APPLIQUER'
 
   return (
     <div style={{
@@ -325,13 +306,25 @@ padding: '10px', overflowY: 'auto', boxSizing: 'border-box',
             borderRadius: 10, padding: '10px 12px',
             display: 'flex', flexDirection: 'column', touchAction: 'manipulation', gap: 6,
           }}>
-            <input type="text" placeholder="Nom du site" value={newName}
-              onChange={e => setNewName(e.target.value)} style={inputStyle} />
-            <div style={{ display: 'flex', gap: 6 }}>
-              <input type="number" placeholder="K" value={newK}
-                onChange={e => setNewK(e.target.value)} style={{ ...inputStyle, width: 70 }} />
-              <input type="number" placeholder="IRP" value={newIrp}
-                onChange={e => setNewIrp(e.target.value)} style={{ ...inputStyle, flex: 1 }} />
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'4px 0' }}>
+              <div style={{ fontSize:11, color:'#8b949e', fontWeight:600 }}>{currentSite?.name || 'Aucune pente'}</div>
+              {currentSite?.live && <div style={{ fontSize:10, color:'#f0883e', fontWeight:700 }}>● LIVE ({irpNbRuns}r)</div>}
+            </div>
+            <div style={{ display:'flex', gap:12 }}>
+              <div style={{ flex:1 }}>
+                <div style={{ fontSize:9, color:'#4a5568', fontWeight:600 }}>K</div>
+                <div style={{ fontSize:18, fontWeight:900, color: currentSite?.live ? '#58a6ff' : '#e6edf3' }}>{kPente.toFixed(3)}</div>
+              </div>
+              <div style={{ flex:1 }}>
+                <div style={{ fontSize:9, color:'#4a5568', fontWeight:600 }}>IRP</div>
+                <div style={{ fontSize:18, fontWeight:900, color: currentSite?.live ? '#58a6ff' : '#e6edf3' }}>{currentSite?.irp ?? '—'}</div>
+              </div>
+              {iqaHybrid && (
+                <div style={{ flex:1 }}>
+                  <div style={{ fontSize:9, color:'#4a5568', fontWeight:600 }}>IQA hyb</div>
+                  <div style={{ fontSize:18, fontWeight:900, color:'#f0883e' }}>{iqaHybrid}</div>
+                </div>
+              )}
             </div>
             <button onClick={handleApply} style={{
               border: 'none', padding: '11px 0', borderRadius: 6, width: '100%',
