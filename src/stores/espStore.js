@@ -9,6 +9,7 @@ import { create } from 'zustand'
 import { ESP32_CONFIG } from '../constants'
 
 const WS_URL = 'ws://192.168.4.1:81'
+const Q_REF = 39.2  // ½ × 1.225 × 8² Pa (ISA 8m/s reference Poly4)
 
 let _ws = null
 let _demoTimer = null
@@ -70,6 +71,9 @@ export const useESPStore = create((set, get) => ({
     BULLE: 0,
   },
 
+  q: null,
+  irpx: null,
+
   turbBuf: Array(60).fill(0),
   turbSigma: 0,
   pid: { kp: 1.2, ki: 0.05, kd: 0.30 },
@@ -84,6 +88,14 @@ export const useESPStore = create((set, get) => ({
       error: null,
       sdActive: incoming.SD !== undefined ? !!incoming.SD : s.sdActive,
     }))
+
+    // IRPX: pression dynamique + IQA temps reel
+    const spd = next.SPD || 0
+    const rho = next.RHO || 1.225
+    const iqa = next.IQA || 0
+    const q = spd > 0 ? +(0.5 * rho * spd * spd).toFixed(1) : null
+    const irpx = (q !== null && iqa > 0) ? +((q / Q_REF) * iqa).toFixed(3) : null
+    set({ q, irpx })
 
     // Altitude -> appStore partage
     if (incoming.ALT !== undefined && incoming.ALT > 0 && setAltitude) {
@@ -248,6 +260,6 @@ export const useESPStore = create((set, get) => ({
     get().wsStop()
     get().stopDemo()
     set({ connected: false, wsStatus: 'off', lastUpdate: null, error: null, demo: false,
-          sdActive: false, turbBuf: Array(60).fill(0), turbSigma: 0 })
+          sdActive: false, turbBuf: Array(60).fill(0), turbSigma: 0, q: null, irpx: null })
   },
 }))

@@ -40,6 +40,7 @@ const DEFAULT_SITES = [
 ]
 
 import { useIrpStore } from '../../stores/irpStore'
+import { useESPStore } from '../../stores/espStore'
 
 const V_RANGE = Array.from({ length: 226 }, (_, i) => 4.0 + i * 0.05)
 
@@ -57,6 +58,9 @@ export default function Poly4Page() {
   const irpTrend      = useIrpStore(s => s.trend)
   const irpNbRuns     = useIrpStore(s => s.nbRuns)
   const iqaHybrid     = useIrpStore(s => s.iqaHybrid)
+  const espQ          = useESPStore(s => s.q)
+  const espIrpx       = useESPStore(s => s.irpx)
+  const espConnected  = useESPStore(s => s.connected)
   const activeSite    = useAppStore(s => s.activeSite)
   const setActiveSite = useAppStore(s => s.setActiveSite)
   const model         = useModelStore(s => s.models?.[s.activeModelId] ?? null)
@@ -330,6 +334,22 @@ padding: '10px', overflowY: 'auto', boxSizing: 'border-box',
                 </div>
               )}
             </div>
+            {espIrpx !== null && (
+              <div style={{ display:'flex', gap:12, padding:'6px 0', borderTop:'1px solid #1e2535', marginTop:2 }}>
+                <div style={{ flex:1 }}>
+                  <div style={{ fontSize:9, color:'#4a5568', fontWeight:600 }}>IRPX</div>
+                  <div style={{ fontSize:18, fontWeight:900, color:'#00d1b2' }}>{espIrpx.toFixed(2)}</div>
+                </div>
+                <div style={{ flex:1 }}>
+                  <div style={{ fontSize:9, color:'#4a5568', fontWeight:600 }}>q</div>
+                  <div style={{ fontSize:18, fontWeight:900, color:'#00d1b2' }}>{espQ} Pa</div>
+                </div>
+                <div style={{ flex:1 }}>
+                  <div style={{ fontSize:9, color:'#4a5568', fontWeight:600 }}>IQA</div>
+                  <div style={{ fontSize:18, fontWeight:900, color:'#00d1b2' }}>{(useESPStore.getState().data?.IQA || 0).toFixed(1)}</div>
+                </div>
+              </div>
+            )}
             <button onClick={handleApply} style={{
               border: 'none', padding: '11px 0', borderRadius: 6, width: '100%',
               color: 'white', fontSize: '0.72rem', fontWeight: 'bold', cursor: 'pointer',

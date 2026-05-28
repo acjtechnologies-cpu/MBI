@@ -333,6 +333,8 @@ const [gistStatus, setGistStatus] = useState('');
   const nbIrpRuns    = useIrpStore(s => s.nbRuns);
   const espConnected = useESPStore(s => s.connected);
   const sdActive     = useESPStore(s => s.sdActive);
+  const qSnap        = useESPStore(s => s.q);
+  const irpxSnap     = useESPStore(s => s.irpx);
 
   // Chrono
   const t0Ref      = useRef(null);
@@ -377,6 +379,8 @@ const [gistStatus, setGistStatus] = useState('');
   iqa_snap:    iqaSnap,
   vent_snap:   ventSnap,
   sgrad_snap:  sGradSnap,
+  q_snap:      qSnap,
+  irpx_snap:   irpxSnap,
   bulle_snap:  bulleSnap,
   t_start:     t0Ref.current,
   site:        { ...useAppStore.getState().activeSite },
