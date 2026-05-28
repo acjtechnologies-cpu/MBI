@@ -362,8 +362,3 @@ padding: '10px', overflowY: 'auto', boxSizing: 'border-box',
   )
 }
 
-const inputStyle = {
-  background: '#0d1117', border: '1px solid #21262d', color: 'white',
-  padding: '7px 10px', borderRadius: 6, fontSize: '0.82rem', outline: 'none',
-  width: '100%', boxSizing: 'border-box',
-}
