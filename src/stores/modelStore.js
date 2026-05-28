@@ -302,13 +302,15 @@ const useModelStore = create(
       },
 
       duplicateModel: (modelId) => {
-        set((state) => {
-          if (!state.models?.[modelId]) return state
-          const src = state.models[modelId]
-          const newId = 'model-' + Date.now()
-          const copy = { ...src, id: newId, nom: src.nom + ' (copie)' }
-          return { models: { ...state.models, [newId]: copy } }
-        })
+        const state = get()
+        if (!state.models?.[modelId]) return null
+        const src = state.models[modelId]
+        const newId = 'model-' + Date.now()
+        const copy = JSON.parse(JSON.stringify(src))
+        copy.id = newId
+        copy.nom = src.nom + ' (copie)'
+        set((s) => ({ models: { ...s.models, [newId]: copy } }))
+        return newId
       },      exportModel: (modelId) => {
         const state = get()
         if (!state.models?.[modelId]) return null
