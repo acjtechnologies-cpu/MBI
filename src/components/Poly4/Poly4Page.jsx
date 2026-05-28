@@ -51,6 +51,8 @@ export default function Poly4Page() {
   const altitude      = useAppStore(s => s.altitude ?? 0)
   const offsetStore   = useAppStore(s => s.offset ?? -144)
   const irpK          = useIrpStore(s => s.kActuel)
+  const irpConfidence = useIrpStore(s => s.confidence)
+  const setSiteRef    = useIrpStore(s => s.setSiteRef)
   const irpVal        = useIrpStore(s => s.irp)
   const irpTrend      = useIrpStore(s => s.trend)
   const irpNbRuns     = useIrpStore(s => s.nbRuns)
@@ -182,9 +184,10 @@ export default function Poly4Page() {
       if (typeof setActiveSite === 'function') {
         const nextSite = allSites[nextIdx]
         setActiveSite({ name: nextSite.name, irp: nextSite.irp, k: nextSite.k })
+          setSiteRef(nextSite.irp, nextSite.name)
       }
     }
-  }, [mode, vent, sites, allSites, siteIdx, setParam, offsetStore, setOffset, setActiveSite])
+  }, [mode, vent, sites, allSites, siteIdx, setParam, offsetStore, setOffset, setActiveSite, setSiteRef])
 
   const startPress = (dir) => {
     handleChange(dir)
@@ -199,6 +202,7 @@ export default function Poly4Page() {
     const site = currentSite
     if (typeof setActiveSite === 'function' && site) {
       setActiveSite({ name: site.name, irp: site.irp, k: site.k })
+      setSiteRef(site.irp, site.name)
     }
     setApplied(true)
     setTimeout(() => setApplied(false), 2500)
@@ -228,7 +232,7 @@ padding: '10px', overflowY: 'auto', boxSizing: 'border-box',
             {currentSite?.name ?? '—'}
           </div>
           <div style={{ fontSize: '0.65rem', color: '#4a5568' }}>
-            K {kPente.toFixed(3)} · IRP {currentSite?.irp ?? '—'}{currentSite?.live && <span style={{ color:'#f0883e', marginLeft:6 }}>● LIVE ({irpNbRuns}r)</span>}
+            K {kPente.toFixed(3)} · IRP {currentSite?.irp ?? '—'}{currentSite?.live && <span style={{ color: irpConfidence === 'HIGH' ? '#3fb950' : irpConfidence === 'MEDIUM' ? '#58a6ff' : '#f0883e', marginLeft:6 }}>● {irpConfidence || 'LIVE'} ({irpNbRuns}r)</span>}
             {applied && <span style={{ color: '#39d353', marginLeft: 8 }}>✓ ACTIVÉ</span>}
           </div>
         </div>
@@ -308,7 +312,7 @@ padding: '10px', overflowY: 'auto', boxSizing: 'border-box',
           }}>
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'4px 0' }}>
               <div style={{ fontSize:11, color:'#8b949e', fontWeight:600 }}>{currentSite?.name || 'Aucune pente'}</div>
-              {currentSite?.live && <div style={{ fontSize:10, color:'#f0883e', fontWeight:700 }}>● LIVE ({irpNbRuns}r)</div>}
+              {currentSite?.live && <div style={{ fontSize:10, color: irpConfidence === 'HIGH' ? '#3fb950' : irpConfidence === 'MEDIUM' ? '#58a6ff' : '#f0883e', fontWeight:700 }}>● {irpConfidence || 'LIVE'} ({irpNbRuns}r)</div>}
             </div>
             <div style={{ display:'flex', gap:12 }}>
               <div style={{ flex:1 }}>

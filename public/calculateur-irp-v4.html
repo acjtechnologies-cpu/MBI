@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Calculateur IRP V4 — F3F PIT</title>
+<style>
+  :root {
+    --bg: #05070a;
+    --panel: #0d1117;
+    --panel2: #131720;
+    --border: #1e2535;
+    --border2: #30363d;
+    --txt: #e8eaf0;
+    --muted: #8b949e;
+    --green: #3fb950;
+    --blue: #1a73e8;
+    --orange: #ffb74d;
+    --red: #f85149;
+    --purple: #a78bfa;
+    --cyan: #00d1b2;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { height:100dvh; overflow-y:auto; background:var(--bg); color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',monospace,sans-serif;
+    user-select:none; }
+
+  h1 { font-size:15px; font-weight:900; letter-spacing:2px; color:var(--cyan);
+    padding:14px 16px 0; text-transform:uppercase; }
+  .sub { font-size:10px; color:var(--muted); padding:2px 16px 12px; letter-spacing:1px; }
+
+  .card { background:var(--panel); border:1px solid var(--border); border-radius:12px;
+    margin:0 12px 12px; padding:14px; }
+  .card-title { font-size:10px; font-weight:700; color:var(--muted); letter-spacing:1px;
+    text-transform:uppercase; margin-bottom:10px; }
+
+  .manche-row { display:flex; gap:6px; align-items:center; }
+  .manche-num { font-size:10px; color:var(--muted); width:20px; text-align:right; flex-shrink:0; }
+  input[type=number], input[type=text] {
+    background:var(--panel2); border:1px solid var(--border2); color:var(--txt);
+    border-radius:8px; padding:7px 10px; font-size:13px; font-weight:700; width:100%;
+    font-family:inherit; outline:none; text-align:center; }
+  input[type=number]:focus, input[type=text]:focus { border-color:var(--blue); }
+  .inp-lbl { font-size:9px; color:var(--muted); text-align:center; margin-top:2px; }
+
+  .results-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:10px; }
+  .res-card { background:var(--panel2); border-radius:8px; padding:10px; text-align:center;
+    border:1px solid var(--border); }
+  .res-val { font-size:20px; font-weight:900; line-height:1; }
+  .res-lbl { font-size:9px; color:var(--muted); margin-top:4px; letter-spacing:.5px; }
+
+  .irp-big { text-align:center; padding:14px; background:var(--panel2);
+    border-radius:10px; border:1px solid var(--border); margin-bottom:10px; }
+  .irp-val { font-size:48px; font-weight:900; line-height:1; color:var(--cyan); }
+  .irp-sub { font-size:11px; color:var(--muted); margin-top:4px; }
+
+  .k-badge { display:inline-block; padding:6px 18px; border-radius:20px;
+    font-size:18px; font-weight:900; margin-top:8px; }
+  .conf-badge { display:inline-block; padding:3px 10px; border-radius:12px;
+    font-size:10px; font-weight:700; margin-left:8px; letter-spacing:.5px; }
+
+  .table { width:100%; border-collapse:collapse; font-size:11px; }
+  .table th { color:var(--muted); font-weight:700; padding:4px 6px; text-align:right;
+    border-bottom:1px solid var(--border); letter-spacing:.5px; }
+  .table th:first-child { text-align:center; }
+  .table td { padding:5px 6px; text-align:right; border-bottom:1px solid rgba(255,255,255,.04); }
+  .table td:first-child { text-align:center; color:var(--muted); }
+  .table tr.skip td { color:var(--border2); text-decoration:line-through; }
+
+  .sites-list { display:flex; flex-direction:column; gap:4px; }
+  .site-row { display:flex; align-items:center; gap:8px; padding:8px 10px;
+    background:var(--panel2); border-radius:8px; border:1px solid var(--border);
+    cursor:pointer; transition:border-color .15s; }
+  .site-row:hover { border-color:var(--blue); }
+  .site-row.active { border-color:var(--cyan); background:rgba(0,209,178,.08); }
+  .site-name { flex:1; font-size:12px; font-weight:700; }
+  .site-irp { font-size:11px; color:var(--muted); }
+  .site-k { font-size:13px; font-weight:900; min-width:42px; text-align:right; }
+
+  .btn { padding:10px 16px; border-radius:8px; border:none; cursor:pointer;
+    font-size:13px; font-weight:700; font-family:inherit; transition:all .15s;
+    touch-action:manipulation; }
+  .btn-blue { background:var(--blue); color:#fff; }
+  .btn-green { background:#238636; color:#fff; }
+  .btn-red { background:rgba(248,81,73,.2); color:var(--red); border:1px solid var(--red); }
+  .btn-row { display:flex; gap:8px; margin-top:8px; }
+  .btn-row .btn { flex:1; }
+
+  .add-row { display:flex; gap:6px; align-items:flex-end; }
+  .add-row > div { flex:1; }
+
+  .formula { background:rgba(0,209,178,.06); border:1px solid rgba(0,209,178,.2);
+    border-radius:8px; padding:12px; text-align:center; margin-bottom:10px; }
+  .formula .eq { font-size:13px; font-weight:700; color:var(--cyan); margin-bottom:3px; }
+  .formula .eq2 { font-size:11px; color:var(--muted); }
+
+  .gauge-wrap { position:relative; height:14px; border-radius:7px; overflow:hidden;
+    background:linear-gradient(90deg,#f85149,#ffb74d,#3fb950,#ffb74d,#1a73e8);
+    margin:8px 0; }
+  .gauge-cursor { position:absolute; top:0; width:3px; height:100%;
+    background:#fff; border-radius:2px; transition:left .3s; box-shadow:0 0 6px #fff; }
+  .gauge-labels { display:flex; justify-content:space-between; font-size:9px;
+    color:var(--muted); margin-top:2px; }
+
+  .sep { height:1px; background:var(--border); margin:10px 0; }
+
+  .iqa-bar-wrap { position:relative; height:14px; border-radius:7px; overflow:hidden;
+    background:linear-gradient(90deg,#f85149 0%,#ffb74d 30%,#3fb950 60%,#00d1b2 100%);
+    margin:8px 0; }
+  .iqa-cursor { position:absolute; top:0; width:3px; height:100%;
+    background:#fff; border-radius:2px; transition:left .3s; box-shadow:0 0 6px #fff; }
+  .iqa-labels { display:flex; justify-content:space-between; font-size:9px;
+    color:var(--muted); margin-top:2px; }
+
+  .filtered-tag { font-size:9px; color:var(--red); background:rgba(248,81,73,.12);
+    padding:1px 5px; border-radius:4px; margin-left:4px; }
+
+  .ref-selector { display:flex; gap:6px; align-items:center; margin-bottom:12px;
+    padding:10px; background:var(--panel2); border-radius:8px; border:1px solid var(--border); }
+  .ref-val { font-size:22px; font-weight:900; color:var(--cyan); }
+  .ref-name { font-size:12px; color:var(--txt); font-weight:600; }
+  .ref-info { font-size:9px; color:var(--muted); }
+</style>
+</head>
+<body>
+
+<h1>📐 Calculateur IRP V4</h1>
+<div class="sub">K<sub>dyn</sub> = IRP<sub>raw</sub> / IRP<sub>site_ref</sub> — F3F PIT</div>
+
+<!-- Formules V4 -->
+<div class="card">
+  <div class="formula">
+    <div class="eq">Trend = T<sub>median</sub> × (1 − σ<sub>T</sub>)</div>
+    <div class="eq">IRP<sub>raw</sub> = Trend × V<sub>moy</sub><sup> 0.7</sup></div>
+    <div class="eq" style="color:var(--orange)">K<sub>dyn</sub> = clamp(IRP<sub>raw</sub> / IRP<sub>site_ref</sub>, 0.85, 1.15)</div>
+    <div class="eq2" style="margin-top:6px;">IQA<sub>pilot</sub> = clamp((60 − Trend) / 3, 0, 10)</div>
+    <div class="eq2">IQA<sub>hybrid</sub> = 0.6 × IQA<sub>station</sub> + 0.4 × IQA<sub>pilot</sub></div>
+    <div class="eq2" style="margin-top:4px;color:var(--green)">Confiance : LOW (&lt;5r ou σ&gt;15%) · MEDIUM (5-15r, σ&lt;15%) · HIGH (&gt;15r, σ&lt;10%)</div>
+  </div>
+
+  <!-- Référence site -->
+  <div class="card-title">Référence site (cliquer un site ci-dessous ou saisir)</div>
+  <div class="ref-selector">
+    <div style="flex:1">
+      <div class="ref-name" id="refSiteName">Aucun site sélectionné</div>
+      <div class="ref-info">IRP<sub>site_ref</sub> utilisé pour K<sub>dyn</sub></div>
+    </div>
+    <div class="ref-val" id="refIrpVal">171</div>
+  </div>
+  <input type="number" id="inpIrpRef" placeholder="IRP ref manuel (défaut 171)" min="50" max="400" step="1" style="margin-bottom:12px;">
+
+  <!-- Nom du site -->
+  <div class="card-title">Nom du site</div>
+  <input type="text" id="siteName" placeholder="Ex: Saint Ferriol" style="margin-bottom:12px;">
+
+  <!-- IQA station optionnel -->
+  <div class="card-title">IQA station (optionnel, 0-10)</div>
+  <input type="number" id="inpIqaStation" placeholder="IQA station" min="0" max="10" step="0.1" style="margin-bottom:12px;">
+
+  <!-- Saisie manches -->
+  <div class="card-title">Runs (temps en secondes + vent m/s)</div>
+  <div id="manchesList"></div>
+
+  <div class="add-row" style="margin-top:8px;">
+    <div>
+      <input type="number" id="inpT" placeholder="T (s)" min="0" max="120" step="0.01">
+      <div class="inp-lbl">Temps (s)</div>
+    </div>
+    <div>
+      <input type="number" id="inpV" placeholder="V (m/s)" min="0" max="25" step="0.1">
+      <div class="inp-lbl">Vent (m/s)</div>
+    </div>
+    <button class="btn btn-blue" onclick="addManche()" style="flex-shrink:0;padding:10px 14px;">+ Ajouter</button>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-red" onclick="clearManches()">🗑 Vider</button>
+    <button class="btn btn-green" onclick="calculate()">⚡ Calculer IRP</button>
+  </div>
+</div>
+
+<!-- Résultats -->
+<div class="card" id="resultsCard" style="display:none;">
+  <div class="card-title">Résultats V4 — K<sub>dyn</sub></div>
+
+  <div class="irp-big">
+    <div class="irp-val" id="irpVal">—</div>
+    <div class="irp-sub">IRP<sub>raw</sub> <span id="irpRefDisplay" style="color:var(--muted)">/ ref 171</span></div>
+    <div id="kBadge" class="k-badge">K<sub>dyn</sub> = —</div>
+    <span id="confBadge" class="conf-badge"></span>
+  </div>
+
+  <!-- Stats intermédiaires -->
+  <div class="results-grid">
+    <div class="res-card">
+      <div class="res-val" id="resTrend" style="color:var(--cyan)">—</div>
+      <div class="res-lbl">TREND</div>
+    </div>
+    <div class="res-card">
+      <div class="res-val" id="resTmedian" style="color:var(--blue)">—</div>
+      <div class="res-lbl">T MÉDIAN</div>
+    </div>
+    <div class="res-card">
+      <div class="res-val" id="resSigmaT" style="color:var(--purple)">—</div>
+      <div class="res-lbl">σ<sub>T</sub> (CV)</div>
+    </div>
+  </div>
+
+  <div class="results-grid">
+    <div class="res-card">
+      <div class="res-val" id="resVmoy" style="color:var(--orange)">—</div>
+      <div class="res-lbl">V MOY</div>
+    </div>
+    <div class="res-card">
+      <div class="res-val" id="resTmean" style="color:var(--muted)">—</div>
+      <div class="res-lbl">T MOYEN</div>
+    </div>
+    <div class="res-card">
+      <div class="res-val" id="resSigma" style="color:var(--muted)">—</div>
+      <div class="res-lbl">σ (s)</div>
+    </div>
+  </div>
+
+  <div class="results-grid">
+    <div class="res-card">
+      <div class="res-val" id="resNvalid" style="color:var(--green)">—</div>
+      <div class="res-lbl">RUNS VALIDES</div>
+    </div>
+    <div class="res-card">
+      <div class="res-val" id="resIqaPilot" style="color:var(--cyan)">—</div>
+      <div class="res-lbl">IQA PILOT</div>
+    </div>
+    <div class="res-card">
+      <div class="res-val" id="resIqaHybrid" style="color:var(--green)">—</div>
+      <div class="res-lbl">IQA HYBRID</div>
+    </div>
+  </div>
+
+  <!-- Jauge K_dyn -->
+  <div class="card-title">Position K<sub>dyn</sub></div>
+  <div class="gauge-wrap">
+    <div class="gauge-cursor" id="gaugeCursor" style="left:50%"></div>
+  </div>
+  <div class="gauge-labels">
+    <span>0.85 Léger</span>
+    <span>1.00 Ref site</span>
+    <span>1.15 Dynamique</span>
+  </div>
+
+  <div class="sep"></div>
+
+  <!-- Jauge IQA pilot -->
+  <div class="card-title">IQA pilot</div>
+  <div class="iqa-bar-wrap">
+    <div class="iqa-cursor" id="iqaCursor" style="left:50%"></div>
+  </div>
+  <div class="iqa-labels">
+    <span>0 Nul</span>
+    <span>5 Moyen</span>
+    <span>10 Optimal</span>
+  </div>
+
+  <div class="sep"></div>
+
+  <!-- Table détail -->
+  <div class="card-title">Détail par run</div>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>T (s)</th>
+        <th>V (m/s)</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+
+  <div class="btn-row">
+    <button class="btn btn-green" onclick="saveSite()">💾 Sauver ce site</button>
+  </div>
+  <div id="saveMsg" style="font-size:10px;color:var(--muted);text-align:center;margin-top:4px;"></div>
+</div>
+
+<!-- Sites enregistrés -->
+<div class="card">
+  <div class="card-title">Sites enregistrés — cliquer pour utiliser comme référence</div>
+  <div id="sitesList" class="sites-list"></div>
+</div>
+
+<script>
+// ── Constantes ──────────────────────────────────────
+const DEFAULT_IRP_REF = 171
+
+const DEFAULT_SITES = [
+  { name: 'Rognac',             irp: 260, k: 1.150, manches: 0,  note: 'V estimé ~18 m/s', confidence: 'LOW' },
+  { name: 'Hanstholm Danemark', irp: 225, k: 1.150, manches: 4,  note: '4 manches ⚠', confidence: 'LOW' },
+  { name: "Font d'Urles",       irp: 223, k: 1.150, manches: 11, note: '11 manches ✅', confidence: 'MEDIUM' },
+  { name: 'Col du Glandon',     irp: 186, k: 1.088, manches: 9,  note: '9 manches ✅', confidence: 'MEDIUM' },
+  { name: 'Col des Faisses',    irp: 186, k: 1.088, manches: 13, note: '13 manches ✅', confidence: 'MEDIUM' },
+  { name: 'Sceautres',          irp: 182, k: 1.064, manches: 9,  note: '9 manches ✅', confidence: 'MEDIUM' },
+  { name: 'Saint Ferriol',      irp: 193, k: 1.000, manches: 17, note: '17 manches CDM ✅', confidence: 'HIGH' },
+  { name: 'Cèderon',            irp: 155, k: 0.906, manches: 20, note: '20 manches ✅', confidence: 'HIGH' },
+  { name: 'Serra de Busa',      irp: 124, k: 0.850, manches: 16, note: '16 manches ✅ (V estimé)', confidence: 'HIGH' },
+]
+
+let manches = []
+let sites = []
+let activeRefIrp = DEFAULT_IRP_REF
+let activeRefName = ''
+
+function getIrpRef() {
+  const manual = parseFloat(document.getElementById('inpIrpRef').value)
+  if (!isNaN(manual) && manual > 0) return manual
+  return activeRefIrp || DEFAULT_IRP_REF
+}
+
+function setRefFromSite(irp, name) {
+  activeRefIrp = irp
+  activeRefName = name
+  document.getElementById('refSiteName').textContent = name || 'Référence manuelle'
+  document.getElementById('refIrpVal').textContent = irp
+  document.getElementById('inpIrpRef').value = ''
+  if (manches.length >= 2) calculate()
+}
+
+function loadSites() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('irp_sites_v4') || 'null')
+    sites = saved || JSON.parse(JSON.stringify(DEFAULT_SITES))
+  } catch { sites = JSON.parse(JSON.stringify(DEFAULT_SITES)) }
+  renderSites()
+}
+
+function saveSites() {
+  localStorage.setItem('irp_sites_v4', JSON.stringify(sites))
+}
+
+// ── Utilitaires stats ───────────────────────────────
+function median(arr) {
+  const s = [...arr].sort((a, b) => a - b)
+  const mid = Math.floor(s.length / 2)
+  return s.length % 2 !== 0 ? s[mid] : (s[mid - 1] + s[mid]) / 2
+}
+
+function mean(arr) {
+  return arr.reduce((s, v) => s + v, 0) / arr.length
+}
+
+function stddev(arr, avg) {
+  return Math.sqrt(arr.reduce((s, v) => s + (v - avg) ** 2, 0) / arr.length)
+}
+
+function clamp(v, lo, hi) {
+  return Math.max(lo, Math.min(hi, v))
+}
+
+function getConfidence(nbRuns, sigmaT) {
+  if (nbRuns >= 15 && sigmaT < 0.10) return 'HIGH'
+  if (nbRuns >= 5 && sigmaT < 0.15) return 'MEDIUM'
+  return 'LOW'
+}
+
+function confColor(conf) {
+  if (conf === 'HIGH') return { bg: 'rgba(63,185,80,.15)', color: '#3fb950', border: '#238636' }
+  if (conf === 'MEDIUM') return { bg: 'rgba(26,115,232,.15)', color: '#58a6ff', border: '#1a73e8' }
+  return { bg: 'rgba(255,183,77,.15)', color: '#ffb74d', border: '#ffb74d' }
+}
+
+// ── Manches ─────────────────────────────────────────
+function addManche() {
+  const t = parseFloat(document.getElementById('inpT').value)
+  const v = parseFloat(document.getElementById('inpV').value)
+  if (isNaN(t) || t <= 0 || t > 120) { alert('Temps invalide (> 0 et ≤ 120s)'); return }
+  if (isNaN(v) || v < 0 || v > 25) { alert('Vent invalide (0-25 m/s)'); return }
+  manches.push({ t, v, duree_ms: t * 1000 })
+  document.getElementById('inpT').value = ''
+  document.getElementById('inpV').value = ''
+  renderManches()
+  if (manches.length >= 2) calculate()
+}
+
+function removeManche(i) {
+  manches.splice(i, 1)
+  renderManches()
+  if (manches.length >= 2) calculate()
+  else document.getElementById('resultsCard').style.display = 'none'
+}
+
+function clearManches() {
+  manches = []
+  renderManches()
+  document.getElementById('resultsCard').style.display = 'none'
+}
+
+function renderManches() {
+  const el = document.getElementById('manchesList')
+  if (!manches.length) {
+    el.innerHTML = '<div style="font-size:11px;color:var(--muted);text-align:center;padding:8px;">Aucun run — ajoutez des données</div>'
+    return
+  }
+  el.innerHTML = manches.map((m, i) => {
+    const valid = m.duree_ms > 20000 && m.duree_ms < 120000 && m.v > 0
+    return `
+    <div class="manche-row" style="margin-bottom:4px;">
+      <span class="manche-num">${i + 1}</span>
+      <div style="flex:1;background:var(--panel2);border:1px solid var(--border);border-radius:6px;
+        padding:5px 10px;display:flex;justify-content:space-between;align-items:center;
+        ${!valid ? 'opacity:.4;' : ''}">
+        <span style="font-size:12px;font-weight:700;color:var(--txt)">${m.t.toFixed(2)}s</span>
+        <span style="font-size:11px;color:var(--muted)">${m.v.toFixed(1)} m/s</span>
+        ${!valid ? '<span class="filtered-tag">filtré</span>' : ''}
+      </div>
+      <button onclick="removeManche(${i})" style="background:none;border:none;color:var(--red);
+        cursor:pointer;font-size:14px;padding:4px;touch-action:manipulation;">✕</button>
+    </div>`
+  }).join('')
+}
+
+// ── Calcul V4 ───────────────────────────────────────
+function calculate() {
+  const valid = manches.filter(m => m.duree_ms > 20000 && m.duree_ms < 120000 && m.v > 0)
+  if (valid.length < 2) {
+    alert('Il faut au moins 2 runs valides (20-120s, vent > 0)')
+    return null
+  }
+
+  const times = valid.map(m => m.t)
+  const vents = valid.map(m => m.v)
+
+  // Stats
+  const T_median = median(times)
+  const T_mean = mean(times)
+  const sigma = stddev(times, T_mean)
+  const sigma_T = T_mean > 0 ? sigma / T_mean : 0
+
+  // Trend
+  const Trend = T_median * (1 - sigma_T)
+
+  // IRP_raw
+  const V_moy = mean(vents)
+  const IRP_raw = Trend * Math.pow(V_moy, 0.7)
+
+  // K_dyn = IRP_raw / IRP_site_ref
+  const irpRef = getIrpRef()
+  const K_dyn = clamp(IRP_raw / irpRef, 0.85, 1.15)
+
+  // Confiance
+  const confidence = getConfidence(valid.length, sigma_T)
+
+  // IQA pilot
+  const IQA_pilot = clamp((60 - Trend) / 3, 0, 10)
+
+  // IQA hybrid
+  const iqaStationInput = parseFloat(document.getElementById('inpIqaStation').value)
+  const hasIqaStation = !isNaN(iqaStationInput) && iqaStationInput >= 0 && iqaStationInput <= 10
+  const IQA_hybrid = hasIqaStation ? 0.6 * iqaStationInput + 0.4 * IQA_pilot : null
+
+  // ── Affichage ──
+  document.getElementById('resultsCard').style.display = 'block'
+
+  // IRP big
+  document.getElementById('irpVal').textContent = IRP_raw.toFixed(0)
+  document.getElementById('irpRefDisplay').textContent = `/ ref ${irpRef}`
+
+  // Badge K_dyn
+  const badge = document.getElementById('kBadge')
+  badge.textContent = `Kdyn = ${K_dyn.toFixed(3)}`
+  if (K_dyn >= 1.08) badge.style.cssText = 'background:rgba(26,115,232,.2);color:#4a9eff;border:1px solid #1a73e8;display:inline-block;padding:6px 18px;border-radius:20px;font-size:18px;font-weight:900;margin-top:8px'
+  else if (K_dyn >= 1.0) badge.style.cssText = 'background:rgba(63,185,80,.15);color:#3fb950;border:1px solid #238636;display:inline-block;padding:6px 18px;border-radius:20px;font-size:18px;font-weight:900;margin-top:8px'
+  else if (K_dyn >= 0.92) badge.style.cssText = 'background:rgba(255,183,77,.15);color:#ffb74d;border:1px solid #ffb74d;display:inline-block;padding:6px 18px;border-radius:20px;font-size:18px;font-weight:900;margin-top:8px'
+  else badge.style.cssText = 'background:rgba(248,81,73,.15);color:#f85149;border:1px solid #f85149;display:inline-block;padding:6px 18px;border-radius:20px;font-size:18px;font-weight:900;margin-top:8px'
+
+  // Badge confiance
+  const confEl = document.getElementById('confBadge')
+  const cc = confColor(confidence)
+  confEl.textContent = confidence
+  confEl.style.cssText = `display:inline-block;padding:3px 10px;border-radius:12px;font-size:10px;font-weight:700;margin-left:8px;letter-spacing:.5px;background:${cc.bg};color:${cc.color};border:1px solid ${cc.border}`
+
+  // Stats
+  document.getElementById('resTrend').textContent = Trend.toFixed(2)
+  document.getElementById('resTmedian').textContent = T_median.toFixed(2)
+  document.getElementById('resSigmaT').textContent = (sigma_T * 100).toFixed(1) + '%'
+  document.getElementById('resVmoy').textContent = V_moy.toFixed(1)
+  document.getElementById('resTmean').textContent = T_mean.toFixed(2)
+  document.getElementById('resSigma').textContent = sigma.toFixed(2)
+  document.getElementById('resNvalid').textContent = valid.length + '/' + manches.length
+  document.getElementById('resIqaPilot').textContent = IQA_pilot.toFixed(1)
+  document.getElementById('resIqaHybrid').textContent = IQA_hybrid !== null ? IQA_hybrid.toFixed(1) : '—'
+
+  // Jauge K
+  const pctK = (K_dyn - 0.85) / (1.15 - 0.85) * 100
+  document.getElementById('gaugeCursor').style.left = pctK + '%'
+
+  // Jauge IQA
+  const pctIqa = clamp(IQA_pilot / 10 * 100, 0, 100)
+  document.getElementById('iqaCursor').style.left = pctIqa + '%'
+
+  // Table détail
+  const tbody = document.getElementById('tableBody')
+  tbody.innerHTML = manches.map((m, i) => {
+    const isValid = m.duree_ms > 20000 && m.duree_ms < 120000 && m.v > 0
+    return `<tr class="${!isValid ? 'skip' : ''}">
+      <td>${i + 1}</td>
+      <td>${m.t.toFixed(2)}</td>
+      <td>${m.v.toFixed(1)}</td>
+      <td>${isValid ? '✅' : '❌ filtré'}</td>
+    </tr>`
+  }).join('')
+
+  return { IRP: IRP_raw, K: K_dyn, Trend, sigma_T, IQA_pilot, IQA_hybrid, V_moy, valid_count: valid.length, confidence, irpRef }
+}
+
+// ── Sauver site ─────────────────────────────────────
+function saveSite() {
+  const name = document.getElementById('siteName').value.trim()
+  if (!name) { alert('Entrez un nom de site'); return }
+  const res = calculate()
+  if (!res) return
+  const entry = {
+    name,
+    irp: Math.round(res.IRP),
+    k: parseFloat(res.K.toFixed(3)),
+    manches: res.valid_count,
+    trend: parseFloat(res.Trend.toFixed(2)),
+    sigma_t: parseFloat((res.sigma_T * 100).toFixed(1)),
+    iqa_pilot: parseFloat(res.IQA_pilot.toFixed(1)),
+    confidence: res.confidence,
+    irp_ref: res.irpRef,
+    note: `${res.valid_count} runs ${res.confidence === 'HIGH' ? '✅' : res.confidence === 'MEDIUM' ? '✅' : '⚠'} · σT=${(res.sigma_T*100).toFixed(1)}%`
+  }
+  sites = [entry, ...sites.filter(s => s.name !== name)]
+  saveSites()
+  renderSites()
+  document.getElementById('saveMsg').textContent = `✓ ${name} sauvegardé (IRP=${entry.irp}, Kdyn=${entry.k}, ${entry.confidence})`
+  setTimeout(() => document.getElementById('saveMsg').textContent = '', 3000)
+}
+
+// ── Afficher sites ──────────────────────────────────
+function renderSites() {
+  const el = document.getElementById('sitesList')
+  el.innerHTML = sites.map((s, i) => {
+    let kColor = s.k >= 1.08 ? '#4a9eff' : s.k >= 1.0 ? '#3fb950' : s.k >= 0.92 ? '#ffb74d' : '#f85149'
+    const cc = confColor(s.confidence || 'LOW')
+    return `
+    <div class="site-row" onclick="selectSiteAsRef(${i})">
+      <div class="site-name">${s.name}</div>
+      <div class="site-irp">IRP ${s.irp} · ${s.note || ''}
+        <span style="background:${cc.bg};color:${cc.color};border:1px solid ${cc.border};padding:1px 6px;border-radius:8px;font-size:9px;font-weight:700;margin-left:4px;">${s.confidence || '?'}</span>
+      </div>
+      <div class="site-k" style="color:${kColor}">K ${s.k.toFixed(3)}</div>
+      <button onclick="event.stopPropagation();deleteSite(${i})"
+        style="background:none;border:none;color:var(--red);cursor:pointer;font-size:13px;padding:2px 4px;touch-action:manipulation;">🗑</button>
+    </div>`
+  }).join('') || '<div style="font-size:11px;color:var(--muted);text-align:center;padding:8px;">Aucun site</div>'
+}
+
+function selectSiteAsRef(i) {
+  const s = sites[i]
+  setRefFromSite(s.irp, s.name)
+  document.getElementById('siteName').value = s.name
+  document.querySelectorAll('.site-row').forEach((r, j) => r.classList.toggle('active', j === i))
+}
+
+function deleteSite(i) {
+  if (!confirm(`Supprimer ${sites[i].name} ?`)) return
+  sites.splice(i, 1)
+  saveSites()
+  renderSites()
+}
+
+// ── Init ────────────────────────────────────────────
+document.getElementById('inpT').addEventListener('keydown', e => e.key === 'Enter' && document.getElementById('inpV').focus())
+document.getElementById('inpV').addEventListener('keydown', e => e.key === 'Enter' && addManche())
+document.getElementById('inpIqaStation').addEventListener('input', () => { if (manches.length >= 2) calculate() })
+document.getElementById('inpIrpRef').addEventListener('input', () => {
+  const v = parseFloat(document.getElementById('inpIrpRef').value)
+  if (!isNaN(v) && v > 0) {
+    document.getElementById('refSiteName').textContent = 'Référence manuelle'
+    document.getElementById('refIrpVal').textContent = v
+    document.querySelectorAll('.site-row').forEach(r => r.classList.remove('active'))
+  }
+  if (manches.length >= 2) calculate()
+})
+renderManches()
+loadSites()
+</script>
+</body>
+</html>
