@@ -24,6 +24,8 @@ const useAppStore = create(
 
       // Offset
       offset: 0,
+      nezDelta: 0,
+      nezPlombs: [45, 25, 15, 5],
       poly4Mode: 'vent',
       poly4SiteIdx: 6,        // Offset en grammes
  activeSite: { name: '', irp: 171, k: 1.000 },
@@ -80,6 +82,11 @@ altitude: 0,
           offset: Math.max(-400, state.offset - 42),
         })),
  setKUp: (value) => set({ k_up: value }),
+
+      // Nez Slots
+      setNezPlombs: (plombs) => set({ nezPlombs: plombs }),
+      incrementNez: () => set(s => ({ nezDelta: Math.min(200, s.nezDelta + Math.min(...s.nezPlombs)) })),
+      decrementNez: () => set(s => ({ nezDelta: Math.max(-100, s.nezDelta - Math.min(...s.nezPlombs)) })),
       setAlpha: (value) => set({ alpha: value }),
       setAltitude: (value) => set({ altitude: value }), 
       // S�lection param�tre
@@ -114,6 +121,8 @@ altitude: 0,
         chronoR: state.chronoR,
         lievre: state.lievre,
         offset: state.offset,
+        nezDelta: state.nezDelta,
+        nezPlombs: state.nezPlombs,
         altitude: state.altitude,
         activeSite: state.activeSite,
         ballastSnap: state.ballastSnap,

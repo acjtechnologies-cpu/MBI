@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useModelStore } from '../../stores/modelStore'
 import { Edit3, Trash2, Copy, Download, Settings, Save, X, Plus } from 'lucide-react'
 import SouteEditor from './SouteEditor'
+import NezConfig from '../Pilote/NezConfig'
 import GliderBrowser from '../GliderBrowser'
 
 export default function ModelManager() {
@@ -149,6 +150,8 @@ export default function ModelManager() {
               ))
             )}
           </div>
+
+          <NezConfig />
         </div>
 
         {/* Footer actions */}

@@ -4,6 +4,7 @@ import { useShallow } from 'zustand/react/shallow'
 import { useModelStore } from '../../stores/modelStore'
 import GliderBrowser from '../GliderBrowser'
 import MatriceInteractive from './MatriceInteractive'
+import NezCGLine from './NezCGLine'
 
 // -”€ Poly4 fallback (Mamba - pas de model.poly4) -”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-
 const P4 = { A4:-1.728e-4, A3:8.178e-3, A2:-0.14980, A1:1.34713, A0:-1.19522, vMin:4.05, vMax:15.30 }
@@ -154,6 +155,7 @@ export default function DashboardPilote() {
     params, offset, activeSite,
     setOffset, setBallastSnap,
     incrementParam, decrementParam, setParam,
+    nezDelta, incrementNez, decrementNez,
   } = useAppStore(useShallow(s => ({
     params:         s.params,
     offset:         s.offset,
@@ -163,6 +165,9 @@ export default function DashboardPilote() {
     incrementParam: s.incrementParam,
     setParam:       s.setParam,
     decrementParam: s.decrementParam,
+    nezDelta:       s.nezDelta,
+    incrementNez:   s.incrementNez,
+    decrementNez:   s.decrementNez,
   })))
 
   const altitude    = useAppStore(s => parseFloat(s.altitude) || 0)
@@ -221,6 +226,12 @@ export default function DashboardPilote() {
   const dm            = cfg ? cfg.m - targetG : 0
   const cgD           = cfg ? cfg.cg - model.cgVide : 0
   const cgClass       = Math.abs(cgD) < 0.5 ? 'neutre' : cgD < 0 ? 'avant' : 'arriere'
+  // ── Nez Slots ──
+  const nezDist       = model.nezDist || 0
+  const hasNez        = nezDist > 0
+  const nezMM         = (hasNez && nezDelta !== 0)
+    ? -(nezDelta / (kgVal * 1000 + nezDelta)) * nezDist
+    : 0
   const c100          = Math.round((m0kg - getMasseAlt(m0kg, 100)) * 1000)
   const ventLabel     = altitude > 0
     ? `VENT m/s — ${model.nom} — ρ -${altCorrection}g`
@@ -314,8 +325,9 @@ export default function DashboardPilote() {
     setSelectedParam(p)
     if (p !== 'kg') setKgManuel(null)
   }
-  function handlePress(dir) {
+    function handlePress(dir) {
     doChange(dir)
+    if (selectedParam === 'nez') return
     repeatRef.current = setTimeout(() => {
       repeatRef.current = setInterval(() => doChange(dir), 200)
     }, 400)
@@ -341,6 +353,8 @@ export default function DashboardPilote() {
         setOffset(Math.max(-500, Math.min(500, offsetVal + dir * 42))); break
       case 'alt':
         setAltitude(Math.max(0, Math.min(3000, altitude + dir * 50))); break
+      case 'nez':
+        dir > 0 ? incrementNez() : decrementNez(); break
     }
   }
 
@@ -369,7 +383,24 @@ export default function DashboardPilote() {
             </div>
 
             {/* Barographe - soutes dynamiques */}
-            <div className="mb-baro">
+            <div className="mb-baro" style={{ position:'relative' }}>
+              {hasNez && (
+                <div
+                  onClick={() => selectParam('nez')}
+                  style={{
+                    position:'absolute', top:0, bottom:0,
+                    left:'50%', transform:'translateX(-50%)',
+                    width:28, zIndex:5, cursor:'pointer',
+                    touchAction:'manipulation', WebkitTapHighlightColor:'transparent',
+                  }}>
+                  <NezCGLine
+                    mm={nezMM}
+                    grams={nezDelta}
+                    active={selectedParam === 'nez'}
+                    showDot={true}
+                  />
+                </div>
+              )}
               {soutes.map((soute, idx) => {
                 const cap         = soute.capacite || 3
                 const colors      = [
@@ -435,14 +466,14 @@ export default function DashboardPilote() {
                   {isFaiOver ? '⛔ FAI' : 'g/dm²'}
                 </div>
               </div>
-              <div style={{ textAlign:'center', flex:1, color: cgClass === 'neutre' ? '#4ade80' : cgClass === 'avant' ? '#fbbf24' : cgClass === 'arriere' ? '#f87171' : '#8b949e' }}>
+              <div style={{ textAlign:'center', flex:1, color: Math.abs(cgD + nezMM) > 3 ? '#f87171' : cgClass === 'neutre' ? '#4ade80' : cgClass === 'avant' ? '#fbbf24' : cgClass === 'arriere' ? '#f87171' : '#8b949e' }}>
                 <div style={{ fontSize:9, color:'#8b949e', fontWeight:700, letterSpacing:0.5, marginBottom:2 }}>CG</div>
                 <div style={{ fontSize:22, fontWeight:900, lineHeight:1 }}>
-                  {cfg ? cfg.cg.toFixed(1) : model.cgVide}
-                  {cgD !== 0 && <span style={{ fontSize:12, fontWeight:700, marginLeft:3 }}>{cgD > 0 ? '+' : ''}{cgD.toFixed(1)}mm</span>}
+                  {cfg ? (cfg.cg + nezMM).toFixed(1) : model.cgVide}
+                  {(cgD + nezMM) !== 0 && <span style={{ fontSize:12, fontWeight:700, marginLeft:3 }}>{(cgD + nezMM) > 0 ? '+' : ''}{(cgD + nezMM).toFixed(1)}mm</span>}
                 </div>
                 <div style={{ fontSize:9, color:'#4a5568', marginTop:2 }}>
-                  Cible {model.cgVide}mm
+                  Cible {model.cgVide}mm{nezDelta !== 0 && <span style={{ color:'#d29922' }}> · nez {nezDelta > 0 ? '+' : ''}{nezDelta}g</span>}
                 </div>
               </div>
             </div>
@@ -461,10 +492,23 @@ export default function DashboardPilote() {
                       <div className="mb-mode-lbl">ALT m</div>
                     </button>
                   </div>
+                  {hasNez ? (
+                    <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:6 }}>
+                      <button className={`mb-mode-btn${selectedParam === 'offset' ? ' active' : ''}`} onClick={() => selectParam('offset')}>
+                        <div className="mb-mode-val">{offsetVal >= 0 ? '+' : ''}{offsetVal}g</div>
+                        <div className="mb-mode-lbl">OFFSET</div>
+                      </button>
+                      <button className={`mb-mode-btn${selectedParam === 'nez' ? ' active' : ''}`} onClick={() => selectParam('nez')} style={selectedParam === 'nez' ? { background:'linear-gradient(135deg,#065f46,#064e3b)', borderColor:'#34d399' } : {}}>
+                        <div className="mb-mode-val" style={selectedParam === 'nez' ? { color:'#4ade80' } : {}}>{nezDelta === 0 ? '0' : (nezDelta > 0 ? '+' : '') + nezDelta + 'g'}</div>
+                        <div className="mb-mode-lbl">NEZ{nezMM !== 0 ? ` ${nezMM.toFixed(1)}mm` : ''}</div>
+                      </button>
+                    </div>
+                  ) : (
                   <button className={`mb-mode-btn${selectedParam === 'offset' ? ' active' : ''}`} onClick={() => selectParam('offset')}>
                     <div className="mb-mode-val">{offsetVal >= 0 ? '+' : ''}{offsetVal}g</div>
                     <div className="mb-mode-lbl">OFFSET</div>
                   </button>
+                  )}
                 </div>
                 <div className="mb-ctrl-arrows">
                   <button className="mb-nav"

@@ -1,4 +1,4 @@
-﻿import { create } from 'zustand'
+import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 /**
@@ -31,69 +31,6 @@ const MATRIX_MAMBA = [
   {n:20, m:4072, cg:102.8, av:{G:3,D:3,matG:'Laiton',matD:'Laiton'}, c:{G:3,D:3,matG:'Plomb',matD:'Plomb'}, ar:{G:4,D:4,matG:'Laiton',matD:'Laiton'}}
 ]
 
-
-// Modèle par défaut — Pike Precision 2
-const DEFAULT_PIKE2 = {
-  id: 'pike-precision-2',
-  nom: 'Pike Precision 2',
-  drapeau: '🇩🇪',
-  constructeur: 'Pikurus',
-  masseVide: 2350,
-  cgVide: 97.0,
-  surface: 57.7,
-  offset: 1,
-  masse_ref_8ms: 3.474,
-  version: '1.0',
-  poly4: {
-    type: 'table',
-    vent:  [4.05,4.23,4.41,4.61,4.82,5.04,5.28,5.53,5.80,6.10,6.42,6.78,7.17,7.61,8.10,8.65,9.28,9.99,10.78,11.65,12.60,13.70,15.30],
-    masse: [2.300,2.385,2.470,2.555,2.640,2.725,2.810,2.895,2.980,3.065,3.150,3.235,3.320,3.405,3.490,3.575,3.660,3.745,3.830,3.915,4.000,4.085,4.170]
-  },
-  matrix: [
-    {n:1,  m:2500, cg:96.2, av:{G:[{nom:'Laiton',masse:42}],D:[]}, ar:{G:[{nom:'Laiton',masse:126}],D:[]}},
-    {n:2,  m:2584, cg:97.1, av:{G:[{nom:'Laiton',masse:21}],D:[{nom:'Laiton',masse:42}]}, ar:{G:[{nom:'Laiton',masse:126}],D:[{nom:'Laiton',masse:63}]}},
-    {n:3,  m:2670, cg:96.6, av:{G:[{nom:'Laiton',masse:42}],D:[{nom:'Laiton',masse:42}]}, ar:{G:[{nom:'Laiton',masse:126}],D:[{nom:'Laiton',masse:126}]}},
-    {n:4,  m:2714, cg:97.3, av:{G:[{nom:'Laiton',masse:21},{nom:'Laiton',masse:42}],D:[{nom:'Laiton',masse:42}]}, ar:{G:[{nom:'Laiton',masse:126}],D:[{nom:'Laiton',masse:63},{nom:'Laiton',masse:126}]}},
-    {n:5,  m:2799, cg:96.9, av:{G:[{nom:'Laiton',masse:21},{nom:'Laiton',masse:42}],D:[{nom:'Laiton',masse:21},{nom:'Laiton',masse:42}]}, ar:{G:[{nom:'Laiton',masse:63},{nom:'Laiton',masse:126}],D:[{nom:'Laiton',masse:63},{nom:'Laiton',masse:126}]}},
-    {n:6,  m:2884, cg:97.6, av:{G:[{nom:'Laiton',masse:42},{nom:'Laiton',masse:42}],D:[{nom:'Laiton',masse:21},{nom:'Laiton',masse:42}]}, ar:{G:[{nom:'Laiton',masse:63},{nom:'Laiton',masse:126}],D:[{nom:'Laiton',masse:126},{nom:'Laiton',masse:126}]}},
-    {n:7,  m:2969, cg:97.1, av:{G:[{nom:'Laiton',masse:42},{nom:'Laiton',masse:42}],D:[{nom:'Laiton',masse:42},{nom:'Laiton',masse:42}]}, ar:{G:[{nom:'Laiton',masse:126},{nom:'Laiton',masse:126}],D:[{nom:'Laiton',masse:126},{nom:'Laiton',masse:126}]}},
-    {n:8,  m:3054, cg:97.7, av:{G:[{nom:'Laiton',masse:42},{nom:'Laiton',masse:42},{nom:'Laiton',masse:21}],D:[{nom:'Laiton',masse:42},{nom:'Laiton',masse:42}]}, ar:{G:[{nom:'Laiton',masse:126},{nom:'Laiton',masse:126}],D:[{nom:'Laiton',masse:126},{nom:'Laiton',masse:126},{nom:'Laiton',masse:63}]}},
-    {n:9,  m:3118, cg:97.2, av:{G:[{nom:'Laiton',masse:42},{nom:'Laiton',masse:42},{nom:'Laiton',masse:21}],D:[{nom:'Laiton',masse:42},{nom:'Laiton',masse:42},{nom:'Laiton',masse:21}]}, ar:{G:[{nom:'Laiton',masse:126},{nom:'Laiton',masse:126},{nom:'Laiton',masse:63}],D:[{nom:'Laiton',masse:126},{nom:'Laiton',masse:126},{nom:'Laiton',masse:63}]}},
-    {n:10, m:3350, cg:97.0, av:{G:[{nom:'Laiton',masse:42},{nom:'Laiton',masse:42},{nom:'Laiton',masse:42}],D:[{nom:'Laiton',masse:42},{nom:'Laiton',masse:42},{nom:'Laiton',masse:42}]}, ar:{G:[{nom:'Laiton',masse:126},{nom:'Laiton',masse:126},{nom:'Laiton',masse:126}],D:[{nom:'Laiton',masse:126},{nom:'Laiton',masse:126},{nom:'Laiton',masse:126}]}},
-    {n:11, m:3484, cg:97.5, av:{G:[{nom:'Laiton',masse:42},{nom:'Laiton',masse:42},{nom:'Laiton',masse:42},{nom:'Laiton',masse:21}],D:[{nom:'Laiton',masse:42},{nom:'Laiton',masse:42},{nom:'Laiton',masse:42}]}, ar:{G:[{nom:'Laiton',masse:126},{nom:'Laiton',masse:126},{nom:'Laiton',masse:126}],D:[{nom:'Laiton',masse:126},{nom:'Laiton',masse:126},{nom:'Laiton',masse:126},{nom:'Laiton',masse:63}]}},
-    {n:12, m:3569, cg:97.1, av:{G:[{nom:'Laiton',masse:42},{nom:'Laiton',masse:42},{nom:'Laiton',masse:42},{nom:'Laiton',masse:21}],D:[{nom:'Laiton',masse:42},{nom:'Laiton',masse:42},{nom:'Laiton',masse:42},{nom:'Laiton',masse:21}]}, ar:{G:[{nom:'Laiton',masse:126},{nom:'Laiton',masse:126},{nom:'Laiton',masse:126},{nom:'Laiton',masse:63}],D:[{nom:'Laiton',masse:126},{nom:'Laiton',masse:126},{nom:'Laiton',masse:126},{nom:'Laiton',masse:63}]}},
-    {n:13, m:3654, cg:97.3, av:{G:[{nom:'Tungsten',masse:70},{nom:'Laiton',masse:42},{nom:'Laiton',masse:42},{nom:'Laiton',masse:21}],D:[{nom:'Tungsten',masse:70},{nom:'Laiton',masse:42},{nom:'Laiton',masse:42},{nom:'Laiton',masse:21}]}, ar:{G:[{nom:'Laiton',masse:126},{nom:'Laiton',masse:126},{nom:'Laiton',masse:126},{nom:'Laiton',masse:63}],D:[{nom:'Laiton',masse:126},{nom:'Laiton',masse:126},{nom:'Laiton',masse:126},{nom:'Laiton',masse:126}]}},
-    {n:14, m:3794, cg:97.0, av:{G:[{nom:'Tungsten',masse:70},{nom:'Tungsten',masse:70},{nom:'Laiton',masse:42},{nom:'Laiton',masse:42}],D:[{nom:'Tungsten',masse:70},{nom:'Tungsten',masse:70},{nom:'Laiton',masse:42},{nom:'Laiton',masse:42}]}, ar:{G:[{nom:'Laiton',masse:126},{nom:'Laiton',masse:126},{nom:'Laiton',masse:126},{nom:'Laiton',masse:126}],D:[{nom:'Laiton',masse:126},{nom:'Laiton',masse:126},{nom:'Laiton',masse:126},{nom:'Laiton',masse:126}]}},
-    {n:15, m:3879, cg:97.4, av:{G:[{nom:'Tungsten',masse:70},{nom:'Tungsten',masse:70},{nom:'Laiton',masse:42},{nom:'Laiton',masse:42}],D:[{nom:'Tungsten',masse:70},{nom:'Tungsten',masse:70},{nom:'Laiton',masse:42},{nom:'Laiton',masse:42},{nom:'Laiton',masse:21}]}, ar:{G:[{nom:'Laiton',masse:126},{nom:'Laiton',masse:126},{nom:'Laiton',masse:126},{nom:'Laiton',masse:126},{nom:'Laiton',masse:63}],D:[{nom:'Laiton',masse:126},{nom:'Laiton',masse:126},{nom:'Laiton',masse:126},{nom:'Laiton',masse:126}]}},
-    {n:16, m:3824, cg:97.1, av:{G:[{nom:'Tungsten',masse:70},{nom:'Tungsten',masse:70},{nom:'Laiton',masse:42},{nom:'Laiton',masse:42},{nom:'Laiton',masse:21}],D:[{nom:'Tungsten',masse:70},{nom:'Tungsten',masse:70},{nom:'Laiton',masse:42},{nom:'Laiton',masse:42},{nom:'Laiton',masse:21}]}, ar:{G:[{nom:'Laiton',masse:126},{nom:'Laiton',masse:126},{nom:'Laiton',masse:126},{nom:'Laiton',masse:126},{nom:'Laiton',masse:63}],D:[{nom:'Laiton',masse:126},{nom:'Laiton',masse:126},{nom:'Laiton',masse:126},{nom:'Laiton',masse:126},{nom:'Laiton',masse:63}]}},
-    {n:17, m:4242, cg:97.0, av:{G:[{nom:'Tungsten',masse:70},{nom:'Tungsten',masse:70},{nom:'Laiton',masse:42},{nom:'Laiton',masse:42},{nom:'Laiton',masse:42}],D:[{nom:'Tungsten',masse:70},{nom:'Tungsten',masse:70},{nom:'Laiton',masse:42},{nom:'Laiton',masse:42},{nom:'Laiton',masse:42}]}, ar:{G:[{nom:'Laiton',masse:126},{nom:'Laiton',masse:126},{nom:'Laiton',masse:126},{nom:'Laiton',masse:126},{nom:'Laiton',masse:126}],D:[{nom:'Laiton',masse:126},{nom:'Laiton',masse:126},{nom:'Laiton',masse:126},{nom:'Laiton',masse:126},{nom:'Laiton',masse:126}]}}
-  ],
-  soutes: {
-    'avant': {
-      id: 'avant',
-      nom: 'Avant Aile',
-      couleur: '#ffd700',
-      distanceBA: 78,
-      capacite: 5,
-      materiaux: [
-        { nom: 'Tungsten', masse: 70, stock: 2 },
-        { nom: 'Laiton',   masse: 42, stock: 3 },
-        { nom: 'Laiton',   masse: 21, stock: 1 }
-      ]
-    },
-    'arriere': {
-      id: 'arriere',
-      nom: 'Arrière Aile',
-      couleur: '#3fb950',
-      distanceBA: 118,
-      capacite: 5,
-      materiaux: [
-        { nom: 'Laiton', masse: 126, stock: 5 },
-        { nom: 'Laiton', masse: 63,  stock: 1 }
-      ]
-    }
-  }
-}
 // Modele par defaut — Mamba S avec matrice intégrée
 const DEFAULT_MODEL = {
   id: 'mamba-s',
@@ -101,18 +38,10 @@ const DEFAULT_MODEL = {
   drapeau: '🇫🇷',
   masseVide: 2550,
   cgVide: 102,
-  surface: 57,
+  surface: 59,
   offset: -144,
-  masse_ref_8ms: 3.330,
+  nezDist: 260,
   version: '1.0',
-  poly4: {
-    type: 'coefficients',
-    A4: -1.728e-4,
-    A3:  8.178e-3,
-    A2: -0.14980,
-    A1:  1.34713,
-    A0: -1.19522
-  },
   matrix: MATRIX_MAMBA,
   soutes: {
     'avant-cle': {
@@ -155,8 +84,7 @@ const useModelStore = create(
   persist(
     (set, get) => ({
       models: {
-        'mamba-s': DEFAULT_MODEL,
-        'pike-precision-2': DEFAULT_PIKE2
+        'mamba-s': DEFAULT_MODEL
       },
       activeModelId: 'mamba-s',
       _hasHydrated: false,
@@ -253,65 +181,7 @@ const useModelStore = create(
         })
       },
 
-
-      addSoute: (modelId, soute) => {
-        set((state) => {
-          if (!state.models?.[modelId]) return state
-          return {
-            models: {
-              ...state.models,
-              [modelId]: {
-                ...state.models[modelId],
-                soutes: { ...state.models[modelId].soutes, [soute.id]: soute }
-              }
-            }
-          }
-        })
-      },
-
-      updateSoute: (modelId, souteId, updates) => {
-        set((state) => {
-          if (!state.models?.[modelId]?.soutes?.[souteId]) return state
-          return {
-            models: {
-              ...state.models,
-              [modelId]: {
-                ...state.models[modelId],
-                soutes: {
-                  ...state.models[modelId].soutes,
-                  [souteId]: { ...state.models[modelId].soutes[souteId], ...updates }
-                }
-              }
-            }
-          }
-        })
-      },
-
-      deleteSoute: (modelId, souteId) => {
-        set((state) => {
-          if (!state.models?.[modelId]) return state
-          const newSoutes = { ...state.models[modelId].soutes }
-          delete newSoutes[souteId]
-          return {
-            models: {
-              ...state.models,
-              [modelId]: { ...state.models[modelId], soutes: newSoutes }
-            }
-          }
-        })
-      },
-
-      duplicateModel: (modelId) => {
-        const state = get()
-        if (!state.models?.[modelId]) return null
-        const src = state.models[modelId]
-        const newId = 'model-' + Date.now()
-        const copy = JSON.parse(JSON.stringify(src))
-        copy.id = newId
-        copy.nom = src.nom + ' (copie)'
-        set((s) => ({ models: { ...s.models, [newId]: copy } }))
-        return newId
-      },      exportModel: (modelId) => {
+      exportModel: (modelId) => {
         const state = get()
         if (!state.models?.[modelId]) return null
         return JSON.stringify(state.models[modelId], null, 2)
@@ -328,29 +198,31 @@ const useModelStore = create(
     }),
     {
       name: 'mbi-model-storage',
-      version: 2,
-     partialize: (state) => ({
-  models: state.models,
-  activeModelId: state.activeModelId
-}),
- onRehydrateStorage: () => (state) => {
+      partialize: (state) => ({
+        models: state.models,
+        activeModelId: state.activeModelId
+      }),
+      onRehydrateStorage: () => (state) => {
         if (state) {
           state.setHasHydrated(true)
-          if (!state.models) state.models = {}
-          if (!state.models['mamba-s']) state.models['mamba-s'] = DEFAULT_MODEL
-          if (!state.models['pike-precision-2']) state.models['pike-precision-2'] = DEFAULT_PIKE2
-          if (!state.models[state.activeModelId]) state.activeModelId = 'mamba-s'
-          // Migration masse_ref_8ms — force valeurs builtin
-          const BUILTIN_REF = { 'pike-precision-2': 3.474, 'mamba-s': 3.330 }
-          Object.entries(BUILTIN_REF).forEach(([id, ref]) => {
-            if (state.models[id] && state.models[id].masse_ref_8ms !== ref) {
-              state.models[id].masse_ref_8ms = ref
+          // Vérifier que la matrice Mamba est bien présente
+          if (!state.models) {
+            state.models = { 'mamba-s': DEFAULT_MODEL }
+            state.activeModelId = 'mamba-s'
+          } else if (state.models['mamba-s'] && !state.models['mamba-s'].matrix) {
+            // Migrer: ajouter la matrice si absente
+            state.models['mamba-s'] = {
+              ...state.models['mamba-s'],
+              matrix: MATRIX_MAMBA,
+              offset: state.models['mamba-s'].offset || -144,
+            nezDist: state.models['mamba-s'].nezDist || 260
             }
-          })
+          }
         }
       }
     }
   )
 )
+
 export default useModelStore
 export { useModelStore }
