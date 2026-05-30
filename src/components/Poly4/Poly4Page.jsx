@@ -188,7 +188,7 @@ export default function Poly4Page() {
       if (typeof setActiveSite === 'function') {
         const nextSite = allSites[nextIdx]
         setActiveSite({ name: nextSite.name, irp: nextSite.irp, k: nextSite.k })
-          setSiteRef(nextSite.irp, nextSite.name)
+          if (!nextSite.live) setSiteRef(nextSite.irp, nextSite.name)
       }
     }
   }, [mode, vent, sites, allSites, siteIdx, setParam, offsetStore, setOffset, setActiveSite, setSiteRef])
@@ -206,7 +206,7 @@ export default function Poly4Page() {
     const site = currentSite
     if (typeof setActiveSite === 'function' && site) {
       setActiveSite({ name: site.name, irp: site.irp, k: site.k })
-      setSiteRef(site.irp, site.name)
+      if (!site.live) setSiteRef(site.irp, site.name)
     }
     setApplied(true)
     setTimeout(() => setApplied(false), 2500)
