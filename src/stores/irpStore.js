@@ -118,7 +118,7 @@ export const useIrpStore = create((set, get) => ({
 
     // K_dyn = clamp(IRP_raw / IRP_site_ref, 0.85, 1.15)
     const ref = siteRef || DEFAULT_SITE_REF
-    const kDyn = Math.max(K_MIN, Math.min(K_MAX, irpRaw / ref))
+    const kDyn = Math.max(K_MIN, Math.min(K_MAX, ref / irpRaw))
 
     // Confiance
     let confidence = 'LOW'
