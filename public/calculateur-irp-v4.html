@@ -132,7 +132,7 @@
   <div class="formula">
     <div class="eq">Trend = T<sub>median</sub> × (1 − σ<sub>T</sub>)</div>
     <div class="eq">IRP<sub>raw</sub> = Trend × V<sub>moy</sub><sup> 0.7</sup></div>
-    <div class="eq" style="color:var(--orange)">K<sub>dyn</sub> = clamp(IRP<sub>raw</sub> / IRP<sub>site_ref</sub>, 0.85, 1.15)</div>
+    <div class="eq" style="color:var(--orange)">K<sub>dyn</sub> = clamp(IRP<sub>site_ref</sub> / IRP<sub>raw</sub>, 0.85, 1.15)</div>
     <div class="eq2" style="margin-top:6px;">IQA<sub>pilot</sub> = clamp((60 − Trend) / 3, 0, 10)</div>
     <div class="eq2">IQA<sub>hybrid</sub> = 0.6 × IQA<sub>station</sub> + 0.4 × IQA<sub>pilot</sub></div>
     <div class="eq2" style="margin-top:4px;color:var(--green)">Confiance : LOW (&lt;5r ou σ&gt;15%) · MEDIUM (5-15r, σ&lt;15%) · HIGH (&gt;15r, σ&lt;10%)</div>
@@ -441,9 +441,9 @@ function calculate() {
   const V_moy = mean(vents)
   const IRP_raw = Trend * Math.pow(V_moy, 0.7)
 
-  // K_dyn = IRP_raw / IRP_site_ref
+  // K_dyn = IRP_site_ref / IRP_raw
   const irpRef = getIrpRef()
-  const K_dyn = clamp(IRP_raw / irpRef, 0.85, 1.15)
+  const K_dyn = clamp(irpRef / IRP_raw, 0.85, 1.15)
 
   // Confiance
   const confidence = getConfidence(valid.length, sigma_T)
