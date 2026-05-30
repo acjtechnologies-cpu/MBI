@@ -259,7 +259,7 @@ function JournalView({ pilotes, currentSessionId, onBack }) {
                           <span style={{ fontSize: 11, color: '#888', flex: 1 }}>{pNom}</span>
                           <span style={{ fontSize: 13, fontWeight: 500, color: '#ccc',
                             fontVariantNumeric: 'tabular-nums' }}>{formatDuree(r.duree_ms)}</span>
-                          {r.iqa_snap != null && (
+                          {r.vent_snap > 0 && <span style={{ fontSize: 9, color: "#58a6ff", minWidth: 28, textAlign: "right" }}>{r.vent_snap.toFixed(1)}</span>}{r.iqa_snap != null && (
                             <span style={{ fontSize: 9, color: iqaColor(r.iqa_snap), minWidth: 28, textAlign: 'right' }}>
                               {r.iqa_snap.toFixed(1)}
                             </span>
@@ -363,7 +363,7 @@ const [gistStatus, setGistStatus] = useState('');
       cancelAnimationFrame(rafRef.current);
       const duree_ms  = Date.now() - t0Ref.current;
       const iqaSnap   = iqa;
-      const ventSnap  = vent > 0 ? vent : (useAppStore.getState().params?.vent || 8.0);
+      const ventSnap = useESPStore.getState().data?.SPD || useAppStore.getState().params?.vent || 8.0;
       const sGradSnap = sGrad;
       const bulleSnap = isBulleRef.current;
       setRunning(false);
