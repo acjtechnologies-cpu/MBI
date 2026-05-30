@@ -427,6 +427,7 @@ const [gistStatus, setGistStatus] = useState('');
     setSessionId(null);
     setShowReset(false);
     useIrpStore.getState().reset();
+    db.runs.clear().catch(() => {});
     // Ne pas effacer IndexedDB — on garde l'historique
   }
   async function shareText() {
