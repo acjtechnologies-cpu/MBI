@@ -364,7 +364,7 @@ const [gistStatus, setGistStatus] = useState('');
       cancelAnimationFrame(rafRef.current);
       const duree_ms  = Date.now() - t0Ref.current;
       const iqaSnap   = iqa;
-      const ventSnap = useESPStore.getState().data?.SPD || useAppStore.getState().params?.vent || 8.0;
+      const _espState = useESPStore.getState(); const ventSnap = (_espState.connected || _espState.demo) ? (_espState.data?.SPD || 8.0) : (useAppStore.getState().params?.vent || 8.0);
       const sGradSnap = sGrad;
       const bulleSnap = isBulleRef.current;
       setRunning(false);
