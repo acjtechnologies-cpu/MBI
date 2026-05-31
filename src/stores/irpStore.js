@@ -52,6 +52,7 @@ export const useIrpStore = create((set, get) => ({
   iqaPilot: null,
   nbRuns: 0,
   confidence: null,   // 'LOW' | 'MEDIUM' | 'HIGH'
+  deltaPerf: null,    // (ref/IRP_raw - 1) × 100
 
   // Changer la référence site (appelé quand on navigue les pentes)
   setSiteRef: (irp, name) => {
@@ -68,7 +69,7 @@ export const useIrpStore = create((set, get) => ({
 
   // Réinitialiser (nouvelle session)
   reset: () => set({
-    runs: [], trend: null, irp: null, kDyn: null, kActuel: null,
+    runs: [], trend: null, irp: null, kDyn: null, kActuel: null, deltaPerf: null,
     sigmaT: null, vMoy: null, tMedian: null,
     iqaHybrid: null, iqaPilot: null, nbRuns: 0, confidence: null,
   }),
@@ -117,8 +118,11 @@ export const useIrpStore = create((set, get) => ({
     const irpRaw = trend * Math.pow(vMoy, 0.7)
 
     // K_dyn = clamp(IRP_raw / IRP_site_ref, 0.85, 1.15)
-    const ref = siteRef || DEFAULT_SITE_REF
+    const ref = DEFAULT_SITE_REF
     const kDyn = Math.max(K_MIN, Math.min(K_MAX, ref / irpRaw))
+
+    // DeltaPerf = ecart en % par rapport a la reference
+    const deltaPerf = +((ref / irpRaw - 1) * 100).toFixed(1)
 
     // Confiance
     let confidence = 'LOW'
@@ -148,6 +152,7 @@ export const useIrpStore = create((set, get) => ({
       iqaPilot:   iqaPilot !== null ? +iqaPilot.toFixed(2) : null,
       nbRuns:     valid.length,
       confidence,
+      deltaPerf,
     })
   },
 }))

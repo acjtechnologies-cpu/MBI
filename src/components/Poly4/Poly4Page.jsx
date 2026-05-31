@@ -56,6 +56,7 @@ export default function Poly4Page() {
   const setSiteRef    = useIrpStore(s => s.setSiteRef)
   const irpVal        = useIrpStore(s => s.irp)
   const irpTrend      = useIrpStore(s => s.trend)
+  const deltaPerf     = useIrpStore(s => s.deltaPerf)
   const irpNbRuns     = useIrpStore(s => s.nbRuns)
   const iqaHybrid     = useIrpStore(s => s.iqaHybrid)
   const espQ          = useESPStore(s => s.q)
@@ -236,7 +237,7 @@ padding: '10px', overflowY: 'auto', boxSizing: 'border-box',
             {currentSite?.name ?? '—'}
           </div>
           <div style={{ fontSize: '0.65rem', color: '#4a5568' }}>
-            K {kPente.toFixed(3)} · IRP {currentSite?.irp ?? '—'}{currentSite?.live && <span style={{ color: irpConfidence === 'HIGH' ? '#3fb950' : irpConfidence === 'MEDIUM' ? '#58a6ff' : '#f0883e', marginLeft:6 }}>● {irpConfidence || 'LIVE'} ({irpNbRuns}r)</span>}
+            K {kPente.toFixed(3)} · {currentSite?.live && deltaPerf !== null ? (deltaPerf >= 0 ? '+' : '') + deltaPerf + '%' : 'IRP ' + (currentSite?.irp ?? '—')}{currentSite?.live && <span style={{ color: irpConfidence === 'HIGH' ? '#3fb950' : irpConfidence === 'MEDIUM' ? '#58a6ff' : '#f0883e', marginLeft:6 }}>● {irpConfidence || 'LIVE'} ({irpNbRuns}r)</span>}
             {applied && <span style={{ color: '#39d353', marginLeft: 8 }}>✓ ACTIVÉ</span>}
           </div>
         </div>
@@ -324,8 +325,8 @@ padding: '10px', overflowY: 'auto', boxSizing: 'border-box',
                 <div style={{ fontSize:18, fontWeight:900, color: currentSite?.live ? '#58a6ff' : '#e6edf3' }}>{kPente.toFixed(3)}</div>
               </div>
               <div style={{ flex:1 }}>
-                <div style={{ fontSize:9, color:'#4a5568', fontWeight:600 }}>IRP</div>
-                <div style={{ fontSize:18, fontWeight:900, color: currentSite?.live ? '#58a6ff' : '#e6edf3' }}>{currentSite?.irp ?? '—'}</div>
+                <div style={{ fontSize:9, color:'#4a5568', fontWeight:600 }}>{currentSite?.live ? 'ΔPerf' : 'IRP'}</div>
+                <div style={{ fontSize:18, fontWeight:900, color: currentSite?.live ? (deltaPerf >= 0 ? '#3fb950' : '#f85149') : '#e6edf3' }}>{currentSite?.live && deltaPerf !== null ? (deltaPerf >= 0 ? '+' : '') + deltaPerf + '%' : currentSite?.irp ?? '—'}</div>
               </div>
               {iqaHybrid && (
                 <div style={{ flex:1 }}>
