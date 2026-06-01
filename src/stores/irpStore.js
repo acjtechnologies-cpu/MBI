@@ -29,7 +29,7 @@ function stdDev(arr) {
 
 const K_MIN = 0.85
 const K_MAX = 1.15
-const DEFAULT_SITE_REF = 230  // Saint Ferriol V5 median (CDF+CDM)
+const DEFAULT_SITE_REF = 171  // Saint Ferriol TOP pilotes (App IRP LIVE)
 
 export const useIrpStore = create((set, get) => ({
 
