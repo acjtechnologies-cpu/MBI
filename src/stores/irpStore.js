@@ -121,6 +121,7 @@ export const useIrpStore = create((set, get) => ({
     const ref = DEFAULT_SITE_REF
     const kDyn = Math.max(K_MIN, Math.min(K_MAX, ref / irpRaw))
 
+    console.log("[IRP_DEBUG]", {irpRaw, ref, trend, vMoy, tMed, sigmaT, nbValid: valid.length})
     // DeltaPerf = ecart en % par rapport a la reference
     const deltaPerf = +((ref / irpRaw - 1) * 100).toFixed(1)
 
