@@ -71,7 +71,7 @@ export default function Poly4Page() {
   const setMode         = useAppStore(s => s.setPoly4Mode)
   const [sites, setSites]   = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem('mbi_sites') || 'null') || DEFAULT_SITES
+      localStorage.removeItem('mbi_sites'); return DEFAULT_SITES  // V5 force refresh
     } catch { return DEFAULT_SITES }
   })
   const siteIdxRaw      = useAppStore(s => s.poly4SiteIdx)
