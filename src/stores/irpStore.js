@@ -27,9 +27,10 @@ function stdDev(arr) {
   return Math.sqrt(arr.reduce((a, b) => a + (b - mean) ** 2, 0) / arr.length)
 }
 
+const INDICE_875 = 0.875  // T_best/T_median ratio F3F
 const K_MIN = 0.85
 const K_MAX = 1.15
-const DEFAULT_SITE_REF = 171  // Saint Ferriol TOP pilotes (App IRP LIVE)
+const DEFAULT_SITE_REF = 230  // Saint Ferriol V5 median (CDF+CDM)
 
 export const useIrpStore = create((set, get) => ({
 
@@ -53,6 +54,14 @@ export const useIrpStore = create((set, get) => ({
   nbRuns: 0,
   confidence: null,   // 'LOW' | 'MEDIUM' | 'HIGH'
   deltaPerf: null,    // (ref/IRP_raw - 1) × 100
+
+  // V5 Manche system (T_best -> T_median -> IRP)
+  mancheResults: [],
+  mancheIrp: null,
+  mancheK: null,
+  mancheDelta: null,
+  mancheDeltaMasse: null,
+  mancheRef: null,     // auto-ref from M1-M3
 
   // Changer la référence site (appelé quand on navigue les pentes)
   setSiteRef: (irp, name) => {
@@ -78,6 +87,48 @@ export const useIrpStore = create((set, get) => ({
   loadRuns: (runs) => {
     set({ runs })
     get()._recalc()
+  },
+
+  // V5: ajouter un resultat de manche (T_best officiel + V_moy)
+  addManche: (tBest, vMoy, masseVol, kPente) => {
+    const tMedian = +(tBest / INDICE_875).toFixed(2)
+    const irp = +(tMedian * Math.pow(vMoy, 0.7)).toFixed(1)
+    const m = [...get().mancheResults, { tBest, tMedian, vMoy, irp, ts: Date.now() }]
+    set({ mancheResults: m })
+    get()._recalcManche(masseVol, kPente)
+  },
+
+  clearManches: () => set({
+    mancheResults: [], mancheIrp: null, mancheK: null,
+    mancheDelta: null, mancheDeltaMasse: null, mancheRef: null,
+  }),
+
+  _recalcManche: (masseVol, kPente) => {
+    const { mancheResults } = get()
+    if (!mancheResults.length) return
+
+    const irps = mancheResults.map(m => m.irp)
+    const lastIrp = irps[irps.length - 1]
+
+    // Auto-ref: average IRP of first 3 manches, then fixed
+    let ref
+    if (mancheResults.length <= 3) {
+      ref = irps.reduce((a, b) => a + b, 0) / irps.length
+    } else {
+      ref = irps.slice(0, 3).reduce((a, b) => a + b, 0) / 3
+    }
+
+    const kDyn = Math.max(K_MIN, Math.min(K_MAX, ref / lastIrp))
+    const delta = +((kDyn - 1) * 100).toFixed(1)
+    const dMasse = Math.round((masseVol || 3400) * (delta / 100) * (kPente || 1.0))
+
+    set({
+      mancheIrp: lastIrp,
+      mancheK: +kDyn.toFixed(3),
+      mancheDelta: delta,
+      mancheDeltaMasse: dMasse,
+      mancheRef: +ref.toFixed(0),
+    })
   },
 
   // Recalcul interne
