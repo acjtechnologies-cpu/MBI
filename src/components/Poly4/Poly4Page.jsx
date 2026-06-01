@@ -28,15 +28,15 @@ function rhoAlt(altM) {
 }
 
 const DEFAULT_SITES = [
-  { name: 'Rognac',             irp: 260, k: 1.150 },
-  { name: 'Hanstholm Danemark', irp: 225, k: 1.150 },
-  { name: "Font d'Urles",       irp: 223, k: 1.150 },
-  { name: 'Col du Glandon',     irp: 186, k: 1.088 },
-  { name: 'Col des Faisses',    irp: 186, k: 1.088 },
-  { name: 'Sceautres',          irp: 182, k: 1.064 },
-  { name: 'Saint Ferriol',      irp: 171, k: 1.000 },
-  { name: 'Cederon',            irp: 155, k: 0.906 },
-  { name: 'Serra de Busa',      irp: 124, k: 0.850 },
+  { name: 'Rognac',             irp: 290, k: 1.150 },
+  { name: "Font d'Urles",       irp: 250, k: 1.087 },
+  { name: 'Hanstholm Danemark', irp: 245, k: 1.065 },
+  { name: 'Saint Ferriol',      irp: 230, k: 1.000 },
+  { name: 'Col du Glandon',     irp: 210, k: 0.913 },
+  { name: 'Col des Faisses',    irp: 210, k: 0.913 },
+  { name: 'Sceautres',          irp: 205, k: 0.891 },
+  { name: 'Cederon',            irp: 175, k: 0.850 },
+  { name: 'Serra de Busa',      irp: 140, k: 0.850 },
 ]
 
 import { useIrpStore } from '../../stores/irpStore'
@@ -327,6 +327,9 @@ padding: '10px', overflowY: 'auto', boxSizing: 'border-box',
               <div style={{ flex:1 }}>
                 <div style={{ fontSize:9, color:'#4a5568', fontWeight:600 }}>{currentSite?.live ? 'ΔPerf' : 'IRP'}</div>
                 <div style={{ fontSize:18, fontWeight:900, color: currentSite?.live ? (deltaPerf >= 0 ? '#3fb950' : '#f85149') : '#e6edf3' }}>{currentSite?.live && deltaPerf !== null ? (deltaPerf >= 0 ? '+' : '') + deltaPerf + '%' : currentSite?.irp ?? '—'}</div>
+              {currentSite?.live && deltaPerf !== null && (
+                <div style={{ fontSize:10, color: deltaPerf >= 0 ? '#3fb950' : '#f85149', marginTop:2 }}>{((masseFinale * 1000 * (deltaPerf/100) * kPente)|0) >= 0 ? '+' : ''}{(masseFinale * 1000 * (deltaPerf/100) * kPente)|0}g</div>
+              )}
               </div>
               {iqaHybrid && (
                 <div style={{ flex:1 }}>

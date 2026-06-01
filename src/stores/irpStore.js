@@ -29,7 +29,7 @@ function stdDev(arr) {
 
 const K_MIN = 0.85
 const K_MAX = 1.15
-const DEFAULT_SITE_REF = 171  // Fallback si aucun site sélectionné
+const DEFAULT_SITE_REF = 230  // Saint Ferriol V5 median (CDF+CDM)
 
 export const useIrpStore = create((set, get) => ({
 
@@ -121,7 +121,6 @@ export const useIrpStore = create((set, get) => ({
     const ref = DEFAULT_SITE_REF
     const kDyn = Math.max(K_MIN, Math.min(K_MAX, ref / irpRaw))
 
-    console.log("[IRP_DEBUG]", {irpRaw, ref, trend, vMoy, tMed, sigmaT, nbValid: valid.length})
     // DeltaPerf = ecart en % par rapport a la reference
     const deltaPerf = +((ref / irpRaw - 1) * 100).toFixed(1)
 
