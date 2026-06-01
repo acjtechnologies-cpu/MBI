@@ -122,7 +122,7 @@ export const useIrpStore = create((set, get) => ({
     const kDyn = Math.max(K_MIN, Math.min(K_MAX, ref / irpRaw))
 
     // DeltaPerf = ecart en % par rapport a la reference
-    const deltaPerf = +((ref / irpRaw - 1) * 100).toFixed(1)
+    const deltaPerf = +((kDyn - 1) * 100).toFixed(1)
 
     // Confiance
     let confidence = 'LOW'
