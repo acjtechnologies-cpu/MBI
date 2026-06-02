@@ -588,7 +588,7 @@ const [gistStatus, setGistStatus] = useState('');
         <div style={{ fontSize: 12, color: '#555', marginBottom: 4, letterSpacing: '0.08em' }}>
           {pilotes[piloteActif].nom}
           <span style={{ color: '#333', margin: '0 6px' }}>·</span>
-          manche {manche}{deltaPerf !== null ? <span style={{ fontSize:10, color: deltaPerf >= 0 ? '#3fb950' : '#f85149', marginLeft:6 }}>{deltaPerf >= 0 ? '+' : ''}{deltaPerf}% · {((_masseVol * 1000 * (deltaPerf/100) * _kPente)|0) >= 0 ? '+' : ''}{(_masseVol * 1000 * (deltaPerf/100) * _kPente)|0}g ({nbIrpRuns}r)</span> : kActuel && <span style={{ fontSize:10, color:'#58a6ff', marginLeft:6 }}>K {kActuel} ({nbIrpRuns}r)</span>}
+          manche {manche}
         </div>
         <div style={{ fontSize: 58, fontWeight: 500, letterSpacing: -1,
           color: running ? couleurActif : '#fff', fontVariantNumeric: 'tabular-nums',
