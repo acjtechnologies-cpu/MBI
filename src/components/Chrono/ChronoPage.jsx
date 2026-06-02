@@ -535,62 +535,55 @@ const [gistStatus, setGistStatus] = useState('');
       </div>
 
       {/* ── SESSION INDICATOR ────────────────────────────────────────────── */}
-      {sessionId && (
-        <div style={{ padding: '3px 12px', background: '#0a0f0a', borderBottom: '0.5px solid #1a1a1a',
-          flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#1D9E75' }} />
-          <span style={{ fontSize: 9, color: '#1D9E75', letterSpacing: '0.04em' }}>
-            SESSION {fmtDate(sessionId)} {fmtTime(sessionId)}
-          </span>
-          <span style={{ fontSize: 9, color: '#333', marginLeft: 'auto' }}>{runs.length} run{runs.length > 1 ? 's' : ''}</span>
-        </div>
-      )}
+
 
       {/* ── SÉLECTEUR PILOTE ─────────────────────────────────────────────── */}
-      <div style={{ display: 'flex', gap: 6, padding: '8px 12px', overflowX: 'auto',
-        flexShrink: 0, scrollbarWidth: 'none' }}>
-        {pilotes.map((p, i) => {
-          const best   = bestPour(i);
-          const active = i === piloteActif;
-          const col    = COULEURS[i];
-          return (
-            <div key={i} onClick={() => !running && setPiloteActif(i)}
-              onDoubleClick={() => startEdit(i)}
-              style={{ flexShrink: 0, minWidth: 64,
-                background: active ? '#0f0f0f' : '#141414',
-                border: `1.5px solid ${active ? col : '#2a2a2a'}`,
-                borderRadius: 10, padding: '7px 10px', textAlign: 'center',
-                cursor: 'pointer', touchAction: 'manipulation',
-                WebkitTapHighlightColor: 'transparent' }}>
-              {editNom === i ? (
-                <input autoFocus value={editVal} onChange={e => setEditVal(e.target.value)}
-                  onBlur={commitEdit} onKeyDown={e => e.key === 'Enter' && commitEdit()}
-                  style={{ width: 56, background: 'transparent', border: 'none', color: col,
-                    fontSize: 12, fontWeight: 500, textAlign: 'center', outline: 'none' }}
-                  maxLength={12} />
-              ) : (
-                <div style={{ fontSize: 12, fontWeight: 500, color: active ? col : '#888' }}>{p.nom}</div>
-              )}
-              <div style={{ fontSize: 10, color: active ? col : '#444', marginTop: 2,
-                fontVariantNumeric: 'tabular-nums' }}>
-                {best ? formatDuree(best) : '—'}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '6px 12px',
+        flexShrink: 0, borderBottom: '0.5px solid #1a1a1a' }}>
+        <div style={{ display: 'flex', gap: 3, flex: 1 }}>
+          {pilotes.map((p, i) => {
+            const best   = bestPour(i);
+            const active = i === piloteActif;
+            const col    = COULEURS[i];
+            return (
+              <div key={i} onClick={() => !running && setPiloteActif(i)}
+                onDoubleClick={() => startEdit(i)}
+                style={{ padding: '3px 8px', borderRadius: 6,
+                  border: `1px solid ${active ? col : '#2a2a2a'}`,
+                  background: active ? `${col}15` : 'transparent',
+                  textAlign: 'center', cursor: 'pointer', minWidth: 38,
+                  touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}>
+                {editNom === i ? (
+                  <input autoFocus value={editVal} onChange={e => setEditVal(e.target.value)}
+                    onBlur={commitEdit} onKeyDown={e => e.key === 'Enter' && commitEdit()}
+                    style={{ width: 32, background: 'transparent', border: 'none', color: col,
+                      fontSize: 10, fontWeight: 700, textAlign: 'center', outline: 'none' }}
+                    maxLength={12} />
+                ) : (
+                  <div style={{ fontSize: 10, fontWeight: 700, color: active ? col : '#666' }}>
+                    P{i + 1}
+                  </div>
+                )}
+                <div style={{ fontSize: 9, color: active ? col : '#333', fontVariantNumeric: 'tabular-nums' }}>
+                  {best ? formatDuree(best) : '—'}
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
 
       {/* ── DISPLAY CHRONO ───────────────────────────────────────────────── */}
       <div style={{ margin: '0 12px 8px', background: '#050505',
         border: `1.5px solid ${running ? couleurActif : '#1a1a1a'}`,
-        borderRadius: 14, padding: '14px 16px 12px', textAlign: 'center',
+        borderRadius: 10, padding: '10px 14px 8px', textAlign: 'center',
         flexShrink: 0, transition: 'border-color 0.2s' }}>
         <div style={{ fontSize: 12, color: '#555', marginBottom: 4, letterSpacing: '0.08em' }}>
           {pilotes[piloteActif].nom}
           <span style={{ color: '#333', margin: '0 6px' }}>·</span>
           manche {manche}
         </div>
-        <div style={{ fontSize: 58, fontWeight: 500, letterSpacing: -1,
+        <div style={{ fontSize: 48, fontWeight: 500, letterSpacing: -1,
           color: running ? couleurActif : '#fff', fontVariantNumeric: 'tabular-nums',
           lineHeight: 1, marginBottom: 6, transition: 'color 0.15s' }}>
           {fmtDisplay(running ? elapsed : null)}
@@ -607,7 +600,7 @@ const [gistStatus, setGistStatus] = useState('');
 
       {/* ── BOUTON START / STOP ──────────────────────────────────────────── */}
       <button onClick={handleStartStop} style={{
-        margin: '0 12px 10px', height: 76, borderRadius: 16, border: 'none',
+        margin: '0 12px 8px', height: 56, borderRadius: 16, border: 'none',
         background: running ? '#8b1a1a' : '#0d4a36', color: '#fff',
         fontSize: 24, fontWeight: 500, letterSpacing: '0.05em', cursor: 'pointer',
         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14,
@@ -632,7 +625,7 @@ const [gistStatus, setGistStatus] = useState('');
       <div style={{ padding: '0 12px', flex: 1, overflowY: 'auto' }}>
         <div style={{ fontSize: 10, color: '#444', letterSpacing: '0.08em',
           textTransform: 'uppercase', marginBottom: 6 }}>
-          Runs — {runs.length}
+          Journal — {runs.length} runs
         </div>
         {runs.length === 0 && (
           <div style={{ textAlign: 'center', color: '#333', fontSize: 13, padding: '24px 0' }}>
@@ -678,6 +671,8 @@ const [gistStatus, setGistStatus] = useState('');
             {gistStatus === 'syncing' ? '⏳' : gistStatus === 'ok' ? '✓ Gist' : gistStatus === 'err' ? '✗' : '↓ JSON'}
           </button>
         <button onClick={() => setShowReset(true)} style={{ ...btnFooter, color: '#8b2020' }}>Réinit.</button>
+        <button onClick={() => { clearMancheResults() }} style={{ ...btnFooter, color: '#ffd700', borderColor: '#4a3a00' }}>Vider V5</button>
+      </div>
 
       {/* ── V5 MANCHE PANEL ── */}
       <div style={{ margin:'10px 12px', padding:12, background:'#0d1117', border:'1px solid #1e2535', borderRadius:12 }}>
@@ -743,7 +738,6 @@ const [gistStatus, setGistStatus] = useState('');
             )}
           </div>
         )}
-      </div>
       </div>
 
       {/* ── MODAL RESET ──────────────────────────────────────────────────── */}
