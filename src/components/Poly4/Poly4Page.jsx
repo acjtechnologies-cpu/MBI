@@ -35,7 +35,8 @@ const DEFAULT_SITES = [
   { name: 'Col du Glandon',     irp: 210, k: 0.913 },
   { name: 'Col des Faisses',    irp: 210, k: 0.913 },
   { name: 'Sceautres',          irp: 205, k: 0.891 },
-  { name: 'Cederon',            irp: 175, k: 0.850 },
+  { name: 'Route des Crêtes',   irp: 201, k: 0.873 },
+  { name: 'Séderon',            irp: 175, k: 0.850 },
   { name: 'Serra de Busa',      irp: 140, k: 0.850 },
 ]
 
