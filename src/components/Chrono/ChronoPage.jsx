@@ -337,6 +337,45 @@ const [gistStatus, setGistStatus] = useState('');
   const mancheRef    = useIrpStore(s => s.mancheRef);
   const mancheResults = useIrpStore(s => s.mancheResults);
   const [tBestInput, setTBestInput] = useState('');
+  const [manualPilote, setManualPilote] = useState(null);
+  const [manualTime, setManualTime]     = useState('');
+  const longPressRef = useRef(null);
+
+  function startLongPress(idx) {
+    longPressRef.current = setTimeout(() => {
+      if (!running) {
+        setManualPilote(idx);
+        setManualTime('');
+        if (navigator.vibrate) navigator.vibrate(30);
+      }
+    }, 500);
+  }
+  function cancelLongPress() {
+    if (longPressRef.current) clearTimeout(longPressRef.current);
+  }
+  function submitManualTime() {
+    const sec = parseFloat(manualTime);
+    if (isNaN(sec) || sec < 10 || sec > 120) { setManualPilote(null); return; }
+    const sid = sessionId ?? Date.now();
+    if (!sessionId) setSessionId(sid);
+    const _espState = useESPStore.getState();
+    const ventSnap = (_espState.connected || _espState.demo) ? (_espState.data?.SPD || 8.0) : (useAppStore.getState().params?.vent || 8.0);
+    const newRun = {
+      id: Date.now(), pilote_id: manualPilote, manche,
+      session_id: sid, duree_ms: Math.round(sec * 1000),
+      iqa_snap: iqa, vent_snap: ventSnap, sgrad_snap: sGrad,
+      q_snap: qSnap, irpx_snap: irpxSnap,
+      bulle_snap: false, t_start: Date.now(),
+      site: { ...useAppStore.getState().activeSite },
+      ballast: { ...useAppStore.getState().ballastSnap },
+      altitude: useAppStore.getState().altitude,
+    };
+    setRuns(prev => [newRun, ...prev]);
+    db.runs.add(newRun).catch(() => {});
+    addIrpRun(newRun);
+    setManualPilote(null);
+    if (navigator.vibrate) navigator.vibrate([30, 50, 80]);
+  }
   const [vMoyInput, setVMoyInput]   = useState('');
   const _masseVol    = useAppStore(s => s.ballastSnap?.masse ?? 3.4);
   const _kPente      = useAppStore(s => s.activeSite?.k ?? 1.0);
@@ -546,8 +585,15 @@ const [gistStatus, setGistStatus] = useState('');
             const active = i === piloteActif;
             const col    = COULEURS[i];
             return (
-              <div key={i} onClick={() => !running && setPiloteActif(i)}
+              <div key={i}
+                onClick={() => { cancelLongPress(); if (!running) setPiloteActif(i); }}
                 onDoubleClick={() => startEdit(i)}
+                onTouchStart={() => startLongPress(i)}
+                onTouchEnd={cancelLongPress}
+                onTouchMove={cancelLongPress}
+                onMouseDown={() => startLongPress(i)}
+                onMouseUp={cancelLongPress}
+                onMouseLeave={cancelLongPress}
                 style={{ padding: '3px 8px', borderRadius: 6,
                   border: `1px solid ${active ? col : '#2a2a2a'}`,
                   background: active ? `${col}15` : 'transparent',
@@ -572,6 +618,32 @@ const [gistStatus, setGistStatus] = useState('');
           })}
         </div>
       </div>
+
+      {/* ── SAISIE MANUELLE (long press) ── */}
+      {manualPilote !== null && (
+        <div style={{ padding: '8px 12px', background: '#0d1117', borderBottom: '1px solid #1e2535',
+          display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+          <span style={{ fontSize: 11, color: COULEURS[manualPilote], fontWeight: 700 }}>
+            {pilotes[manualPilote]?.nom}
+          </span>
+          <input type="number" autoFocus value={manualTime}
+            onChange={e => setManualTime(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && submitManualTime()}
+            placeholder="Temps (s)"
+            style={{ flex: 1, background: '#131720', border: '1px solid #ffd700',
+              color: '#e8eaf0', borderRadius: 6, padding: '6px 10px', fontSize: 14,
+              fontWeight: 700, fontFamily: 'monospace', outline: 'none', textAlign: 'center' }}
+          />
+          <button onClick={submitManualTime}
+            style={{ padding: '6px 12px', borderRadius: 6, border: 'none',
+              background: '#ffd700', color: '#000', fontSize: 12, fontWeight: 700,
+              cursor: 'pointer' }}>OK</button>
+          <button onClick={() => setManualPilote(null)}
+            style={{ padding: '6px 8px', borderRadius: 6, border: '1px solid #30363d',
+              background: 'transparent', color: '#8b949e', fontSize: 12,
+              cursor: 'pointer' }}>✕</button>
+        </div>
+      )}
 
       {/* ── DISPLAY CHRONO ───────────────────────────────────────────────── */}
       <div style={{ margin: '0 12px 8px', background: '#050505',
