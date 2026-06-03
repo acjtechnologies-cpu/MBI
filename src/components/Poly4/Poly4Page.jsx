@@ -27,18 +27,14 @@ function rhoAlt(altM) {
   return Math.pow(1 - 2.2557e-5 * altM, 5.2559)
 }
 
-const DEFAULT_SITES = [
-  { name: 'Rognac',             irp: 290, k: 1.150 },
-  { name: "Font d'Urles",       irp: 250, k: 1.087 },
-  { name: 'Hanstholm Danemark', irp: 245, k: 1.065 },
+// Fallback si fetch echoue
+const FALLBACK_SITES = [
   { name: 'Saint Ferriol',      irp: 230, k: 1.000 },
-  { name: 'Col du Glandon',     irp: 210, k: 0.913 },
-  { name: 'Col des Faisses',    irp: 210, k: 0.913 },
-  { name: 'Sceautres',          irp: 205, k: 0.891 },
-  { name: 'Route des Crêtes',   irp: 201, k: 0.873 },
-  { name: 'Séderon',            irp: 175, k: 0.850 },
-  { name: 'Serra de Busa',      irp: 140, k: 0.850 },
+  { name: 'Rognac',             irp: 290, k: 1.150 },
+  { name: 'Serra de Busa',      irp: 140, k: 0.609 },
 ]
+
+const SITES_URL = import.meta.env.BASE_URL + 'planeurs/sites.json'
 
 import { useIrpStore } from '../../stores/irpStore'
 import { useESPStore } from '../../stores/espStore'
@@ -72,7 +68,7 @@ export default function Poly4Page() {
   const setMode         = useAppStore(s => s.setPoly4Mode)
   const [sites, setSites]   = useState(() => {
     try {
-      localStorage.removeItem('mbi_sites'); return DEFAULT_SITES  // V5 force refresh
+      return JSON.parse(localStorage.getItem('mbi_sites_v5') || 'null') || FALLBACK_SITES
     } catch { return DEFAULT_SITES }
   })
   const siteIdxRaw      = useAppStore(s => s.poly4SiteIdx)
@@ -98,6 +94,20 @@ export default function Poly4Page() {
   const offsetADN   = (model?.masse_ref_8ms || P4_REF_8MS) - P4_REF_8MS
   const offsetTerrain = offsetStore / 1000
   const offsetKg    = offsetADN + offsetTerrain
+
+  // ── Fetch sites.json on mount ──
+  useEffect(() => {
+    fetch(SITES_URL)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data?.sites?.length) {
+          const fetched = data.sites.map(s => ({ name: s.name, irp: s.irp, k: s.k }))
+          setSites(fetched)
+          localStorage.setItem('mbi_sites_v5', JSON.stringify(fetched))
+        }
+      })
+      .catch(() => {})  // offline: use cache
+  }, [])
 
   // ── masseFinale = poly4(vent) × rho(alt) × K_pente + offset/1000 ─────────
   const masseFinale = useMemo(() =>
