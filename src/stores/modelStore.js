@@ -35,7 +35,7 @@ const MATRIX_MAMBA = [
 const DEFAULT_MODEL = {
   id: 'mamba-s',
   nom: 'Mamba S',
-  drapeau: '????????',
+  drapeau: '🇫🇷',
   masseVide: 2550,
   cgVide: 102,
   surface: 57,
@@ -145,7 +145,7 @@ const useModelStore = create(
         return Object.values(state.models || {}).map(m => ({
           id: m.id,
           nom: m.nom,
-          drapeau: m.drapeau || '???????',
+          drapeau: m.drapeau || '🏁',
           masseVide: m.masseVide,
           hasMatrix: !!(m.matrix && m.matrix.length > 0)
         }))
