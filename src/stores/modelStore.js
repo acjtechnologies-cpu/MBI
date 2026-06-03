@@ -38,9 +38,10 @@ const DEFAULT_MODEL = {
   drapeau: '🇫🇷',
   masseVide: 2550,
   cgVide: 102,
-  surface: 59,
+  surface: 57,
+  masse_ref_8ms: 3.330,
   offset: -144,
-  nezDist: 260,
+  nezDist: 340,
   version: '1.0',
   matrix: MATRIX_MAMBA,
   soutes: {
@@ -197,7 +198,7 @@ const useModelStore = create(
       }
     }),
     {
-      name: 'mbi-model-storage',
+      name: 'mbi-model-v5',
       partialize: (state) => ({
         models: state.models,
         activeModelId: state.activeModelId
@@ -215,7 +216,7 @@ const useModelStore = create(
               ...state.models['mamba-s'],
               matrix: MATRIX_MAMBA,
               offset: state.models['mamba-s'].offset || -144,
-            nezDist: state.models['mamba-s'].nezDist || 260
+            nezDist: state.models['mamba-s'].nezDist || 340
             }
           }
         }
