@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Calculateur IRP V5 — F3F PIT</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=DM+Sans:wght@400;500;700;800&display=swap');
+  :root{--bg:#05070a;--panel:#0d1117;--panel2:#131720;--border:#1e2535;--border2:#30363d;
+    --txt:#e8eaf0;--muted:#8b949e;--green:#3fb950;--blue:#1a73e8;--orange:#ffb74d;
+    --red:#f85149;--purple:#a78bfa;--cyan:#00d1b2;--gold:#ffd700}
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{min-height:100dvh;background:var(--bg);color:var(--txt);
+    font-family:'DM Sans',sans-serif;user-select:none;overflow-y:auto}
+  .header{padding:16px;border-bottom:1px solid var(--border)}
+  .header h1{font-family:'JetBrains Mono';font-size:14px;font-weight:800;color:var(--cyan);letter-spacing:2px;text-transform:uppercase}
+  .header .sub{font-size:10px;color:var(--muted);margin-top:2px;letter-spacing:.5px}
+  .header .ver{font-size:9px;color:var(--cyan);opacity:.5;float:right;margin-top:-20px}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;margin:10px 12px;padding:14px}
+  .card-t{font-family:'JetBrains Mono';font-size:10px;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+  .dot{width:6px;height:6px;border-radius:50%;display:inline-block}
+  .eq-box{background:rgba(0,209,178,.05);border:1px solid rgba(0,209,178,.15);border-radius:10px;padding:12px;text-align:center;margin-bottom:12px}
+  .eq{font-family:'JetBrains Mono';font-size:12px;font-weight:700;color:var(--cyan);margin:2px 0}
+  .eq-gold{color:var(--gold)}.eq-green{color:var(--green)}.eq-or{color:var(--orange)}
+  .eq2{font-size:10px;color:var(--muted)}
+  input[type=number],input[type=text],textarea{background:var(--panel2);border:1px solid var(--border2);color:var(--txt);
+    border-radius:8px;padding:8px 10px;font-size:13px;font-weight:700;width:100%;font-family:'JetBrains Mono';outline:none;text-align:center}
+  input:focus,textarea:focus{border-color:var(--cyan)}
+  textarea{text-align:left;font-size:11px;resize:vertical;min-height:80px}
+  .lbl{font-size:9px;color:var(--muted);text-align:center;margin-top:3px;letter-spacing:.5px}
+  .row{display:flex;gap:8px;align-items:flex-end;margin-bottom:8px}
+  .btn{padding:10px 14px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:700;
+    font-family:'DM Sans';transition:all .15s;touch-action:manipulation;width:100%}
+  .btn-cyan{background:var(--cyan);color:#000}.btn-blue{background:var(--blue);color:#fff}
+  .btn-green{background:#238636;color:#fff}.btn-red{background:rgba(248,81,73,.15);color:var(--red);border:1px solid rgba(248,81,73,.3)}
+  .btn-ghost{background:transparent;border:1px solid var(--border2);color:var(--muted)}
+  .btn-gold{background:var(--gold);color:#000}
+  .btn-row{display:flex;gap:8px;margin-top:10px}
+  .btn-row .btn{flex:1}
+  .big-num{text-align:center;padding:14px;background:var(--panel2);border-radius:10px;border:1px solid var(--border);margin-bottom:10px}
+  .big-val{font-family:'JetBrains Mono';font-size:42px;font-weight:800;line-height:1}
+  .big-sub{font-size:10px;color:var(--muted);margin-top:4px}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+  .stat{background:var(--panel2);border-radius:8px;padding:10px;text-align:center;border:1px solid var(--border)}
+  .stat-v{font-family:'JetBrains Mono';font-size:18px;font-weight:800;line-height:1}
+  .stat-l{font-size:8px;color:var(--muted);margin-top:4px;letter-spacing:.5px;text-transform:uppercase}
+  .delta-box{text-align:center;padding:16px;border-radius:12px;margin-bottom:10px}
+  .delta-val{font-family:'JetBrains Mono';font-size:36px;font-weight:800;line-height:1}
+  .delta-masse{font-family:'JetBrains Mono';font-size:22px;font-weight:800;margin-top:8px}
+  .delta-sub{font-size:11px;margin-top:6px}
+  .delta-pos{background:rgba(63,185,80,.1);border:1px solid rgba(63,185,80,.3);color:var(--green)}
+  .delta-neg{background:rgba(248,81,73,.1);border:1px solid rgba(248,81,73,.3);color:var(--red)}
+  .delta-neutral{background:rgba(0,209,178,.1);border:1px solid rgba(0,209,178,.3);color:var(--cyan)}
+  .gauge{position:relative;height:16px;border-radius:8px;overflow:hidden;margin:8px 0;
+    background:linear-gradient(90deg,#f85149,#ffb74d 35%,#3fb950 50%,#58a6ff 65%,#a78bfa)}
+  .gauge-c{position:absolute;top:0;width:4px;height:100%;background:#fff;border-radius:2px;transition:left .3s;box-shadow:0 0 8px #fff}
+  .gauge-lbl{display:flex;justify-content:space-between;font-size:8px;color:var(--muted);margin-top:2px}
+  .mi{display:flex;align-items:center;gap:4px;padding:4px 8px;background:var(--panel2);border:1px solid var(--border);border-radius:8px;margin-bottom:3px;font-size:10px}
+  .mi .num{font-family:'JetBrains Mono';color:var(--muted);width:22px;text-align:right}
+  .mi .val{font-family:'JetBrains Mono';font-weight:700;flex:1}
+  .mi .d{font-family:'JetBrains Mono';font-weight:700;min-width:44px;text-align:right}
+  .mi .mg{font-size:9px;color:var(--orange);min-width:40px;text-align:right}
+  .mi .del{color:var(--red);cursor:pointer;padding:2px 4px;border:none;background:none;font-size:12px}
+  .table{width:100%;border-collapse:collapse;font-size:10px;font-family:'JetBrains Mono'}
+  .table th{color:var(--muted);font-weight:700;padding:4px 6px;text-align:right;border-bottom:1px solid var(--border)}
+  .table td{padding:4px 6px;text-align:right;border-bottom:1px solid rgba(255,255,255,.03)}
+  .table td:first-child,.table th:first-child{text-align:center}
+  .table .med{background:rgba(0,209,178,.08);font-weight:800}
+  .sites-list{display:flex;flex-direction:column;gap:4px}
+  .site-row{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--panel2);
+    border-radius:8px;border:1px solid var(--border);cursor:pointer;transition:border-color .15s}
+  .site-row:hover{border-color:var(--blue)}.site-row.active{border-color:var(--cyan);background:rgba(0,209,178,.06)}
+  .site-name{flex:1;font-size:12px;font-weight:700}
+  .site-irp{font-family:'JetBrains Mono';font-size:11px;color:var(--muted)}
+  .conf{display:inline-block;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700;letter-spacing:.5px}
+  .conf-h{background:rgba(63,185,80,.15);color:var(--green)}.conf-m{background:rgba(26,115,232,.15);color:#58a6ff}.conf-l{background:rgba(255,183,77,.15);color:var(--orange)}
+  .sep{height:1px;background:var(--border);margin:10px 0}
+  .hide{display:none}
+  .msg{font-size:10px;color:var(--muted);text-align:center;padding:6px;min-height:20px}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>&#128208; Calculateur IRP V5</h1>
+  <div class="sub">Calibration m&eacute;diane &middot; K = IRP<sub>ref</sub> / IRP<sub>raw</sub> &middot; &Delta;Perf &rarr; &Delta;Masse</div>
+  <div class="ver">F3F PIT &middot; V5 &middot; sites.json</div>
+</div>
+
+<div class="card">
+  <div class="eq-box">
+    <div class="eq">T<sub>median</sub> = Pilote &agrave; 875 pts (milieu de tableau)</div>
+    <div class="eq eq-gold">IRP = T<sub>median</sub> &times; V<sub>moy</sub><sup>0.7</sup></div>
+    <div class="eq eq-green">&Delta;Perf = (IRP<sub>ref</sub> / IRP<sub>raw</sub> &minus; 1) &times; 100</div>
+    <div class="eq eq-or">&Delta;Masse = M<sub>vol</sub> &times; &Delta;Perf% &times; K<sub>pente</sub></div>
+    <div class="eq2" style="margin-top:6px">Indice<sub>1000</sub> = (T<sub>best</sub> / T<sub>median</sub>) &times; 1000 &asymp; 875</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-t"><span class="dot" style="background:var(--orange)"></span>Configuration planeur</div>
+  <div class="row">
+    <div><input type="number" id="inpMasse" value="3400" min="2000" max="5000" step="10"><div class="lbl">Masse vol (g)</div></div>
+    <div><input type="number" id="inpKpente" value="1.1" min="0.8" max="1.5" step="0.01"><div class="lbl">K pente</div></div>
+    <div><input type="number" id="inpIrpRef" value="230" min="50" max="400" step="1"><div class="lbl">IRP ref site</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-t"><span class="dot" style="background:var(--cyan)"></span>Saisie &mdash; coller les temps F3X Vault</div>
+  <textarea id="inpPilots" placeholder="Coller les temps moyens F3X Vault (un par ligne ou virgules)&#10;Ex: 37.30, 37.81, 38.24, 38.60, 40.13, ..."></textarea>
+  <div class="row" style="margin-top:8px">
+    <div><input type="number" id="inpVmoy" placeholder="V moy (m/s)" min="0" max="25" step="0.1"><div class="lbl">Vent moyen</div></div>
+    <div><button class="btn btn-cyan" onclick="calcFromPilots()">&#9889; Analyser</button></div>
+  </div>
+</div>
+
+<div class="card hide" id="pilotResults">
+  <div class="card-t"><span class="dot" style="background:var(--green)"></span>Analyse peloton</div>
+  <div class="grid-3">
+    <div class="stat"><div class="stat-v" style="color:var(--cyan)" id="rPilots">&mdash;</div><div class="stat-l">Pilotes</div></div>
+    <div class="stat"><div class="stat-v" style="color:var(--gold)" id="rTbest">&mdash;</div><div class="stat-l">T best</div></div>
+    <div class="stat"><div class="stat-v" style="color:var(--green)" id="rTmedian">&mdash;</div><div class="stat-l">T median</div></div>
+  </div>
+  <div class="grid-3">
+    <div class="stat"><div class="stat-v" style="color:var(--orange)" id="rIndice">&mdash;</div><div class="stat-l">Indice 1000</div></div>
+    <div class="stat"><div class="stat-v" style="color:var(--purple)" id="rSigma">&mdash;</div><div class="stat-l">&sigma; peloton</div></div>
+    <div class="stat"><div class="stat-v" style="color:var(--muted)" id="rTmoy">&mdash;</div><div class="stat-l">T moyen</div></div>
+  </div>
+  <div class="big-num">
+    <div class="big-val" style="color:var(--cyan)" id="rIRP">&mdash;</div>
+    <div class="big-sub">IRP<sub>median</sub> = T<sub>med</sub> &times; V<sub>moy</sub><sup>0.7</sup></div>
+  </div>
+  <div class="delta-box delta-neutral" id="deltaBox">
+    <div class="delta-val" id="rDelta">&mdash;</div>
+    <div class="delta-sub" id="rDeltaSub">&Delta;Perf vs r&eacute;f&eacute;rence</div>
+    <div class="delta-masse" id="rDeltaMasse">&mdash;</div>
+  </div>
+  <div class="gauge"><div class="gauge-c" id="gaugeC" style="left:50%"></div></div>
+  <div class="gauge-lbl"><span>-15% L&eacute;ger</span><span>0% Ref</span><span>+15% Lourd</span></div>
+  <div class="sep"></div>
+  <div class="card-t"><span class="dot" style="background:var(--muted)"></span>D&eacute;tail peloton</div>
+  <div style="max-height:250px;overflow-y:auto">
+    <table class="table" id="pilotTable"><thead><tr><th>#</th><th>T moy</th><th>Points</th><th>Zone</th></tr></thead><tbody></tbody></table>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-green" onclick="saveSite()">&#128190; Sauver site</button>
+  </div>
+  <div class="msg" id="saveMsg"></div>
+</div>
+
+<div class="card">
+  <div class="card-t"><span class="dot" style="background:var(--gold)"></span>V5 &mdash; T<sub>best</sub> manche &rarr; &Delta;Masse</div>
+  <div class="row">
+    <div><input type="number" id="inpMT" placeholder="T best (s)" min="20" max="120" step="0.01"><div class="lbl">T best (s)</div></div>
+    <div><input type="number" id="inpMV" placeholder="V moy" min="0" max="25" step="0.1"><div class="lbl">Vent (m/s)</div></div>
+    <div style="flex:0"><button class="btn btn-gold" onclick="addManche()" style="white-space:nowrap">+ Manche</button></div>
+  </div>
+  <div id="mancheList"></div>
+  <div class="btn-row">
+    <button class="btn btn-red" onclick="clearManches()">&#128465; Vider</button>
+    <button class="btn btn-ghost" onclick="toggleAutoRef()"><span id="autoRefLabel">Auto-ref: M1-M3</span></button>
+  </div>
+  <div class="msg" id="mancheMsg"></div>
+</div>
+
+<div class="card">
+  <div class="card-t"><span class="dot" style="background:var(--gold)"></span>Sites calibr&eacute;s <span id="sitesSource" style="font-size:8px;color:var(--cyan);margin-left:auto"></span></div>
+  <div id="sitesList" class="sites-list"></div>
+</div>
+
+<div style="text-align:center;padding:20px;font-size:9px;color:var(--border2)">
+  F3F PIT &middot; ACJ Technologies &middot; IRP V5 M&eacute;diane &middot; &copy; Jo 2026
+</div>
+
+<script>
+const SITES_JSON_URL = 'planeurs/sites.json'
+let sites = [], manches = [], autoRef = true
+
+function median(a){const s=[...a].sort((x,y)=>x-y),m=s.length>>1;return s.length%2?s[m]:(s[m-1]+s[m])/2}
+function mean(a){return a.reduce((s,v)=>s+v,0)/a.length}
+function stddev(a){const m=mean(a);return Math.sqrt(a.reduce((s,v)=>s+(v-m)**2,0)/a.length)}
+function clamp(v,lo,hi){return Math.max(lo,Math.min(hi,v))}
+function getRef(){return parseFloat(document.getElementById('inpIrpRef').value)||230}
+function getMasse(){return parseFloat(document.getElementById('inpMasse').value)||3400}
+function getKp(){return parseFloat(document.getElementById('inpKpente').value)||1.1}
+
+function parseTimes(text){
+  const nums=[]
+  for(const line of text.split(/[\n\r]+/)){
+    const matches=line.match(/(\d+[.,]\d+)/g)
+    if(matches) for(const m of matches){
+      const v=parseFloat(m.replace(',','.'))
+      if(v>=25&&v<=120) nums.push(v)
+    }
+  }
+  return [...new Set(nums.map(n=>+n.toFixed(2)))].sort((a,b)=>a-b)
+}
+
+function calcFromPilots(){
+  const text=document.getElementById('inpPilots').value.trim()
+  const vmoy=parseFloat(document.getElementById('inpVmoy').value)
+  if(!text){alert('Coller les temps moyens des pilotes');return}
+  if(isNaN(vmoy)||vmoy<=0){alert('Vent moyen requis');return}
+  const times=parseTimes(text)
+  if(times.length<5){alert('Minimum 5 pilotes (trouvé: '+times.length+')');return}
+  const n=times.length, tBest=times[0], tMed=median(times), tMoy=mean(times)
+  const sigma=stddev(times), indice=Math.round(tBest/tMed*1000)
+  const irp=+(tMed*Math.pow(vmoy,0.7)).toFixed(1)
+  const ref=getRef(), kDyn=clamp(ref/irp,0.85,1.15)
+  const delta=+((ref/irp-1)*100).toFixed(1)
+  const dMasse=Math.round(getMasse()*(delta/100)*getKp())
+  document.getElementById('pilotResults').classList.remove('hide')
+  document.getElementById('rPilots').textContent=n
+  document.getElementById('rTbest').textContent=tBest.toFixed(2)+'s'
+  document.getElementById('rTmedian').textContent=tMed.toFixed(2)+'s'
+  document.getElementById('rIndice').textContent=indice
+  document.getElementById('rSigma').textContent=sigma.toFixed(2)+'s'
+  document.getElementById('rTmoy').textContent=tMoy.toFixed(2)+'s'
+  document.getElementById('rIRP').textContent=irp
+  const db=document.getElementById('deltaBox'),dv=document.getElementById('rDelta')
+  const ds=document.getElementById('rDeltaSub'),dm=document.getElementById('rDeltaMasse')
+  dv.textContent=(delta>=0?'+':'')+delta+'%'
+  ds.textContent='\u0394Perf vs ref '+ref+' \u00b7 K='+kDyn.toFixed(3)
+  dm.textContent=(dMasse>=0?'+':'')+dMasse+'g'
+  db.className='delta-box '+(delta>2?'delta-pos':delta<-2?'delta-neg':'delta-neutral')
+  document.getElementById('gaugeC').style.left=clamp((delta+15)/30*100,0,100)+'%'
+  const medIdx=Math.floor(n/2)
+  document.getElementById('pilotTable').querySelector('tbody').innerHTML=times.map((t,i)=>{
+    const pts=Math.round(tBest/t*1000)
+    const zone=i<Math.floor(n*.2)?'\ud83c\udfc6':i<Math.floor(n*.4)?'\u25b2':i<Math.floor(n*.6)?'\u25cf':i<Math.floor(n*.8)?'\u25bc':'\u2b07'
+    return `<tr class="${i===medIdx?'med':''}"><td>${i+1}</td><td>${t.toFixed(2)}</td><td>${pts}</td><td>${zone}</td></tr>`
+  }).join('')
+}
+
+function addManche(){
+  const tb=parseFloat(document.getElementById('inpMT').value)
+  const v=parseFloat(document.getElementById('inpMV').value)
+  if(isNaN(tb)||tb<20||tb>120){alert('T best invalide');return}
+  if(isNaN(v)||v<1||v>25){alert('Vent invalide');return}
+  const tMed=+(tb/0.875).toFixed(2)
+  manches.push({tb,tMed,v,irp:+(tMed*Math.pow(v,0.7)).toFixed(1)})
+  document.getElementById('inpMT').value='';document.getElementById('inpMV').value=''
+  renderManches()
+}
+function clearManches(){manches=[];renderManches()}
+function toggleAutoRef(){
+  autoRef=!autoRef
+  document.getElementById('autoRefLabel').textContent=autoRef?'Auto-ref: M1-M3':'Auto-ref: OFF (ref site)'
+  renderManches()
+}
+function renderManches(){
+  const el=document.getElementById('mancheList'),msg=document.getElementById('mancheMsg')
+  if(!manches.length){el.innerHTML='';msg.textContent='';return}
+  let ref
+  if(autoRef&&manches.length>=3) ref=mean(manches.slice(0,3).map(m=>m.irp))
+  else if(autoRef) ref=getRef()
+  else ref=getRef()
+  msg.textContent=autoRef&&manches.length>=3?'Ref auto M1-M3 = '+ref.toFixed(0):'Ref '+(autoRef?'site (auto apres M3)':'')+' = '+getRef()
+  const masse=getMasse(),kp=getKp()
+  el.innerHTML=manches.map((m,i)=>{
+    const k=clamp(ref/m.irp,0.92,1.08)
+    const d=+((k-1)*100).toFixed(1)
+    const dm=Math.round(masse*(d/100)*kp)
+    const col=d>2?'var(--green)':d<-2?'var(--red)':'var(--cyan)'
+    return `<div class="mi"><span class="num">M${i+1}</span><span class="val">${m.tb}s\u2192${m.tMed}s \u00b7 ${m.v}m/s</span><span style="font-family:'JetBrains Mono';font-size:9px;color:var(--muted)">IRP ${m.irp}</span><span class="d" style="color:${col}">${d>=0?'+':''}${d}%</span><span class="mg">${dm>=0?'+':''}${dm}g</span><button class="del" onclick="manches.splice(${i},1);renderManches()">\u2715</button></div>`
+  }).join('')
+  if(manches.length){
+    const last=manches[manches.length-1]
+    const k=clamp(ref/last.irp,0.92,1.08),d=+((k-1)*100).toFixed(1),dm=Math.round(masse*(d/100)*kp)
+    el.innerHTML+=`<div style="text-align:center;padding:10px;margin-top:6px;border-radius:8px;background:${d>2?'rgba(63,185,80,.08)':d<-2?'rgba(248,81,73,.08)':'rgba(0,209,178,.08)'};border:1px solid ${d>2?'rgba(63,185,80,.2)':d<-2?'rgba(248,81,73,.2)':'rgba(0,209,178,.2)'}"><div style="font-family:'JetBrains Mono';font-size:24px;font-weight:800;color:${d>2?'var(--green)':d<-2?'var(--red)':'var(--cyan)'}">${d>=0?'+':''}${d}%</div><div style="font-family:'JetBrains Mono';font-size:16px;font-weight:700;color:var(--orange);margin-top:2px">${dm>=0?'+':''}${dm}g</div><div style="font-size:9px;color:var(--muted);margin-top:2px">Derni\u00e8re manche vs ref session</div></div>`
+  }
+}
+
+function loadSites(){
+  fetch(SITES_JSON_URL).then(r=>r.ok?r.json():null).then(data=>{
+    if(data&&data.sites){
+      sites=data.sites;renderSites()
+      document.getElementById('sitesSource').textContent='sites.json v'+data.version
+      document.getElementById('inpIrpRef').value=data.ref||230
+    }
+  }).catch(()=>{
+    try{sites=JSON.parse(localStorage.getItem('irp_sites_v5')||'null')||[]}catch(e){sites=[]}
+    renderSites()
+    document.getElementById('sitesSource').textContent='cache local'
+  })
+}
+function saveSites(){localStorage.setItem('irp_sites_v5',JSON.stringify(sites))}
+function saveSite(){
+  const irpEl=document.getElementById('rIRP')
+  if(irpEl.textContent==='\u2014'){alert("Analyser le peloton d'abord");return}
+  const name=prompt('Nom du site:')
+  if(!name)return
+  const irp=parseFloat(irpEl.textContent), ref=getRef(), k=+(irp/ref).toFixed(3)
+  sites=[{name,irp:Math.round(irp),k,confidence:'LOW',note:'V5 calculateur',manches:1},...sites.filter(s=>s.name!==name)]
+  saveSites();renderSites()
+  document.getElementById('saveMsg').textContent='\u2713 '+name+' (IRP='+Math.round(irp)+', K='+k+')'
+  setTimeout(()=>document.getElementById('saveMsg').textContent='',3000)
+}
+function selectSite(i){
+  document.getElementById('inpIrpRef').value=sites[i].irp
+  document.querySelectorAll('.site-row').forEach((r,j)=>r.classList.toggle('active',j===i))
+  if(manches.length)renderManches()
+}
+function renderSites(){
+  const el=document.getElementById('sitesList')
+  el.innerHTML=sites.map((s,i)=>{
+    const cc=s.confidence==='HIGH'?'conf-h':s.confidence==='MEDIUM'?'conf-m':'conf-l'
+    return `<div class="site-row" onclick="selectSite(${i})"><div class="site-name">${s.name}</div><div class="site-irp">IRP ${s.irp} \u00b7 ${s.note||''} <span class="conf ${cc}">${s.confidence||'?'}</span></div></div>`
+  }).join('')||'<div class="msg">Aucun site</div>'
+}
+
+document.getElementById('inpMT').addEventListener('keydown',e=>e.key==='Enter'&&document.getElementById('inpMV').focus())
+document.getElementById('inpMV').addEventListener('keydown',e=>e.key==='Enter'&&addManche())
+loadSites()
+</script>
+</body>
+</html>
