@@ -291,7 +291,7 @@ function saveSite(){
   const name=prompt('Nom du site:')
   if(!name)return
   const irp=parseFloat(irpEl.textContent), ref=getRef(), k=+(irp/ref).toFixed(3)
-  sites=[{name,irp:Math.round(irp),k,confidence:'LOW',note:'V5 calculateur',manches:1},...sites.filter(s=>s.name!==name)]
+  sites=[{name,irp:Math.round(irp),confidence:'LOW',note:'V5 calculateur',manches:1},...sites.filter(s=>s.name!==name)]
   saveSites();renderSites()
   document.getElementById('saveMsg').textContent='\u2713 '+name+' (IRP='+Math.round(irp)+', K='+k+')'
   setTimeout(()=>document.getElementById('saveMsg').textContent='',3000)

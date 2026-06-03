@@ -28,11 +28,14 @@ function rhoAlt(altM) {
 }
 
 // Fallback si fetch echoue
+// K_site = irp / REF_IRP (derive, jamais stocke)
+const REF_IRP = 230
+const deriveK = (irp) => Math.max(0.85, Math.min(1.15, irp / REF_IRP))
 const FALLBACK_SITES = [
-  { name: 'Saint Ferriol',      irp: 230, k: 1.000 },
-  { name: 'Rognac',             irp: 290, k: 1.150 },
-  { name: 'Serra de Busa',      irp: 140, k: 0.609 },
-]
+  { name: 'Saint Ferriol', irp: 230 },
+  { name: 'Rognac',        irp: 290 },
+  { name: 'Serra de Busa', irp: 140 },
+].map(s => ({ ...s, k: deriveK(s.irp) }))
 
 const SITES_URL = import.meta.env.BASE_URL + 'planeurs/sites.json'
 
@@ -101,7 +104,7 @@ export default function Poly4Page() {
       .then(r => r.ok ? r.json() : null)
       .then(data => {
         if (data?.sites?.length) {
-          const fetched = data.sites.map(s => ({ name: s.name, irp: s.irp, k: s.k }))
+          const fetched = data.sites.map(s => ({ name: s.name, irp: s.irp, k: deriveK(s.irp) }))
           setSites(fetched)
           localStorage.setItem('mbi_sites_v5', JSON.stringify(fetched))
         }

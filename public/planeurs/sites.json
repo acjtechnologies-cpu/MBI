@@ -8,7 +8,6 @@
     {
       "name": "Rognac",
       "irp": 290,
-      "k": 1.15,
       "confidence": "LOW",
       "manches": 0,
       "note": "Estime"
@@ -16,7 +15,6 @@
     {
       "name": "Font d'Urles",
       "irp": 250,
-      "k": 1.087,
       "confidence": "MEDIUM",
       "manches": 11,
       "note": "11 manches"
@@ -24,7 +22,6 @@
     {
       "name": "Hanstholm Danemark",
       "irp": 245,
-      "k": 1.065,
       "confidence": "LOW",
       "manches": 0,
       "note": "Estime"
@@ -32,7 +29,6 @@
     {
       "name": "Saint Ferriol",
       "irp": 230,
-      "k": 1.0,
       "confidence": "HIGH",
       "manches": 30,
       "note": "CDF+CDM mediane"
@@ -40,7 +36,6 @@
     {
       "name": "Col du Glandon",
       "irp": 210,
-      "k": 0.913,
       "confidence": "MEDIUM",
       "manches": 9,
       "note": "9 manches"
@@ -48,7 +43,6 @@
     {
       "name": "Col des Faisses",
       "irp": 210,
-      "k": 0.913,
       "confidence": "MEDIUM",
       "manches": 9,
       "note": "9 manches"
@@ -56,7 +50,6 @@
     {
       "name": "Sceautres",
       "irp": 205,
-      "k": 0.891,
       "confidence": "MEDIUM",
       "manches": 9,
       "note": "9 manches"
@@ -64,7 +57,6 @@
     {
       "name": "Route des Crêtes",
       "irp": 201,
-      "k": 0.873,
       "confidence": "MEDIUM",
       "manches": 11,
       "note": "V=7m/s, 40 pilotes"
@@ -72,7 +64,6 @@
     {
       "name": "Séderon",
       "irp": 175,
-      "k": 0.761,
       "confidence": "HIGH",
       "manches": 20,
       "note": "20 manches"
@@ -80,7 +71,6 @@
     {
       "name": "Serra de Busa",
       "irp": 140,
-      "k": 0.609,
       "confidence": "HIGH",
       "manches": 16,
       "note": "16 manches"
