@@ -28,8 +28,8 @@ function stdDev(arr) {
 }
 
 const INDICE_875 = 0.875  // T_best/T_median ratio F3F
-const K_MIN = 0.85
-const K_MAX = 1.15
+const K_MIN = 0.92  // +-8% manche delta
+const K_MAX = 1.08  // +-8% manche delta
 const DEFAULT_SITE_REF = 230  // Saint Ferriol V5 median (CDF+CDM)
 
 export const useIrpStore = create((set, get) => ({

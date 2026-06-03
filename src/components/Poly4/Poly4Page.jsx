@@ -91,8 +91,7 @@ export default function Poly4Page() {
   const pressTimer = useRef(null)
 
   // ── Dérivés ───────────────────────────────────────────────────────────────
-  const liveSite = irpK ? { name: 'IRP LIVE', irp: irpVal, k: irpK, live: true } : null
-  const allSites = liveSite ? [liveSite, ...sites] : sites
+  const allSites = sites
   const currentSite = allSites[siteIdx] ?? allSites[Math.min(6, allSites.length - 1)]
   const kPente      = currentSite?.k ?? 1.00
   const rho         = useMemo(() => rhoAlt(altitude), [altitude])
@@ -238,7 +237,7 @@ padding: '10px', overflowY: 'auto', boxSizing: 'border-box',
             {currentSite?.name ?? '—'}
           </div>
           <div style={{ fontSize: '0.65rem', color: '#4a5568' }}>
-            K {kPente.toFixed(3)} · {currentSite?.live && deltaPerf !== null ? (deltaPerf >= 0 ? '+' : '') + deltaPerf + '%' : 'IRP ' + (currentSite?.irp ?? '—')}{currentSite?.live && <span style={{ color: irpConfidence === 'HIGH' ? '#3fb950' : irpConfidence === 'MEDIUM' ? '#58a6ff' : '#f0883e', marginLeft:6 }}>● {irpConfidence || 'LIVE'} ({irpNbRuns}r)</span>}
+            K {kPente.toFixed(3)} · IRP {currentSite?.irp ?? '—'}
             {applied && <span style={{ color: '#39d353', marginLeft: 8 }}>✓ ACTIVÉ</span>}
           </div>
         </div>
@@ -290,7 +289,7 @@ padding: '10px', overflowY: 'auto', boxSizing: 'border-box',
           <div style={{ display: 'flex', gap: 6 }}>
             {[
               { id: 'vent',   label: 'Vent',    val: `${vent.toFixed(1)} m/s` },
-              { id: 'kpente', label: currentSite?.live ? 'K Live' : 'K Pente', val: kPente.toFixed(3) },
+              { id: 'kpente', label: 'K Pente', val: kPente.toFixed(3) },
               { id: 'offset', label: 'Offset', val: (offsetStore >= 0 ? '+' : '') + offsetStore + 'g' },
             ].map(tab => (
               <div key={tab.id} onClick={() => setMode(tab.id)} style={{
@@ -318,19 +317,16 @@ padding: '10px', overflowY: 'auto', boxSizing: 'border-box',
           }}>
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'4px 0' }}>
               <div style={{ fontSize:11, color:'#8b949e', fontWeight:600 }}>{currentSite?.name || 'Aucune pente'}</div>
-              {currentSite?.live && <div style={{ fontSize:10, color: irpConfidence === 'HIGH' ? '#3fb950' : irpConfidence === 'MEDIUM' ? '#58a6ff' : '#f0883e', fontWeight:700 }}>● {irpConfidence || 'LIVE'} ({irpNbRuns}r)</div>}
+
             </div>
             <div style={{ display:'flex', gap:12 }}>
               <div style={{ flex:1 }}>
                 <div style={{ fontSize:9, color:'#4a5568', fontWeight:600 }}>K</div>
-                <div style={{ fontSize:18, fontWeight:900, color: currentSite?.live ? '#58a6ff' : '#e6edf3' }}>{kPente.toFixed(3)}</div>
+                <div style={{ fontSize:18, fontWeight:900, color: '#e6edf3' }}>{kPente.toFixed(3)}</div>
               </div>
               <div style={{ flex:1 }}>
-                <div style={{ fontSize:9, color:'#4a5568', fontWeight:600 }}>{currentSite?.live ? 'ΔPerf' : 'IRP'}</div>
-                <div style={{ fontSize:18, fontWeight:900, color: currentSite?.live ? (deltaPerf >= 0 ? '#3fb950' : '#f85149') : '#e6edf3' }}>{currentSite?.live && deltaPerf !== null ? (deltaPerf >= 0 ? '+' : '') + deltaPerf + '%' : currentSite?.irp ?? '—'}</div>
-              {currentSite?.live && deltaPerf !== null && (
-                <div style={{ fontSize:10, color: deltaPerf >= 0 ? '#3fb950' : '#f85149', marginTop:2 }}>{((masseFinale * 1000 * (deltaPerf/100) * kPente)|0) >= 0 ? '+' : ''}{(masseFinale * 1000 * (deltaPerf/100) * kPente)|0}g</div>
-              )}
+                <div style={{ fontSize:9, color:'#4a5568', fontWeight:600 }}>IRP</div>
+                <div style={{ fontSize:18, fontWeight:900, color: '#e6edf3' }}>{currentSite?.irp ?? '—'}</div>
               </div>
               {iqaHybrid && (
                 <div style={{ flex:1 }}>
