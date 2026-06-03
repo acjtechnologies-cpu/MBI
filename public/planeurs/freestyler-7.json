@@ -9,7 +9,7 @@
   "cgVide": 104.0,
   "surface": 54.3,
   "masse_ref_8ms": 3.212,
-  "offset": 0,
+  "offset": -100,
   "poly4": {
     "type": "fallback",
     "A4": -0.0001728,
