@@ -255,7 +255,7 @@ export default function DashboardPilote() {
         planeur_nom: model.nom || '',
         mv:          model.masseVide,
         offset:      modelOffset,
-        surface:     model.surface || 59,
+        surface:     model.surface || 57,
       })
     }
   }, [kgVal, cfg, model, modelOffset])
@@ -460,7 +460,7 @@ export default function DashboardPilote() {
               <div style={{ textAlign:'center', flex:1 }}>
                 <div style={{ fontSize:9, color:'#8b949e', fontWeight:700, letterSpacing:0.5, marginBottom:2 }}>CHARGE</div>
                 <div style={{ fontSize:22, fontWeight:900, color: isFaiOver ? '#f85149' : '#ffb74d', lineHeight:1 }}>
-                  {(kgVal * 1000 / (model.surface || 59)).toFixed(1)}
+                  {(kgVal * 1000 / (model.surface || 57)).toFixed(1)}
                 </div>
                 <div style={{ fontSize:9, color:'#4a5568', marginTop:2 }}>
                   {isFaiOver ? '⛔ FAI' : 'g/dm²'}

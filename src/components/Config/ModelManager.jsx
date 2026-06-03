@@ -187,7 +187,7 @@ function ModelInfoCard({ model, isEditing, onEdit, onSave, onCancel }) {
   const [formData, setFormData] = useState({
     nom: model?.nom || '', drapeau: model?.drapeau || '🛩️',
     masseVide: model?.masseVide || 2500, cgVide: model?.cgVide || 100,
-    surface: model?.surface || 59, masse_ref_8ms: model?.masse_ref_8ms || 3.474
+    surface: model?.surface || 57, masse_ref_8ms: model?.masse_ref_8ms || 3.330
   })
   if (!model) return null
 

@@ -3,11 +3,11 @@ import { persist } from 'zustand/middleware'
 
 /**
  * STORE MODELES - Gestion des planeurs F3F
- * Matrice constructeur intégrée par planeur
+ * Matrice constructeur int??gr??e par planeur
  * Compatible avec NewSolver.js dynamique
  */
 
-// Matrice Mamba S — 20 configs constructeur validées
+// Matrice Mamba S ??? 20 configs constructeur valid??es
 const MATRIX_MAMBA = [
   {n: 1, m:2726, cg:102.2, av:{G:0,D:0,matG:'Laiton',matD:'Laiton'}, c:{G:1,D:1,matG:'Plomb',matD:'Plomb'}, ar:{G:0,D:0,matG:'Laiton',matD:'Laiton'}},
   {n: 2, m:2814, cg:102.2, av:{G:0,D:0,matG:'Laiton',matD:'Laiton'}, c:{G:2,D:1,matG:'Plomb',matD:'Plomb'}, ar:{G:0,D:0,matG:'Laiton',matD:'Laiton'}},
@@ -31,14 +31,15 @@ const MATRIX_MAMBA = [
   {n:20, m:4072, cg:102.8, av:{G:3,D:3,matG:'Laiton',matD:'Laiton'}, c:{G:3,D:3,matG:'Plomb',matD:'Plomb'}, ar:{G:4,D:4,matG:'Laiton',matD:'Laiton'}}
 ]
 
-// Modele par defaut — Mamba S avec matrice intégrée
+// Modele par defaut ??? Mamba S avec matrice int??gr??e
 const DEFAULT_MODEL = {
   id: 'mamba-s',
   nom: 'Mamba S',
-  drapeau: '🇫🇷',
+  drapeau: '????????',
   masseVide: 2550,
   cgVide: 102,
   surface: 57,
+  masse_ref_8ms: 3.330,
   masse_ref_8ms: 3.330,
   offset: -144,
   nezDist: 340,
@@ -47,7 +48,7 @@ const DEFAULT_MODEL = {
   soutes: {
     'avant-cle': {
       id: 'avant-cle',
-      nom: 'Avant Clé',
+      nom: 'Avant Cl??',
       couleur: '#6b7280',
       distanceBA: 80,
       capacite: 3,
@@ -57,7 +58,7 @@ const DEFAULT_MODEL = {
     },
     'centrale-cle': {
       id: 'centrale-cle',
-      nom: 'Centrale Clé',
+      nom: 'Centrale Cl??',
       couleur: '#3b82f6',
       distanceBA: 102,
       capacite: 3,
@@ -68,7 +69,7 @@ const DEFAULT_MODEL = {
     },
     'arriere-aile': {
       id: 'arriere-aile',
-      nom: 'Arrière Aile',
+      nom: 'Arri??re Aile',
       couleur: '#6b7280',
       distanceBA: 129,
       capacite: 4,
@@ -144,7 +145,7 @@ const useModelStore = create(
         return Object.values(state.models || {}).map(m => ({
           id: m.id,
           nom: m.nom,
-          drapeau: m.drapeau || '🛩️',
+          drapeau: m.drapeau || '???????',
           masseVide: m.masseVide,
           hasMatrix: !!(m.matrix && m.matrix.length > 0)
         }))
@@ -188,7 +189,7 @@ const useModelStore = create(
         return JSON.stringify(state.models[modelId], null, 2)
       },
 
-      // Reset modèle aux valeurs par défaut
+      // Reset mod??le aux valeurs par d??faut
       resetModel: (modelId) => {
         if (modelId === 'mamba-s') {
           set((state) => ({
@@ -198,7 +199,7 @@ const useModelStore = create(
       }
     }),
     {
-      name: 'mbi-model-v5',
+      name: 'mbi-model-v6',
       partialize: (state) => ({
         models: state.models,
         activeModelId: state.activeModelId
@@ -206,7 +207,7 @@ const useModelStore = create(
       onRehydrateStorage: () => (state) => {
         if (state) {
           state.setHasHydrated(true)
-          // Vérifier que la matrice Mamba est bien présente
+          // V??rifier que la matrice Mamba est bien pr??sente
           if (!state.models) {
             state.models = { 'mamba-s': DEFAULT_MODEL }
             state.activeModelId = 'mamba-s'
@@ -227,3 +228,4 @@ const useModelStore = create(
 
 export default useModelStore
 export { useModelStore }
+

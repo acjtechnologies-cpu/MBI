@@ -15,7 +15,7 @@ const useAppStore = create(
 
       // Param�tres planeur - CORRIG�S
       mv: 2.455,        // Masse � vide en kg
-      surface: 59.0,    // Surface alaire en dm� (0.59 m� = 59 dm�) - PAR D�FAUT
+      surface: 57.0,    // Surface alaire en dm� (0.59 m� = 59 dm�) - PAR D�FAUT
       
       // Chronos
       chronoC: 40.0,    // Chrono cible
@@ -104,7 +104,7 @@ altitude: 0,
             rosee: 8,
           },
           mv: 2.455,
-          surface: 59.0,
+          surface: 57.0,
           chronoC: 40.0,
           chronoR: 40.0,
           lievre: 38.0,
@@ -112,7 +112,7 @@ altitude: 0,
         }),
     }),
     {
-      name: 'mbi-app-storage',
+      name: 'mbi-app-v5',
       partialize: (state) => ({
         params: state.params,
         mv: state.mv,
