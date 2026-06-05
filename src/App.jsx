@@ -34,7 +34,7 @@ function App() {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100dvh', overflow: 'hidden', background: '#0b0e12' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden', background: '#0b0e12' }}>
 
       <nav style={{ display: 'flex', flexShrink: 0, height: 48, background: '#161b22', borderBottom: '1px solid #21262d', zIndex: 999 }}>
         {TABS.map(({ id, label, icon }) => (
