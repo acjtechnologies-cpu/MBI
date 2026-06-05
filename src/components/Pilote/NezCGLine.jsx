@@ -11,16 +11,16 @@
  *   active    — true si selectedParam === 'nez'
  *   showDot   — true pour afficher le point et la valeur (rangée centrale)
  */
-export default function NezCGLine({ mm = 0, grams = 0, active = false, showDot = false }) {
+export default function NezCGLine({ mm = 0, grams = 0, active = false, showDot = false, cgColor = null }) {
   const MAX_MM = 5
   const absMM = Math.abs(mm)
 
-  // Couleur selon amplitude mm
-  const color = absMM < 0.5 ? '#3fb950'
+  // Couleur: suit le code CG du dashboard si fourni
+  const color = cgColor || (absMM < 0.5 ? '#3fb950'
     : absMM < 2 ? '#56d364'
     : absMM < 4 ? '#d29922'
     : absMM < 6 ? '#db8600'
-    : '#f85149'
+    : '#f85149')
 
   // Position du point : 50% = zéro, haut = CG avance (mm négatif)
   const dotPct = 50 + (mm / MAX_MM) * 42
@@ -74,9 +74,9 @@ export default function NezCGLine({ mm = 0, grams = 0, active = false, showDot =
               top: `${clampedPct}%`,
               left: '50%',
               transform: 'translate(-50%, -50%)',
-              width: 9,
-              height: 9,
-              borderRadius: '50%',
+              width: 7,
+              height: 12,
+              borderRadius: 2,
               background: color,
               transition: 'top 0.35s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s',
               zIndex: 2,

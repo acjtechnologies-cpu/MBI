@@ -141,7 +141,7 @@ const CSS = `
 .mb-m-soutes{flex:1;display:flex;flex-direction:column;gap:4px;min-height:0;overflow-y:auto}
 .mb-m-row-wrap{display:flex;flex-direction:column;flex:1}
 .mb-m-lbl{font-size:8px;font-weight:700;letter-spacing:.5px;padding-left:4px;line-height:1;margin:1px 0}
-.mb-m-row{display:flex;gap:4px;flex:1}
+.mb-m-row{display:flex;gap:8px;flex:1}
 .mb-m-side{flex:1;display:flex;gap:2px;border-radius:6px;padding:3px;background:rgba(255,255,255,.02)}
 .mb-m-side-l{flex-direction:row-reverse}
 .mb-m-info{background:#161b22;border-radius:8px;padding:6px 10px;flex-shrink:0;border:1px solid #21262d;display:flex;align-items:center;gap:8px}
@@ -398,6 +398,7 @@ export default function DashboardPilote() {
                     grams={nezDelta}
                     active={selectedParam === 'nez'}
                     showDot={true}
+                    cgColor={Math.abs(cgD + nezMM) > 3 ? '#f87171' : cgClass === 'neutre' ? '#4ade80' : cgClass === 'avant' ? '#fbbf24' : cgClass === 'arriere' ? '#f87171' : '#8b949e'}
                   />
                 </div>
               )}
