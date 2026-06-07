@@ -157,6 +157,36 @@ const useModelStore = create(
         }))
       },
 
+      // ── Soute CRUD ──
+      addSoute: (modelId, souteData) => {
+        set((state) => {
+          const model = state.models[modelId]
+          if (!model) return state
+          const soutes = { ...model.soutes, [souteData.id]: souteData }
+          return { models: { ...state.models, [modelId]: { ...model, soutes } } }
+        })
+      },
+
+      updateSoute: (modelId, souteId, updates) => {
+        set((state) => {
+          const model = state.models[modelId]
+          if (!model || !model.soutes?.[souteId]) return state
+          const soute = { ...model.soutes[souteId], ...updates }
+          const soutes = { ...model.soutes, [souteId]: soute }
+          return { models: { ...state.models, [modelId]: { ...model, soutes } } }
+        })
+      },
+
+      deleteSoute: (modelId, souteId) => {
+        set((state) => {
+          const model = state.models[modelId]
+          if (!model || !model.soutes) return state
+          const soutes = { ...model.soutes }
+          delete soutes[souteId]
+          return { models: { ...state.models, [modelId]: { ...model, soutes } } }
+        })
+      },
+
       updateModel: (modelId, updates) => {
         set((state) => {
           if (!state.models?.[modelId]) return state
