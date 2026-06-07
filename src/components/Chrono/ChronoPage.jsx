@@ -689,6 +689,21 @@ const [gistStatus, setGistStatus] = useState('');
         </div>
       </div>
 
+      {/* ── V5 DELTA SUMMARY ── */}
+      {mancheDelta !== null && !running && (
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'baseline',
+          gap: 8, padding: '4px 12px', flexShrink: 0 }}>
+          <span style={{ fontFamily: 'monospace', fontSize: 18, fontWeight: 800,
+            color: mancheDelta > 0 ? '#3fb950' : mancheDelta < 0 ? '#f85149' : '#00d1b2' }}>
+            {mancheDelta >= 0 ? '+' : ''}{mancheDelta}%
+          </span>
+          <span style={{ fontFamily: 'monospace', fontSize: 14, fontWeight: 700,
+            color: '#ffb74d' }}>
+            {mancheDeltaMasse >= 0 ? '+' : ''}{mancheDeltaMasse}g
+          </span>
+        </div>
+      )}
+
       {/* ── BOUTON START / STOP ──────────────────────────────────────────── */}
       <button onClick={handleStartStop} style={{
         margin: '0 12px 8px', height: 56, borderRadius: 16, border: 'none',
@@ -803,19 +818,7 @@ const [gistStatus, setGistStatus] = useState('');
               )
             })}
             {mancheRef && <div style={{ fontSize:9, color:'#8b949e', textAlign:'center', marginTop:4 }}>Ref auto M1-{Math.min(3, mancheResults.length)} = {mancheRef}</div>}
-            {mancheDelta !== null && (
-              <div style={{ textAlign:'center', padding:8, marginTop:6, borderRadius:8,
-                background: mancheDelta > 2 ? 'rgba(63,185,80,.1)' : mancheDelta < -2 ? 'rgba(248,81,73,.1)' : 'rgba(0,209,178,.1)',
-                border: '1px solid ' + (mancheDelta > 2 ? 'rgba(63,185,80,.3)' : mancheDelta < -2 ? 'rgba(248,81,73,.3)' : 'rgba(0,209,178,.3)') }}>
-                <div style={{ fontFamily:'monospace', fontSize:22, fontWeight:800, color: mancheDelta > 2 ? '#3fb950' : mancheDelta < -2 ? '#f85149' : '#00d1b2' }}>
-                  {mancheDelta >= 0 ? '+' : ''}{mancheDelta}%
-                </div>
-                <div style={{ fontFamily:'monospace', fontSize:16, fontWeight:700, color:'#ffb74d', marginTop:2 }}>
-                  {mancheDeltaMasse >= 0 ? '+' : ''}{mancheDeltaMasse}g
-                </div>
-                <div style={{ fontSize:9, color:'#8b949e', marginTop:2 }}>Dernière manche vs ref session</div>
-              </div>
-            )}
+
           </div>
         )}
       </div>
