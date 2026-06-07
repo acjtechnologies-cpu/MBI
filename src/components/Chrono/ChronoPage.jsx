@@ -735,17 +735,6 @@ const [gistStatus, setGistStatus] = useState('');
         })}
       </div>
 
-      {/* ── FOOTER ───────────────────────────────────────────────────────── */}
-      <div style={{ display: 'flex', gap: 6, padding: '8px 12px 16px',
-        flexShrink: 0, borderTop: '0.5px solid #1a1a1a' }}>
-        <button onClick={shareText} style={{...btnFooter, color:'#3fb950', borderColor:'#1a3a2a'}}>📤 Partager</button>
-          <button onClick={exportJSON} style={{...btnFooter, fontSize:10, color:'#555'}}>
-            {gistStatus === 'syncing' ? '⏳' : gistStatus === 'ok' ? '✓ Gist' : gistStatus === 'err' ? '✗' : '↓ JSON'}
-          </button>
-        <button onClick={() => setShowReset(true)} style={{ ...btnFooter, color: '#8b2020' }}>Réinit.</button>
-        <button onClick={() => { clearMancheResults() }} style={{ ...btnFooter, color: '#ffd700', borderColor: '#4a3a00' }}>Vider V5</button>
-      </div>
-
       {/* ── V5 MANCHE PANEL ── */}
       <div style={{ margin:'10px 12px', padding:12, background:'#0d1117', border:'1px solid #1e2535', borderRadius:12 }}>
         <div style={{ fontSize:10, fontWeight:700, color:'#8b949e', letterSpacing:1.5, textTransform:'uppercase', marginBottom:8 }}>
@@ -810,6 +799,17 @@ const [gistStatus, setGistStatus] = useState('');
             )}
           </div>
         )}
+      </div>
+
+      {/* ── FOOTER ─── */}
+      <div style={{ display: 'flex', gap: 6, padding: '8px 12px 16px',
+        flexShrink: 0, borderTop: '0.5px solid #1a1a1a' }}>
+        <button onClick={shareText} style={{...btnFooter, color:'#3fb950', borderColor:'#1a3a2a'}}>📤 Partager</button>
+        <button onClick={exportJSON} style={{...btnFooter, fontSize:10, color:'#555'}}>
+          {gistStatus === 'syncing' ? '⏳' : gistStatus === 'ok' ? '✓ Gist' : gistStatus === 'err' ? '✗' : '↓ JSON'}
+        </button>
+        <button onClick={() => setShowReset(true)} style={{ ...btnFooter, color: '#8b2020' }}>Réinit.</button>
+        <button onClick={() => { clearMancheResults() }} style={{ ...btnFooter, color: '#ffd700', borderColor: '#4a3a00' }}>Vider V5</button>
       </div>
 
       {/* ── MODAL RESET ──────────────────────────────────────────────────── */}
