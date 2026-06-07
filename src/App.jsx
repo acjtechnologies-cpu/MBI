@@ -28,7 +28,7 @@ function App() {
       case 'soute':   return <ModelManager />
       case 'poly4':   return <Poly4Component onNavigate={setActiveTab} />
       case 'station': return <StationPage />
-      case 'chrono':  return <ChronoPage />
+      case 'chrono':  return <ChronoPage onNavigate={setActiveTab} />
       default:        return <DashboardPilote />
     }
   }

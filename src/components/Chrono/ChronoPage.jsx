@@ -295,7 +295,7 @@ function JournalView({ pilotes, currentSessionId, onBack }) {
 // ═══════════════════════════════════════════════════════════════════════════════
 // COMPOSANT PRINCIPAL
 // ═══════════════════════════════════════════════════════════════════════════════
-export default function ChronoPage() {
+export default function ChronoPage({ onNavigate } = {}) {
   const [vue, setVue]                   = useState('chrono'); // 'chrono' | 'journal'
   const [pilotes, setPilotes]           = useState(PILOTES_DEFAULT);
   const [piloteActif, setPiloteActif]   = useState(0);
@@ -336,6 +336,8 @@ const [gistStatus, setGistStatus] = useState('');
   const mancheDeltaMasse = useIrpStore(s => s.mancheDeltaMasse);
   const mancheRef    = useIrpStore(s => s.mancheRef);
   const mancheResults = useIrpStore(s => s.mancheResults);
+  const setOffset     = useAppStore(s => s.setOffset);
+  const [appliedV5, setAppliedV5] = useState(false);
   const [tBestInput, setTBestInput] = useState('');
   const [manualPilote, setManualPilote] = useState(null);
   const [manualTime, setManualTime]     = useState('');
@@ -617,6 +619,23 @@ const [gistStatus, setGistStatus] = useState('');
             );
           })}
         </div>
+        {mancheDeltaMasse !== null && (
+          <button onClick={() => {
+            setOffset(mancheDeltaMasse);
+            setAppliedV5(true);
+            setTimeout(() => {
+              setAppliedV5(false);
+              if (typeof onNavigate === 'function') onNavigate('pilote');
+            }, 800);
+          }} style={{
+            padding: '4px 10px', borderRadius: 6, border: 'none', cursor: 'pointer',
+            fontSize: 10, fontWeight: 700, whiteSpace: 'nowrap',
+            background: appliedV5 ? '#238636' : '#1a73e8', color: '#fff',
+            transition: 'background 0.3s',
+          }}>
+            {appliedV5 ? '✓' : (mancheDeltaMasse >= 0 ? '+' : '') + mancheDeltaMasse + 'g'}
+          </button>
+        )}
       </div>
 
       {/* ── SAISIE MANUELLE (long press) ── */}
