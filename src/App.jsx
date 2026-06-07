@@ -26,7 +26,7 @@ function App() {
     switch (activeTab) {
  case 'pilote':  return <DashboardPilote />
       case 'soute':   return <ModelManager />
-      case 'poly4':   return <Poly4Component />
+      case 'poly4':   return <Poly4Component onNavigate={setActiveTab} />
       case 'station': return <StationPage />
       case 'chrono':  return <ChronoPage />
       default:        return <DashboardPilote />

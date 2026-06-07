@@ -44,7 +44,7 @@ import { useESPStore } from '../../stores/espStore'
 
 const V_RANGE = Array.from({ length: 226 }, (_, i) => 4.0 + i * 0.05)
 
-export default function Poly4Page() {
+export default function Poly4Page({ onNavigate } = {}) {
   // ── Stores ────────────────────────────────────────────────────────────────
   const vent          = useAppStore(s => s.params?.vent ?? 8.0)
   const setParam      = useAppStore(s => s.setParam)
@@ -223,7 +223,10 @@ export default function Poly4Page() {
       if (!site.live) setSiteRef(site.irp, site.name)
     }
     setApplied(true)
-    setTimeout(() => setApplied(false), 2500)
+    setTimeout(() => {
+      setApplied(false)
+      if (typeof onNavigate === 'function') onNavigate('pilote')
+    }, 800)
   }
 
   const masseColor = masseFinale > 4.5 ? '#ffb74d' : masseFinale < 2.5 ? '#ff4b91' : '#39d353'
