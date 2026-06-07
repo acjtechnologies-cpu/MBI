@@ -404,12 +404,10 @@ export default function DashboardPilote() {
               )}
               {soutes.map((soute, idx) => {
                 const cap         = soute.capacite || 3
-                const colors      = [
-                  { border: 'rgba(255,215,0,.4)',    label: 'rgba(255,200,80,.9)' },
-                  { border: 'rgba(26,115,232,.45)',  label: 'rgba(100,170,255,.9)' },
-                  { border: 'rgba(63,185,80,.4)',    label: 'rgba(63,185,80,.9)' },
-                ]
-                const col         = colors[idx] || colors[0]
+                // Couleur depuis soute.couleur (Soute editor) ou fallback par index
+                const fallbackColors = ['#ffd700', '#1a73e8', '#3fb950']
+                const sColor = soute.couleur || fallbackColors[idx] || fallbackColors[0]
+                const col = { border: sColor + '66', label: sColor }
                 const matLabel    = soute.materiaux?.map(m => `${m.nom} ${m.masse}g`).join(' - ') || ''
                 return (
                   <div key={idx} className="mb-row-wrap">
