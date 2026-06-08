@@ -28,8 +28,10 @@ function stdDev(arr) {
 }
 
 const INDICE_875 = 0.875  // T_best/T_median ratio F3F
-const K_MIN = 0.92  // +-8% manche delta
-const K_MAX = 1.08  // +-8% manche delta
+const K_MIN = 0.92        // +-8% manche delta
+const K_MAX = 1.08        // +-8% manche delta
+const GAIN_G = 30         // g par % d'ecart IRPX
+const IRPX_CLAMP = 150    // g saturation securite
 const DEFAULT_SITE_REF = 230  // Saint Ferriol V5 median (CDF+CDM)
 
 export const useIrpStore = create((set, get) => ({
@@ -55,13 +57,13 @@ export const useIrpStore = create((set, get) => ({
   confidence: null,   // 'LOW' | 'MEDIUM' | 'HIGH'
   deltaPerf: null,    // (ref/IRP_raw - 1) × 100
 
-  // V5 Manche system (T_best -> T_median -> IRP)
+  // IRPX Run system (q_snap + irpx_snap -> Kdyn -> DeltaMasse)
   mancheResults: [],
-  mancheIrp: null,
-  mancheK: null,
-  mancheDelta: null,
+  mancheIrp: null,      // dernier irpxRun
+  mancheK: null,        // Kdyn
+  mancheDelta: null,    // % ecart
   mancheDeltaMasse: null,
-  mancheRef: null,     // auto-ref from M1-M3
+  mancheRef: null,      // mediane irpx M1-M3
 
   // Changer la référence site (appelé quand on navigue les pentes)
   setSiteRef: (irp, name) => {
@@ -89,17 +91,21 @@ export const useIrpStore = create((set, get) => ({
     get()._recalc()
   },
 
-  // V5: ajouter un resultat de manche (T_best officiel + V_moy)
-  addManche: (tBest, vMoy, masseVol, kPente) => {
-    const tMedian = +(tBest / INDICE_875).toFixed(2)
-    const irp = +(tMedian * Math.pow(vMoy, 0.7)).toFixed(1)
-    const m = [...get().mancheResults, { tBest, tMedian, vMoy, irp, ts: Date.now() }]
+  // IRPX Run: ajouter un resultat de manche (q_snap + irpx_snap depuis ESP)
+  addManche: (tBest, vMoy, masseVol, kPente, qSnap, irpxSnap) => {
+    const m = [...get().mancheResults, {
+      tBest, vMoy,
+      qSnap:    qSnap    ?? null,
+      irpxSnap: irpxSnap ?? null,
+      ts: Date.now()
+    }]
     set({ mancheResults: m })
     get()._recalcManche(masseVol, kPente)
   },
 
   clearManches: () => set({
-    mancheResults: [], mancheIrp: null, mancheK: null,
+    mancheResults: [],
+    mancheIrp: null, mancheK: null,
     mancheDelta: null, mancheDeltaMasse: null, mancheRef: null,
   }),
 
@@ -107,27 +113,41 @@ export const useIrpStore = create((set, get) => ({
     const { mancheResults } = get()
     if (!mancheResults.length) return
 
-    const irps = mancheResults.map(m => m.irp)
-    const lastIrp = irps[irps.length - 1]
+    // Extraire irpxSnap valides
+    const irpxVals = mancheResults
+      .map(m => m.irpxSnap)
+      .filter(v => v !== null && v > 0)
 
-    // Auto-ref: average IRP of first 3 manches, then fixed
-    let ref
-    if (mancheResults.length <= 3) {
-      ref = irps.reduce((a, b) => a + b, 0) / irps.length
-    } else {
-      ref = irps.slice(0, 3).reduce((a, b) => a + b, 0) / 3
+    if (!irpxVals.length) {
+      // Pas de donnees IRPX station -> pas de calcul
+      set({ mancheIrp: null, mancheK: null, mancheDelta: null,
+            mancheDeltaMasse: null, mancheRef: null })
+      return
     }
 
-    const kDyn = Math.max(K_MIN, Math.min(K_MAX, ref / lastIrp))
-    const delta = +((kDyn - 1) * 100).toFixed(1)
-    const dMasse = Math.round((masseVol || 3400) * (delta / 100) * (kPente || 1.0))
+    const lastIrpx = irpxVals[irpxVals.length - 1]
+
+    // Ref : mediane des 3 premieres manches avec irpx valide, puis fixe
+    const refVals = irpxVals.slice(0, 3)
+    const sorted  = [...refVals].sort((a, b) => a - b)
+    const mid     = Math.floor(sorted.length / 2)
+    const ref     = sorted.length % 2
+      ? sorted[mid]
+      : (sorted[mid - 1] + sorted[mid]) / 2
+
+    const kDyn   = Math.max(K_MIN, Math.min(K_MAX, lastIrpx / ref))
+    const delta  = +((kDyn - 1) * 100).toFixed(1)
+    // Gain 30g/% sature a +-150g
+    const dMasse = Math.max(-IRPX_CLAMP, Math.min(IRPX_CLAMP,
+      Math.round(GAIN_G * (kDyn - 1) * 100)
+    ))
 
     set({
-      mancheIrp: lastIrp,
-      mancheK: +kDyn.toFixed(3),
-      mancheDelta: delta,
+      mancheIrp:        +lastIrpx.toFixed(3),
+      mancheK:          +kDyn.toFixed(3),
+      mancheDelta:      delta,
       mancheDeltaMasse: dMasse,
-      mancheRef: +ref.toFixed(0),
+      mancheRef:        +ref.toFixed(3),
     })
   },
 

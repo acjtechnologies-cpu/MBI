@@ -773,7 +773,7 @@ const [gistStatus, setGistStatus] = useState('');
       <div style={{ margin:'10px 12px', padding:12, background:'#0d1117', border:'1px solid #1e2535', borderRadius:12 }}>
         <div style={{ fontSize:10, fontWeight:700, color:'#8b949e', letterSpacing:1.5, textTransform:'uppercase', marginBottom:8 }}>
           <span style={{ display:'inline-block', width:6, height:6, borderRadius:'50%', background:'#ffd700', marginRight:6 }}></span>
-          V5 — T<sub>best</sub> manche → ΔMasse
+          IRPX Run — manche → ΔMasse
         </div>
         <div style={{ display:'flex', gap:6, alignItems:'flex-end' }}>
           <div style={{ flex:1 }}>
@@ -793,7 +793,7 @@ const [gistStatus, setGistStatus] = useState('');
           <button onClick={() => {
             const tb = parseFloat(tBestInput), vm = parseFloat(vMoyInput || '0') || (useAppStore.getState().params?.vent || 8.0)
             if (isNaN(tb) || tb < 20 || tb > 120) return
-            addMancheResult(tb, vm, _masseVol * 1000, _kPente)
+            addMancheResult(tb, vm, _masseVol * 1000, _kPente, qSnap, irpxSnap)
             setTBestInput(''); setVMoyInput('')
           }} style={{ padding:'7px 12px', borderRadius:8, border:'none', background:'#ffd700', color:'#000', fontSize:12, fontWeight:700, cursor:'pointer', whiteSpace:'nowrap' }}>
             + M{(mancheResults?.length || 0) + 1}
@@ -803,21 +803,33 @@ const [gistStatus, setGistStatus] = useState('');
         {mancheResults && mancheResults.length > 0 && (
           <div style={{ marginTop:8 }}>
             {mancheResults.map((m, i) => {
-              const ref = mancheRef || 230
-              const d = +((ref / m.irp - 1) * 100).toFixed(1)
-              const dm = Math.round((_masseVol * 1000) * (d / 100) * _kPente)
-              const col = d > 2 ? '#3fb950' : d < -2 ? '#f85149' : '#00d1b2'
+              const irpx = m.irpxSnap
+              const ref  = mancheRef
+              const hasData = irpx !== null && irpx !== undefined && ref
+              const d  = hasData ? +((irpx / ref - 1) * 100).toFixed(1) : null
+              const dm = hasData ? Math.max(-150, Math.min(150, Math.round(30 * (irpx / ref - 1) * 100))) : null
+              const col = d === null ? '#8b949e' : d > 2 ? '#3fb950' : d < -2 ? '#f85149' : '#00d1b2'
               return (
                 <div key={i} style={{ display:'flex', alignItems:'center', gap:6, padding:'5px 8px', background:'#131720', border:'1px solid #1e2535', borderRadius:8, marginBottom:3, fontSize:11 }}>
                   <span style={{ fontFamily:'monospace', color:'#8b949e', width:22, textAlign:'right', fontSize:10 }}>M{i + 1}</span>
-                  <span style={{ fontFamily:'monospace', fontWeight:700, flex:1 }}>{m.tBest}s→{m.tMedian}s · {m.vMoy}m/s</span>
-                  <span style={{ fontFamily:'monospace', fontSize:10, color:'#8b949e' }}>IRP {m.irp}</span>
-                  <span style={{ fontFamily:'monospace', fontWeight:700, color: col, minWidth:44, textAlign:'right' }}>{d >= 0 ? '+' : ''}{d}%</span>
-                  <span style={{ fontSize:9, color:'#ffb74d', minWidth:40, textAlign:'right' }}>{dm >= 0 ? '+' : ''}{dm}g</span>
+                  <span style={{ fontFamily:'monospace', fontWeight:700, flex:1 }}>{m.tBest}s</span>
+                  <span style={{ fontFamily:'monospace', fontSize:10, color:'#8b949e' }}>
+                    {irpx !== null && irpx !== undefined ? 'IRPX ' + irpx.toFixed(2) : 'IRPX —'}
+                  </span>
+                  <span style={{ fontFamily:'monospace', fontWeight:700, color: col, minWidth:44, textAlign:'right' }}>
+                    {d !== null ? (d >= 0 ? '+' : '') + d + '%' : '—'}
+                  </span>
+                  <span style={{ fontSize:9, color:'#ffb74d', minWidth:40, textAlign:'right' }}>
+                    {dm !== null ? (dm >= 0 ? '+' : '') + dm + 'g' : '—'}
+                  </span>
                 </div>
               )
             })}
-            {mancheRef && <div style={{ fontSize:9, color:'#8b949e', textAlign:'center', marginTop:4 }}>Ref auto M1-{Math.min(3, mancheResults.length)} = {mancheRef}</div>}
+            {mancheRef && (
+              <div style={{ fontSize:9, color:'#8b949e', textAlign:'center', marginTop:4 }}>
+                Ref auto M1-{Math.min(3, mancheResults.filter(m => m.irpxSnap).length)} = {mancheRef.toFixed(2)}
+              </div>
+            )}
 
           </div>
         )}
