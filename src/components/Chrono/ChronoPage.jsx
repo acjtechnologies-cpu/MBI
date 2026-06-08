@@ -387,6 +387,8 @@ const [gistStatus, setGistStatus] = useState('');
   const sdActive     = useESPStore(s => s.sdActive);
   const qSnap        = useESPStore(s => s.q);
   const irpxSnap     = useESPStore(s => s.irpx);
+  const [frozenQ,    setFrozenQ]    = useState(null);
+  const [frozenIrpx, setFrozenIrpx] = useState(null);
 
   // Chrono
   const t0Ref      = useRef(null);
@@ -443,6 +445,8 @@ const [gistStatus, setGistStatus] = useState('');
       setRuns(prev => [newRun, ...prev]);
       db.runs.add(newRun).catch(() => {});
       addIrpRun(newRun);
+      setFrozenQ(qSnap)
+      setFrozenIrpx(irpxSnap)
       if (navigator.vibrate) navigator.vibrate([30, 50, 80]);
     }
   }, [running, iqa, vent, sGrad, piloteActif, manche, tick, sendMarker, sessionId]);
@@ -793,7 +797,7 @@ const [gistStatus, setGistStatus] = useState('');
           <button onClick={() => {
             const tb = parseFloat(tBestInput), vm = parseFloat(vMoyInput || '0') || (useAppStore.getState().params?.vent || 8.0)
             if (isNaN(tb) || tb < 20 || tb > 120) return
-            addMancheResult(tb, vm, _masseVol * 1000, _kPente, qSnap, irpxSnap)
+            addMancheResult(tb, vm, _masseVol * 1000, _kPente, frozenQ, frozenIrpx)
             setTBestInput(''); setVMoyInput('')
           }} style={{ padding:'7px 12px', borderRadius:8, border:'none', background:'#ffd700', color:'#000', fontSize:12, fontWeight:700, cursor:'pointer', whiteSpace:'nowrap' }}>
             + M{(mancheResults?.length || 0) + 1}
