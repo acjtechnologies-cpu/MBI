@@ -391,6 +391,15 @@ const [gistStatus, setGistStatus] = useState('');
   const irpxSnap     = useESPStore(s => s.irpx);
   const [frozenQ,    setFrozenQ]    = useState(null);
   const [frozenIrpx, setFrozenIrpx] = useState(null);
+  const runBuffer = useRef([]);  // buffer {q, iqa} pendant START->STOP
+
+  // Accumuler q/IQA dans le buffer pendant le run
+  useEffect(() => {
+    if (!running) return
+    if (qSnap !== null && irpxSnap !== null) {
+      runBuffer.current.push({ q: qSnap, irpx: irpxSnap })
+    }
+  }, [qSnap, irpxSnap, running])
 
   // Chrono
   const t0Ref      = useRef(null);
@@ -447,8 +456,24 @@ const [gistStatus, setGistStatus] = useState('');
       setRuns(prev => [newRun, ...prev]);
       db.runs.add(newRun).catch(() => {});
       addIrpRun(newRun);
-      setFrozenQ(qSnap)
-      setFrozenIrpx(irpxSnap)
+      // Calculer q95 + irpx median depuis buffer run
+      const buf = runBuffer.current
+      if (buf.length >= 3) {
+        const qs = [...buf.map(x => x.q)].sort((a, b) => a - b)
+        const idx95 = Math.floor(qs.length * 0.95)
+        const q95 = qs[Math.min(idx95, qs.length - 1)]
+        const irpxs = [...buf.map(x => x.irpx)].sort((a, b) => a - b)
+        const midI = Math.floor(irpxs.length / 2)
+        const irpxMed = irpxs.length % 2 ? irpxs[midI] : (irpxs[midI-1] + irpxs[midI]) / 2
+        setFrozenQ(+q95.toFixed(1))
+        setFrozenIrpx(+irpxMed.toFixed(3))
+      } else {
+        setFrozenQ(qSnap)
+        setFrozenIrpx(irpxSnap)
+      }
+      runBuffer.current = []  // vider le buffer
+      // T best auto depuis le chrono
+      if (duree_ms > 0) setTBestInput((duree_ms / 1000).toFixed(2))
       if (navigator.vibrate) navigator.vibrate([30, 50, 80]);
     }
   }, [running, iqa, vent, sGrad, piloteActif, manche, tick, sendMarker, sessionId]);
@@ -710,6 +735,26 @@ const [gistStatus, setGistStatus] = useState('');
         </div>
       )}
 
+      {/* ── BOUTON +Mx AUTO ── */}
+      {!running && tBestInput && (
+        <button onClick={() => {
+          const tb = parseFloat(tBestInput)
+          if (isNaN(tb) || tb < 20 || tb > 120) return
+          addMancheResult(tb, 0, _masseVol * 1000, _kPente, frozenQ, frozenIrpx)
+          setTBestInput('')
+        }} style={{
+          margin: '0 12px 6px', height: 52, borderRadius: 14, border: 'none',
+          background: '#1a3a5c', color: '#4fc3f7',
+          fontSize: 20, fontWeight: 800, cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+          flexShrink: 0, touchAction: 'manipulation', outline: 'none',
+          WebkitTapHighlightColor: 'transparent'
+        }}>
+          <span>+ M{(mancheResults?.length || 0) + 1}</span>
+          <span style={{ fontSize:13, color:'#90caf9', fontWeight:600 }}>{tBestInput}s</span>
+          {frozenIrpx && <span style={{ fontSize:12, color:'#00d1b2', fontWeight:600 }}>IRPX {frozenIrpx}</span>}
+        </button>
+      )}
       {/* ── BOUTON START / STOP ──────────────────────────────────────────── */}
       <button onClick={handleStartStop} style={{
         margin: '0 12px 8px', height: 56, borderRadius: 16, border: 'none',
@@ -744,7 +789,7 @@ const [gistStatus, setGistStatus] = useState('');
             Aucun run pour cette session
           </div>
         )}
-        {runs.map((r, i) => {
+        {runs.slice(0, 1).map((r, i) => {
           const p      = pilotes[r.pilote_id];
           const col    = COULEURS[r.pilote_id] ?? '#888';
           const runsP  = runs.filter(x => x.pilote_id === r.pilote_id);
@@ -789,18 +834,12 @@ const [gistStatus, setGistStatus] = useState('');
             />
             <div style={{ fontSize:8, color:'#8b949e', textAlign:'center', marginTop:2 }}>T best (s)</div>
           </div>
-          <div style={{ flex:1 }}>
-            <input type="number" value={vMoyInput} onChange={e => setVMoyInput(e.target.value)}
-              placeholder="V (m/s)" min="0" max="25" step="0.1"
-              style={{ background:'#131720', border:'1px solid #30363d', color:'#e8eaf0', borderRadius:8, padding:'7px 10px', fontSize:13, fontWeight:700, width:'100%', fontFamily:'inherit', outline:'none', textAlign:'center' }}
-            />
-            <div style={{ fontSize:8, color:'#8b949e', textAlign:'center', marginTop:2 }}>V moy (m/s)</div>
-          </div>
+
           <button onClick={() => {
-            const tb = parseFloat(tBestInput), vm = parseFloat(vMoyInput || '0') || (useAppStore.getState().params?.vent || 8.0)
+            const tb = parseFloat(tBestInput)
             if (isNaN(tb) || tb < 20 || tb > 120) return
-            addMancheResult(tb, vm, _masseVol * 1000, _kPente, frozenQ, frozenIrpx)
-            setTBestInput(''); setVMoyInput('')
+            addMancheResult(tb, 0, _masseVol * 1000, _kPente, frozenQ, frozenIrpx)
+            setTBestInput('')
           }} style={{ padding:'7px 12px', borderRadius:8, border:'none', background:'#ffd700', color:'#000', fontSize:12, fontWeight:700, cursor:'pointer', whiteSpace:'nowrap' }}>
             + M{(mancheResults?.length || 0) + 1}
           </button>
