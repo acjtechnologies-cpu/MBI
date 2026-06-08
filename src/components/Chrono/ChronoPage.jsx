@@ -375,6 +375,8 @@ const [gistStatus, setGistStatus] = useState('');
     setRuns(prev => [newRun, ...prev]);
     db.runs.add(newRun).catch(() => {});
     addIrpRun(newRun);
+    setFrozenQ(qSnap);
+    setFrozenIrpx(irpxSnap);
     setManualPilote(null);
     if (navigator.vibrate) navigator.vibrate([30, 50, 80]);
   }
