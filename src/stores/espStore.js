@@ -9,7 +9,6 @@ import { create } from 'zustand'
 import { ESP32_CONFIG } from '../constants'
 
 const WS_URL = 'ws://192.168.4.1:81'
-const Q_REF = 39.2  // ½ × 1.225 × 8² Pa (ISA 8m/s reference Poly4)
 
 let _ws = null
 let _demoTimer = null
@@ -89,10 +88,17 @@ export const useESPStore = create((set, get) => ({
       sdActive: incoming.SD !== undefined ? !!incoming.SD : s.sdActive,
     }))
 
+
     // IRPX: pression dynamique + IQA temps reel
     const spd = next.SPD || 0
-    const rho = next.RHO || 1.225
     const iqa = next.IQA || 0
+    // Q_REF dynamique : RHO station > ALT GPS > ISA sea level
+    const rho = next.RHO != null && next.RHO > 0
+      ? next.RHO
+      : next.ALT != null
+        ? 1.225 * Math.exp(-next.ALT / 8500)
+        : 1.225
+    const Q_REF = 0.5 * rho * 64  // ref 8 m/s, densite locale
     const q = spd > 0 ? +(0.5 * rho * spd * spd).toFixed(1) : null
     const irpx = (q !== null && iqa > 0) ? +((q / Q_REF) * iqa).toFixed(3) : null
     set({ q, irpx })
@@ -177,6 +183,7 @@ export const useESPStore = create((set, get) => ({
 
   // ── Mode Demo ─────────────────────────────────────────────────
   startDemo: (setAltitude) => {
+    set({ connected: true, wsStatus: "demo" })
     if (_demoTimer) clearInterval(_demoTimer)
     set({ demo: true })
     acquireWakeLock()

@@ -351,7 +351,7 @@ padding: '10px', overflowY: 'auto', boxSizing: 'border-box',
                 </div>
               )}
             </div>
-            {espIrpx !== null && (
+            {espConnected && espIrpx !== null && (
               <div style={{ display:'flex', gap:12, padding:'6px 0', borderTop:'1px solid #1e2535', marginTop:2 }}>
                 <div style={{ flex:1 }}>
                   <div style={{ fontSize:9, color:'#4a5568', fontWeight:600 }}>IRPX</div>
