@@ -58,7 +58,6 @@ export default function Poly4Page({ onNavigate } = {}) {
   const irpTrend      = useIrpStore(s => s.trend)
   const deltaPerf     = useIrpStore(s => s.deltaPerf)
   const irpNbRuns     = useIrpStore(s => s.nbRuns)
-  const iqaHybrid     = useIrpStore(s => s.iqaHybrid)
   const espQ          = useESPStore(s => s.q)
   const espIrpx       = useESPStore(s => s.irpx)
   const espConnected  = useESPStore(s => s.connected)
@@ -335,22 +334,7 @@ padding: '10px', overflowY: 'auto', boxSizing: 'border-box',
               <div style={{ fontSize:11, color:'#8b949e', fontWeight:600 }}>{currentSite?.name || 'Aucune pente'}</div>
 
             </div>
-            <div style={{ display:'flex', gap:12 }}>
-              <div style={{ flex:1 }}>
-                <div style={{ fontSize:9, color:'#4a5568', fontWeight:600 }}>K</div>
-                <div style={{ fontSize:18, fontWeight:900, color: '#e6edf3' }}>{kPente.toFixed(3)}</div>
-              </div>
-              <div style={{ flex:1 }}>
-                <div style={{ fontSize:9, color:'#4a5568', fontWeight:600 }}>IRP</div>
-                <div style={{ fontSize:18, fontWeight:900, color: '#e6edf3' }}>{currentSite?.irp ?? '—'}</div>
-              </div>
-              {iqaHybrid && (
-                <div style={{ flex:1 }}>
-                  <div style={{ fontSize:9, color:'#4a5568', fontWeight:600 }}>IQA hyb</div>
-                  <div style={{ fontSize:18, fontWeight:900, color:'#f0883e' }}>{iqaHybrid}</div>
-                </div>
-              )}
-            </div>
+
             {espConnected && espIrpx !== null && (
               <div style={{ display:'flex', gap:12, padding:'6px 0', borderTop:'1px solid #1e2535', marginTop:2 }}>
                 <div style={{ flex:1 }}>
