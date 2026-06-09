@@ -117,7 +117,7 @@ export default function ArrowControls() {
           onMouseDown={() => handlePressStart(handleIncrement)}
           onMouseUp={handlePressEnd}
           onMouseLeave={handlePressEnd}
-          onTouchStart={() => handlePressStart(handleIncrement)}
+          onTouchStart={e => { e.preventDefault(); handlePressStart(handleIncrement) }}
           onTouchEnd={handlePressEnd}
           disabled={!canIncrement}
           className={`
@@ -138,7 +138,7 @@ export default function ArrowControls() {
           onMouseDown={() => handlePressStart(handleDecrement)}
           onMouseUp={handlePressEnd}
           onMouseLeave={handlePressEnd}
-          onTouchStart={() => handlePressStart(handleDecrement)}
+          onTouchStart={e => { e.preventDefault(); handlePressStart(handleDecrement) }}
           onTouchEnd={handlePressEnd}
           disabled={!canDecrement}
           className={`
