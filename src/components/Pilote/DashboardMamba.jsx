@@ -230,7 +230,7 @@ export default function DashboardMamba() {
         break
       }
       case 'alt':
-        setAlt(a => Math.max(0, Math.min(3000, a + dir * 50)))
+        setAlt(a => Math.max(0, Math.min(3000, a + dir * 25)))
         break
       case 'kg': {
         // Mode kg : ajuste masse directement ±0.010 kg (pas d'effet sur offset)

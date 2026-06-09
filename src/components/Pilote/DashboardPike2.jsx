@@ -340,7 +340,7 @@ export default function DashboardPike2() {
         break
       }
       case 'alt':
-        setAlt(a => Math.max(0, Math.min(3000, a + dir * 50)))
+        setAlt(a => Math.max(0, Math.min(3000, a + dir * 25)))
         break
       case 'kg': {
         const base = kgManuel !== null ? kgManuel : kgVal

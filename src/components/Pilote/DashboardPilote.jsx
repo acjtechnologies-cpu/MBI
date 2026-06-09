@@ -352,7 +352,7 @@ export default function DashboardPilote() {
       case 'offset':
         setOffset(Math.max(-500, Math.min(500, offsetVal + dir * 42))); break
       case 'alt':
-        setAltitude(Math.max(0, Math.min(3000, altitude + dir * 50))); break
+        setAltitude(Math.max(0, Math.min(3000, altitude + dir * 25))); break
       case 'nez':
         dir > 0 ? incrementNez() : decrementNez(); break
     }

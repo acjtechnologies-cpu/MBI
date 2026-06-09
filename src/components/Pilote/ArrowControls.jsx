@@ -33,9 +33,9 @@ export default function ArrowControls() {
     const timer = setTimeout(() => {
       const interval = setInterval(() => {
         action()
-      }, 150)
+      }, 500)
       setPressInterval(interval)
-    }, 500)
+    }, 1200)
     
     setLongPressTimer(timer)
   }
