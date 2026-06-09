@@ -198,11 +198,7 @@ export default function Poly4Page({ onNavigate } = {}) {
       const nextIdx = (siteIdx + dir + allSites.length) % allSites.length
       setSiteIdx(nextIdx)
       setApplied(false)
-      if (typeof setActiveSite === 'function') {
-        const nextSite = allSites[nextIdx]
-        setActiveSite({ name: nextSite.name, irp: nextSite.irp, k: nextSite.k })
-          if (!nextSite.live) setSiteRef(nextSite.irp, nextSite.name)
-      }
+
     }
   }, [mode, vent, sites, allSites, siteIdx, setParam, offsetStore, setOffset, setActiveSite, setSiteRef])
 
