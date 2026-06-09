@@ -333,11 +333,9 @@ const [gistStatus, setGistStatus] = useState('');
   const addMancheResult = useIrpStore(s => s.addManche);
   const clearMancheResults = useIrpStore(s => s.clearManches);
   const mancheDelta  = useIrpStore(s => s.mancheDelta);
-  const mancheDeltaMasse = useIrpStore(s => s.mancheDeltaMasse);
   const mancheRef    = useIrpStore(s => s.mancheRef);
   const mancheResults = useIrpStore(s => s.mancheResults);
   const setOffset     = useAppStore(s => s.setOffset);
-  const [appliedV5, setAppliedV5] = useState(false);
   const [tBestInput, setTBestInput] = useState('');
   const [manualPilote, setManualPilote] = useState(null);
   const [manualTime, setManualTime]     = useState('');
@@ -649,25 +647,7 @@ const [gistStatus, setGistStatus] = useState('');
               </div>
             );
           })}
-        </div>
-        {mancheDeltaMasse !== null && (
-          <button onClick={() => {
-            setOffset(mancheDeltaMasse);
-            setAppliedV5(true);
-            setTimeout(() => {
-              setAppliedV5(false);
-              if (typeof onNavigate === 'function') onNavigate('pilote');
-            }, 800);
-          }} style={{
-            padding: '4px 10px', borderRadius: 6, border: 'none', cursor: 'pointer',
-            fontSize: 10, fontWeight: 700, whiteSpace: 'nowrap',
-            background: appliedV5 ? '#238636' : '#1a73e8', color: '#fff',
-            transition: 'background 0.3s',
-          }}>
-            {appliedV5 ? '✓' : (mancheDeltaMasse >= 0 ? '+' : '') + mancheDeltaMasse + 'g'}
-          </button>
-        )}
-      </div>
+        </div></div>
 
       {/* ── SAISIE MANUELLE (long press) ── */}
       {manualPilote !== null && (
@@ -720,20 +700,7 @@ const [gistStatus, setGistStatus] = useState('');
         </div>
       </div>
 
-      {/* ── V5 DELTA SUMMARY ── */}
-      {mancheDelta !== null && !running && (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'baseline',
-          gap: 8, padding: '4px 12px', flexShrink: 0 }}>
-          <span style={{ fontFamily: 'monospace', fontSize: 18, fontWeight: 800,
-            color: mancheDelta > 0 ? '#3fb950' : mancheDelta < 0 ? '#f85149' : '#00d1b2' }}>
-            {mancheDelta >= 0 ? '+' : ''}{mancheDelta}%
-          </span>
-          <span style={{ fontFamily: 'monospace', fontSize: 14, fontWeight: 700,
-            color: '#ffb74d' }}>
-            {mancheDeltaMasse >= 0 ? '+' : ''}{mancheDeltaMasse}g
-          </span>
-        </div>
-      )}
+
 
       {/* ── BOUTON +Mx AUTO ── */}
       {!running && tBestInput && (
@@ -851,21 +818,12 @@ const [gistStatus, setGistStatus] = useState('');
               const irpx = m.irpxSnap
               const ref  = mancheRef
               const hasData = irpx !== null && irpx !== undefined && ref
-              const d  = hasData ? +((irpx / ref - 1) * 100).toFixed(1) : null
-              const dm = hasData ? Math.max(-150, Math.min(150, Math.round(30 * (irpx / ref - 1) * 100))) : null
-              const col = d === null ? '#8b949e' : d > 2 ? '#3fb950' : d < -2 ? '#f85149' : '#00d1b2'
               return (
                 <div key={i} style={{ display:'flex', alignItems:'center', gap:6, padding:'5px 8px', background:'#131720', border:'1px solid #1e2535', borderRadius:8, marginBottom:3, fontSize:11 }}>
                   <span style={{ fontFamily:'monospace', color:'#8b949e', width:22, textAlign:'right', fontSize:10 }}>M{i + 1}</span>
                   <span style={{ fontFamily:'monospace', fontWeight:700, flex:1 }}>{m.tBest}s</span>
-                  <span style={{ fontFamily:'monospace', fontSize:10, color:'#8b949e' }}>
+                  <span style={{ fontFamily:'monospace', fontSize:10, color:'#00d1b2' }}>
                     {irpx !== null && irpx !== undefined ? 'IRPX ' + irpx.toFixed(2) : 'IRPX —'}
-                  </span>
-                  <span style={{ fontFamily:'monospace', fontWeight:700, color: col, minWidth:44, textAlign:'right' }}>
-                    {d !== null ? (d >= 0 ? '+' : '') + d + '%' : '—'}
-                  </span>
-                  <span style={{ fontSize:9, color:'#ffb74d', minWidth:40, textAlign:'right' }}>
-                    {dm !== null ? (dm >= 0 ? '+' : '') + dm + 'g' : '—'}
                   </span>
                 </div>
               )

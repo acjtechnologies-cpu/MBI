@@ -28,10 +28,7 @@ function stdDev(arr) {
 }
 
 const INDICE_875 = 0.875  // T_best/T_median ratio F3F
-const K_MIN = 0.92        // +-8% manche delta
-const K_MAX = 1.08        // +-8% manche delta
-const GAIN_G = 30         // g par % d'ecart IRPX
-const IRPX_CLAMP = 150    // g saturation securite
+// Constantes K_MIN/K_MAX/GAIN_G supprimées — calcul ΔMasse retiré
 const DEFAULT_SITE_REF = 230  // Saint Ferriol V5 median (CDF+CDM)
 
 export const useIrpStore = create((set, get) => ({
@@ -57,12 +54,10 @@ export const useIrpStore = create((set, get) => ({
   confidence: null,   // 'LOW' | 'MEDIUM' | 'HIGH'
   deltaPerf: null,    // (ref/IRP_raw - 1) × 100
 
-  // IRPX Run system (q_snap + irpx_snap -> Kdyn -> DeltaMasse)
+  // IRPX Run system (q_snap + irpx_snap -> ref médiane)
   mancheResults: [],
   mancheIrp: null,      // dernier irpxRun
-  mancheK: null,        // Kdyn
-  mancheDelta: null,    // % ecart
-  mancheDeltaMasse: null,
+  mancheK: null,
   mancheRef: null,      // mediane irpx M1-M3
 
   // Changer la référence site (appelé quand on navigue les pentes)
@@ -106,7 +101,7 @@ export const useIrpStore = create((set, get) => ({
   clearManches: () => set({
     mancheResults: [],
     mancheIrp: null, mancheK: null,
-    mancheDelta: null, mancheDeltaMasse: null, mancheRef: null,
+    mancheRef: null,
   }),
 
   _recalcManche: (masseVol, kPente) => {
@@ -120,8 +115,7 @@ export const useIrpStore = create((set, get) => ({
 
     if (!irpxVals.length) {
       // Pas de donnees IRPX station -> pas de calcul
-      set({ mancheIrp: null, mancheK: null, mancheDelta: null,
-            mancheDeltaMasse: null, mancheRef: null })
+      set({ mancheIrp: null, mancheK: null, mancheRef: null })
       return
     }
 
@@ -135,19 +129,9 @@ export const useIrpStore = create((set, get) => ({
       ? sorted[mid]
       : (sorted[mid - 1] + sorted[mid]) / 2
 
-    const kDyn   = Math.max(K_MIN, Math.min(K_MAX, lastIrpx / ref))
-    const delta  = +((kDyn - 1) * 100).toFixed(1)
-    // Gain 30g/% sature a +-150g
-    const dMasse = Math.max(-IRPX_CLAMP, Math.min(IRPX_CLAMP,
-      Math.round(GAIN_G * (kDyn - 1) * 100)
-    ))
-
     set({
-      mancheIrp:        +lastIrpx.toFixed(3),
-      mancheK:          +kDyn.toFixed(3),
-      mancheDelta:      delta,
-      mancheDeltaMasse: dMasse,
-      mancheRef:        +ref.toFixed(3),
+      mancheIrp:  +lastIrpx.toFixed(3),
+      mancheRef:  +ref.toFixed(3),
     })
   },
 
