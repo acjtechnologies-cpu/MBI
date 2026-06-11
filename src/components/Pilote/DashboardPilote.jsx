@@ -1,5 +1,6 @@
 ﻿import { useState, useRef, useEffect } from 'react'
 import { useAppStore } from '../../stores/appStore'
+import { useESPStore } from '../../stores/espStore'
 import { useShallow } from 'zustand/react/shallow'
 import { useModelStore } from '../../stores/modelStore'
 import GliderBrowser from '../GliderBrowser'
@@ -171,6 +172,8 @@ export default function DashboardPilote() {
   })))
 
   const altitude    = useAppStore(s => parseFloat(s.altitude) || 0)
+  const espIrpx     = useESPStore(s => s.irpx)
+  const espConnected = useESPStore(s => s.connected || s.demo)
   const setAltitude = useAppStore(s => s.setAltitude)
   const model       = useModelStore(s => s.models?.[s.activeModelId] ?? null)
 
@@ -382,6 +385,31 @@ export default function DashboardPilote() {
               </button>
             </div>
 
+            {/* Jauge IRPX Live */}
+            {espConnected && espIrpx !== null && (
+              <div style={{ margin:'4px 0', padding:'6px 10px', background:'#0d1117', border:'1px solid #1e2535', borderRadius:8, flexShrink:0 }}>
+                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:4 }}>
+                  <span style={{ fontSize:9, color:'#4a5568', fontWeight:700, letterSpacing:1.5 }}>IRPX LIVE</span>
+                  <span style={{ fontSize:16, fontWeight:900, color: espIrpx < 4 ? '#f85149' : espIrpx < 7 ? '#f0a500' : espIrpx < 10 ? '#3fb950' : espIrpx < 12 ? '#00d1b2' : '#e6edf3' }}>{espIrpx.toFixed(2)}</span>
+                </div>
+                <div style={{ position:'relative', height:12, borderRadius:6, overflow:'hidden' }}>
+                  <div style={{ position:'absolute', inset:0, background:'linear-gradient(to right, #f85149 0%, #f0a500 25%, #3fb950 45%, #00d1b2 65%, #e6edf3 100%)', borderRadius:6 }} />
+                  <div style={{ position:'absolute', top:0, bottom:0, left:'50%', width:1, background:'rgba(0,0,0,0.5)' }} />
+                  <div style={{
+                    position:'absolute', top:'50%', transform:'translate(-50%,-50%)',
+                    left:`${Math.min(100, Math.max(0, espIrpx / 14 * 100))}%`,
+                    width:10, height:10, borderRadius:'50%',
+                    background: espIrpx < 4 ? '#f85149' : espIrpx < 7 ? '#f0a500' : espIrpx < 10 ? '#3fb950' : espIrpx < 12 ? '#00d1b2' : '#e6edf3',
+                    border:'2px solid #0b0e12'
+                  }} />
+                </div>
+                <div style={{ display:'flex', justifyContent:'space-between', marginTop:2 }}>
+                  <span style={{ fontSize:7, color:'#4a5568' }}>0</span>
+                  <span style={{ fontSize:7, color:'#3fb950', fontWeight:700 }}>7 REF</span>
+                  <span style={{ fontSize:7, color:'#4a5568' }}>14</span>
+                </div>
+              </div>
+            )}
             {/* Barographe - soutes dynamiques */}
             <div className="mb-baro" style={{ position:'relative' }}>
               {hasNez && (
