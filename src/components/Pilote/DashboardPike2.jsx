@@ -223,7 +223,7 @@ export default function DashboardPike2() {
   const vent        = params.vent
   const m0kg        = getMasse0m(vent, p4)
   const mAltkg      = getMasseAlt(m0kg, alt)
-  const kPente      = activeSite?.k ?? 1.00
+  const kPente      = activeSite?.k_v4 ?? activeSite?.k ?? 1.00
   const modelOffset = parseFloat(model.offset) || 0
   const targetGAuto = Math.max(model.masseVide, Math.round((mAltkg * kPente * 1000) + modelOffset + (parseFloat(offset) || 0)))
   const targetG     = kgManuel !== null ? Math.max(model.masseVide, Math.round(kgManuel * 1000)) : targetGAuto

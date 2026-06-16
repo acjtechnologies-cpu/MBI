@@ -213,7 +213,7 @@ export default function DashboardPilote() {
   const mAltkg        = getMasseAlt(m0kg, altitude)
   const modelOffset   = model.offset ?? Math.round(((model.masse_ref_8ms || P4_REF_8MS) - P4_REF_8MS) * 1000)
   const offsetVal     = parseFloat(offset) || 0
-  const kPente        = activeSite?.k ?? 1.00
+  const kPente        = activeSite?.k_v4 ?? activeSite?.k ?? 1.00
   const altCorrection = Math.round((m0kg - mAltkg) * 1000)
   const targetGAuto   = Math.max(model.masseVide, Math.round(mAltkg * kPente * 1000 + modelOffset + offsetVal))
   const targetG       = cfgAppliquee !== null

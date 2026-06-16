@@ -380,7 +380,7 @@ const [gistStatus, setGistStatus] = useState('');
   }
   const [vMoyInput, setVMoyInput]   = useState('');
   const _masseVol    = useAppStore(s => s.ballastSnap?.masse ?? 3.4);
-  const _kPente      = useAppStore(s => s.activeSite?.k ?? 1.0);
+  const _kPente      = useAppStore(s => s.activeSite?.k_v4 ?? s.activeSite?.k ?? 1.0);
   const irpVal       = useIrpStore(s => s.irp);
   const nbIrpRuns    = useIrpStore(s => s.nbRuns);
   const espConnected = useESPStore(s => s.connected);

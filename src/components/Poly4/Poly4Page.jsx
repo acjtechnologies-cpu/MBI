@@ -30,12 +30,13 @@ function rhoAlt(altM) {
 // Fallback si fetch echoue
 // K_site = irp / REF_IRP (derive, jamais stocke)
 const REF_IRP = 230
-const deriveK = (irp) => Math.max(0.85, Math.min(1.15, irp / REF_IRP))
+const deriveK = (irp, k_v4) => k_v4 != null ? k_v4 : Math.max(0.85, Math.min(1.15, irp / REF_IRP))
 const FALLBACK_SITES = [
-  { name: 'Saint Ferriol', irp: 230 },
-  { name: 'Rognac',        irp: 290 },
-  { name: 'Serra de Busa', irp: 140 },
-].map(s => ({ ...s, k: deriveK(s.irp) }))
+  { name: 'Neutre', irp: 230, k_v4: 1.000 },
+  { name: 'Saint Ferriol', irp: 230, k_v4: 0.913 },
+  { name: 'Rognac',        irp: 290, k_v4: 0.987 },
+  { name: 'Serra de Busa', irp: 140, k_v4: 1.081 },
+].map(s => ({ ...s, k: deriveK(s.irp, s.k_v4) }))
 
 const SITES_URL = import.meta.env.BASE_URL + 'planeurs/sites.json'
 
@@ -103,7 +104,7 @@ export default function Poly4Page({ onNavigate } = {}) {
       .then(r => r.ok ? r.json() : null)
       .then(data => {
         if (data?.sites?.length) {
-          const fetched = data.sites.map(s => ({ name: s.name, irp: s.irp, k: deriveK(s.irp) }))
+          const fetched = data.sites.map(s => ({ name: s.name, irp: s.irp, k_v4: s.k_v4 ?? null, k: deriveK(s.irp, s.k_v4) }))
           setSites(fetched)
           localStorage.setItem('mbi_sites_v5', JSON.stringify(fetched))
         }
@@ -214,7 +215,7 @@ export default function Poly4Page({ onNavigate } = {}) {
   function handleApply() {
     const site = currentSite
     if (typeof setActiveSite === 'function' && site) {
-      setActiveSite({ name: site.name, irp: site.irp, k: site.k })
+      setActiveSite({ name: site.name, irp: site.irp, k: site.k, k_v4: site.k_v4 ?? null })
       if (!site.live) setSiteRef(site.irp, site.name)
     }
     setApplied(true)
