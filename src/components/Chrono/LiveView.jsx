@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════════════════════════
+﻿// ═══════════════════════════════════════════════════════════════════════════════
 // VUE LIVE — Résultats F3XVault en direct
 // Polling getEventRound + getEventStandings
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -222,8 +222,8 @@ function StandingsCard({ standings, target }) {
 
 // ── Composant principal ───────────────────────────────────────────────────────
 export default function LiveView({ onBack }) {
-  const [login, setLogin]       = useState('');
-  const [password, setPassword] = useState('');
+  const [login, setLogin]       = useState(() => localStorage.getItem('f3xv_login') || '');
+  const [password, setPassword] = useState(() => localStorage.getItem('f3xv_pwd') || '');
   const [search, setSearch]     = useState('');
   const [events, setEvents]     = useState([]);
   const [eventId, setEventId]   = useState(null);
@@ -315,9 +315,9 @@ export default function LiveView({ onBack }) {
       {!eventId && (
         <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
           <input style={inputStyle} placeholder="Login F3XVault"
-            value={login} onChange={e => setLogin(e.target.value)} />
+            value={login} onChange={e => { setLogin(e.target.value); localStorage.setItem('f3xv_login', e.target.value); }} />
           <input style={inputStyle} type="password" placeholder="Mot de passe"
-            value={password} onChange={e => setPassword(e.target.value)} />
+            value={password} onChange={e => { setPassword(e.target.value); localStorage.setItem('f3xv_pwd', e.target.value); }} />
           <div style={{ display:'flex', gap:6 }}>
             <input style={{...inputStyle, flex:1}} placeholder="Nom du concours"
               value={search} onChange={e => setSearch(e.target.value)}
