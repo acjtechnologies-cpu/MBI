@@ -135,12 +135,12 @@ function RoundCard({ round, rows, target }) {
 }
 
 function StandingsCard({ standings, target }) {
-  const [rival, setRival] = React.useState(() => localStorage.getItem('f3xv_rival') || '');
-  const rivalIdx = rival ? standings.findIndex(r => r.pilot.toLowerCase().includes(rival.toLowerCase())) : -1;
-  const rivalData = rivalIdx >= 0 ? standings[rivalIdx] : null;
+  const [rival, setRival] = useState(() => localStorage.getItem('f3xv_rival') || '');
   if (!standings.length) return null;
   const joIdx = standings.findIndex(r => r.pilot.toLowerCase().includes(target.toLowerCase()));
   const jo    = standings[joIdx];
+  const rivalIdx = rival ? standings.findIndex(r => r.pilot.toLowerCase().includes(rival.toLowerCase())) : -1;
+  const rivalData = rivalIdx >= 0 ? standings[rivalIdx] : null;
 
   // Concurrent direct au-dessus et en-dessous
   const above = joIdx > 0 ? standings[joIdx - 1] : null;
