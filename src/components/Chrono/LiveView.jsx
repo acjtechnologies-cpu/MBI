@@ -222,15 +222,15 @@ function StandingsCard({ standings, target }) {
 
 // ── Composant principal ───────────────────────────────────────────────────────
 export default function LiveView({ onBack }) {
-  const [login, setLogin]       = useState(() => localStorage.getItem('f3xv_login') || '');
-  const [password, setPassword] = useState(() => localStorage.getItem('f3xv_pwd') || '');
+  const [login, setLogin]       = useState('');
+  const [password, setPassword] = useState('');
   const [search, setSearch]     = useState('');
   const [events, setEvents]     = useState([]);
-  const [eventId, setEventId]   = useState(null);
-  const [eventName, setEventName] = useState('');
-  const [target, setTarget]     = useState('Carrion');
-  const [rounds, setRounds]     = useState({});
-  const [standings, setStandings] = useState([]);
+  const [eventId, setEventId]   = useState(() => { const v = localStorage.getItem('f3xv_event_id'); return v ? parseInt(v) : null; });
+  const [eventName, setEventName] = useState(() => localStorage.getItem('f3xv_event_name') || '');
+  const [target, setTarget]     = useState(() => localStorage.getItem('f3xv_target') || 'Carrion');
+  const [rounds, setRounds]     = useState(() => { try { return JSON.parse(localStorage.getItem('f3xv_rounds') || '{}'); } catch { return {}; } });
+  const [standings, setStandings] = useState(() => { try { return JSON.parse(localStorage.getItem('f3xv_standings') || '[]'); } catch { return []; } });
   const [lastRound, setLastRound] = useState(0);
   const [polling, setPolling]   = useState(false);
   const [lastUpdate, setLastUpdate] = useState(null);
@@ -250,7 +250,7 @@ export default function LiveView({ onBack }) {
   const loadRound = useCallback(async (rn) => {
     const rows = await getRound(login, password, eventId, rn);
     if (rows.length > 0) {
-      setRounds(prev => ({ ...prev, [rn]: rows }));
+      setRounds(prev => { const next = { ...prev, [rn]: rows }; localStorage.setItem('f3xv_rounds', JSON.stringify(next)); return next; });
       setLastRound(rn);
       return true;
     }
@@ -267,7 +267,7 @@ export default function LiveView({ onBack }) {
     }
     // Classement général
     const st = await getStandings(login, password, eventId);
-    if (st.length) setStandings(st);
+    if (st.length) { setStandings(st); localStorage.setItem('f3xv_standings', JSON.stringify(st)); }
     setLastUpdate(new Date().toLocaleTimeString('fr-FR'));
   }, [eventId, lastRound, loadRound, login, password]);
 
@@ -315,9 +315,9 @@ export default function LiveView({ onBack }) {
       {!eventId && (
         <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
           <input style={inputStyle} placeholder="Login F3XVault"
-            value={login} onChange={e => { setLogin(e.target.value); localStorage.setItem('f3xv_login', e.target.value); }} />
+            value={login} onChange={e => setLogin(e.target.value)} />
           <input style={inputStyle} type="password" placeholder="Mot de passe"
-            value={password} onChange={e => { setPassword(e.target.value); localStorage.setItem('f3xv_pwd', e.target.value); }} />
+            value={password} onChange={e => setPassword(e.target.value)} />
           <div style={{ display:'flex', gap:6 }}>
             <input style={{...inputStyle, flex:1}} placeholder="Nom du concours"
               value={search} onChange={e => setSearch(e.target.value)}
@@ -327,7 +327,7 @@ export default function LiveView({ onBack }) {
           </div>
           {error && <div style={{ fontSize:11, color:'#f85149' }}>{error}</div>}
           {events.map((ev, i) => (
-            <div key={i} onClick={() => { setEventId(ev.event_id); setEventName(ev.name); }}
+            <div key={i} onClick={() => { setEventId(ev.event_id); setEventName(ev.name); localStorage.setItem('f3xv_event_id', ev.event_id); localStorage.setItem('f3xv_event_name', ev.name); }}
               style={{ background:'#161b22', border:'0.5px solid #21262d',
                 borderRadius:8, padding:'8px 12px', cursor:'pointer' }}>
               <div style={{ fontSize:12, fontWeight:500 }}>{ev.name}</div>
@@ -342,7 +342,7 @@ export default function LiveView({ onBack }) {
         <>
           <div style={{ display:'flex', gap:6 }}>
             <input style={{...inputStyle, flex:1}} placeholder="Pilote à suivre"
-              value={target} onChange={e => setTarget(e.target.value)} />
+              value={target} onChange={e => { setTarget(e.target.value); localStorage.setItem('f3xv_target', e.target.value); }} />
             <button onClick={() => setPolling(p => !p)} style={{
               background: polling ? '#2ea043' : '#1f6feb', border:'none', color:'#fff',
               borderRadius:8, padding:'0 14px', cursor:'pointer', fontWeight:600 }}>
