@@ -135,6 +135,9 @@ function RoundCard({ round, rows, target }) {
 }
 
 function StandingsCard({ standings, target }) {
+  const [rival, setRival] = React.useState(() => localStorage.getItem('f3xv_rival') || '');
+  const rivalIdx = rival ? standings.findIndex(r => r.pilot.toLowerCase().includes(rival.toLowerCase())) : -1;
+  const rivalData = rivalIdx >= 0 ? standings[rivalIdx] : null;
   if (!standings.length) return null;
   const joIdx = standings.findIndex(r => r.pilot.toLowerCase().includes(target.toLowerCase()));
   const jo    = standings[joIdx];
@@ -193,28 +196,62 @@ function StandingsCard({ standings, target }) {
         </div>
       )}
 
-      {/* Top 5 complet */}
+      {/* Rival manuel */}
+      <div style={{ borderTop:'0.5px solid #1a1a1a', paddingTop:6, marginBottom:6 }}>
+        <div style={{ fontSize:9, color:'#444', marginBottom:4, letterSpacing:1 }}>CONCURRENT CIBLÉ</div>
+        <input
+          placeholder="Nom du concurrent..." value={rival}
+          onChange={e => { setRival(e.target.value); localStorage.setItem('f3xv_rival', e.target.value); }}
+          style={{ background:'#131720', border:'0.5px solid #30363d', color:'#e8eaf0',
+            borderRadius:6, padding:'5px 10px', fontSize:12, width:'100%', boxSizing:'border-box',
+            fontFamily:'inherit', outline:'none', marginBottom:4 }}
+        />
+        {rivalData && jo && (
+          <div style={{ display:'flex', gap:8, padding:'5px 8px', borderRadius:6,
+            background: rivalData.rank < jo.rank ? '#1a0d0d' : '#0d1a0d',
+            border: rivalData.rank < jo.rank ? '0.5px solid #E24B4A44' : '0.5px solid #1D9E7544' }}>
+            <span style={{ fontSize:10, color:'#666', minWidth:22, textAlign:'right' }}>{rivalData.rank}.</span>
+            <span style={{ fontSize:12, color:'#ccc', flex:1 }}>{rivalData.pilot}</span>
+            <span style={{ fontSize:12, fontVariantNumeric:'tabular-nums', color:'#ccc' }}>{rivalData.total.toFixed(0)}</span>
+            <span style={{ fontSize:11, fontWeight:700, minWidth:60, textAlign:'right',
+              color: rivalData.rank < jo.rank ? '#E24B4A' : '#1D9E75' }}>
+              {rivalData.rank < jo.rank
+                ? '+' + (rivalData.total - jo.total).toFixed(0) + ' pts'
+                : '-' + (jo.total - rivalData.total).toFixed(0) + ' pts'}
+            </span>
+          </div>
+        )}
+        {rival && !rivalData && <div style={{ fontSize:10, color:'#555' }}>Pilote non trouvé</div>}
+      </div>
+      {/* Classement complet scrollable */}
       <div style={{ borderTop:'0.5px solid #1a1a1a', paddingTop:6 }}>
-        <div style={{ fontSize:9, color:'#444', marginBottom:4, letterSpacing:1 }}>TOP 5</div>
-        {standings.slice(0, 5).map((r, i) => {
+        <div style={{ fontSize:9, color:'#444', marginBottom:4, letterSpacing:1 }}>CLASSEMENT COMPLET</div>
+        <div style={{ maxHeight:320, overflowY:'auto' }}>
+        {standings.map((r, i) => {
           const isJo = joIdx === i;
+          const isRival = rivalIdx === i;
           return (
-            <div key={i} style={{ display:'flex', gap:8, padding:'3px 6px', borderRadius:5,
-              background: isJo ? '#0d1f2d' : 'transparent' }}>
-              <span style={{ fontSize:10, color: isJo ? '#ffd700' : '#444', minWidth:22, textAlign:'right' }}>
-                {r.rank}.
-              </span>
-              <span style={{ fontSize:11, color: isJo ? '#ffd700' : '#888', flex:1 }}>{r.pilot}</span>
-              <span style={{ fontSize:11, color: isJo ? '#ffd700' : '#666',
-                fontVariantNumeric:'tabular-nums' }}>{r.total.toFixed(0)}</span>
-              {i > 0 && (
-                <span style={{ fontSize:10, color:'#E24B4A', minWidth:50, textAlign:'right' }}>
-                  {standings[i].diff.toFixed(0)}
+            <div key={i} style={{ display:'flex', gap:8, padding:'4px 6px', borderRadius:5,
+              marginBottom:1,
+              background: isJo ? '#0d1f2d' : isRival ? (r.rank < jo?.rank ? '#1a0d0d' : '#0d1a0d') : 'transparent',
+              border: isJo ? '0.5px solid #ffd70044' : isRival ? '0.5px solid #88888844' : 'none' }}>
+              <span style={{ fontSize:10, minWidth:22, textAlign:'right',
+                color: isJo ? '#ffd700' : isRival ? '#aaa' : '#444' }}>{r.rank}.</span>
+              <span style={{ fontSize:11, flex:1,
+                color: isJo ? '#ffd700' : isRival ? '#ccc' : '#888',
+                fontWeight: isJo || isRival ? 600 : 400 }}>{r.pilot}</span>
+              <span style={{ fontSize:11, fontVariantNumeric:'tabular-nums',
+                color: isJo ? '#ffd700' : isRival ? '#ccc' : '#666' }}>{r.total.toFixed(0)}</span>
+              {jo && !isJo && (
+                <span style={{ fontSize:9, minWidth:50, textAlign:'right',
+                  color: r.total > jo.total ? '#E24B4A' : '#1D9E75' }}>
+                  {r.total > jo.total ? '+' : '-'}{Math.abs(r.total - jo.total).toFixed(0)}
                 </span>
               )}
             </div>
           );
         })}
+        </div>
       </div>
     </div>
   );
