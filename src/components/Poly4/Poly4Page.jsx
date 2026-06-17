@@ -92,7 +92,7 @@ export default function Poly4Page({ onNavigate } = {}) {
   // ── Dérivés ───────────────────────────────────────────────────────────────
   const allSites = sites
   const currentSite = allSites[siteIdx] ?? allSites[Math.min(6, allSites.length - 1)]
-  const kPente      = currentSite?.k ?? 1.00
+  const kPente      = currentSite?.k_v4 ?? currentSite?.k ?? 1.00
   const rho         = useMemo(() => rhoAlt(altitude), [altitude])
   const offsetADN   = (model?.masse_ref_8ms || P4_REF_8MS) - P4_REF_8MS
   const offsetTerrain = offsetStore / 1000
@@ -195,13 +195,19 @@ export default function Poly4Page({ onNavigate } = {}) {
       setParam('vent', Math.round(next * 10) / 10)
     } else if (mode === 'offset') {
       const next42 = offsetStore + dir * 42; const nextOff = (offsetStore !== 0 && Math.sign(next42) !== Math.sign(offsetStore)) ? 0 : Math.max(-500, Math.min(500, next42)); setOffset(nextOff)
+    } else if (mode === 'kpente') {
+      const cur = currentSite?.k_v4 ?? currentSite?.k ?? 1.0
+      const next = Math.round(Math.max(0.7, Math.min(1.3, cur + dir * 0.005)) * 1000) / 1000
+      setSites(prev => prev.map(s => s.name === currentSite?.name ? { ...s, k: next, k_v4: next } : s))
+      setActiveSite({ ...currentSite, k: next, k_v4: next })
+      setApplied(false)
     } else {
       const nextIdx = (siteIdx + dir + allSites.length) % allSites.length
       setSiteIdx(nextIdx)
       setApplied(false)
 
     }
-  }, [mode, vent, sites, allSites, siteIdx, setParam, offsetStore, setOffset, setActiveSite, setSiteRef])
+  }, [mode, vent, sites, allSites, siteIdx, setParam, offsetStore, setOffset, setActiveSite, setSiteRef, currentSite, setSites])
 
   const startPress = (dir) => {
     handleChange(dir)
