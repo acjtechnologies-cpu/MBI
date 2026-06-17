@@ -3,6 +3,7 @@ import { useESPStore } from '../../stores/espStore';
 import { useAppStore } from '../../stores/appStore';
 import { useIrpStore } from '../../stores/irpStore';
 import { syncGist, setGistToken, getGistToken } from './gistSync';
+import LiveView from './LiveView';
 // ── Dexie v3 — session_id sur runs ───────────────────────────────────────────
 import Dexie from 'dexie';
 const db = new Dexie('ChronoDB');
@@ -560,6 +561,9 @@ const [gistStatus, setGistStatus] = useState('');
   }
 
   // ── Vue Journal ──────────────────────────────────────────────────────────────
+  if (vue === 'live') {
+    return <LiveView onBack={() => setVue('chrono')} />;
+  }
   if (vue === 'journal') {
     return <JournalView pilotes={pilotes} currentSessionId={sessionId} onBack={() => setVue('chrono')} />;
   }
@@ -601,6 +605,12 @@ const [gistStatus, setGistStatus] = useState('');
             style={{ ...btnMini, width: 'auto', padding: '0 7px', fontSize: 9,
               color: '#60a5fa', border: '0.5px solid #1a3a5a', marginLeft: 2 }}
           >JOURNAL</button>
+          {/* Bouton Live */}
+          <button
+            onClick={() => setVue('live')}
+            style={{ ...btnMini, width: 'auto', padding: '0 7px', fontSize: 9,
+              color: '#1D9E75', border: '0.5px solid #1D9E7544', marginLeft: 2 }}
+          >● LIVE</button>
           {/* Manche */}
           <span style={{ fontSize: 11, color: '#555', marginLeft: 2 }}>M</span>
           <button onClick={() => !running && setManche(m => Math.max(1, m - 1))} style={btnMini}>−</button>
