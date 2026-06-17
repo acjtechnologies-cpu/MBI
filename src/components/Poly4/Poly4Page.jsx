@@ -116,8 +116,18 @@ export default function Poly4Page({ onNavigate } = {}) {
       .then(data => {
         if (data?.sites?.length) {
           const fetched = data.sites.map(s => ({ name: s.name, irp: s.irp, k_v4: s.k_v4 ?? null, k: deriveK(s.irp, s.k_v4) }))
-          setSites(fetched)
-          localStorage.setItem('mbi_sites_v5', JSON.stringify(fetched))
+          // Applique les overrides terrain depuis Dexie
+          db.sites_k.toArray().then(rows => {
+            const merged = fetched.map(s => {
+              const row = rows.find(r => r.name === s.name)
+              return row ? { ...s, k: row.k_v4, k_v4: row.k_v4 } : s
+            })
+            setSites(merged)
+            localStorage.setItem('mbi_sites_v5', JSON.stringify(merged))
+          }).catch(() => {
+            setSites(fetched)
+            localStorage.setItem('mbi_sites_v5', JSON.stringify(fetched))
+          })
         }
       })
       .catch(() => {})  // offline: use cache
