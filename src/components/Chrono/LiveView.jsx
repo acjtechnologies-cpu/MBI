@@ -1,14 +1,13 @@
 // ═══════════════════════════════════════════════════════════════════════════════
 // VUE LIVE — Résultats F3XVault en direct
+// Polling getEventRound + getEventStandings
 // ═══════════════════════════════════════════════════════════════════════════════
-// Polling getEventRound toutes POLL_INTERVAL ms
-// Affiche : classement round courant, écart vs pilote cible, IRPX round
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 
-const API_URL   = 'https://www.f3xvault.com/api.php';
-const POLL_MS   = 120_000; // 2 minutes
-const REF_IRP   = 8.969;   // Escueillens IRP_v6
+const API_URL  = 'https://www.f3xvault.com/api.php';
+const POLL_MS  = 120_000;
+const REF_IRP  = 8.969;
 
 // ── Helpers API ───────────────────────────────────────────────────────────────
 async function apiPost(params) {
@@ -24,7 +23,14 @@ function parseCsv(body) {
   const header = lines[1]?.split(',').map(h => h.replace(/"/g, '').trim());
   if (!header) return [];
   return lines.slice(2).map(l => {
-    const vals = l.split(',').map(v => v.replace(/"/g, '').trim());
+    const vals = [];
+    let cur = '', inQ = false;
+    for (const ch of l) {
+      if (ch === '"') { inQ = !inQ; continue; }
+      if (ch === ',' && !inQ) { vals.push(cur.trim()); cur = ''; continue; }
+      cur += ch;
+    }
+    vals.push(cur.trim());
     return Object.fromEntries(header.map((h, i) => [h, vals[i] ?? '']));
   }).filter(r => Object.values(r).some(v => v));
 }
@@ -32,41 +38,64 @@ function parseCsv(body) {
 async function searchEvents(login, password, string) {
   const body = await apiPost({ login, password, function: 'searchEvents',
     event_type_code: 'f3f', string, per_page: 20, output_type: 'json' });
-  return parseCsv(body).map(r => ({
-    event_id: parseInt(r[''] || r['event_id'] || Object.values(r)[0]),
-    date:     Object.values(r)[1],
-    name:     Object.values(r)[2],
-    location: Object.values(r)[3],
-  })).filter(e => e.event_id > 0);
+  const lines = body.trim().split('\n');
+  if (!lines[0] || lines[0].trim() !== '1') return [];
+  return lines.slice(1).map(l => {
+    const v = [];
+    let cur = '', inQ = false;
+    for (const ch of l) {
+      if (ch === '"') { inQ = !inQ; continue; }
+      if (ch === ',' && !inQ) { v.push(cur.trim()); cur = ''; continue; }
+      cur += ch;
+    }
+    v.push(cur.trim());
+    return { event_id: parseInt(v[0]), date: v[1], name: v[2], location: v[3] };
+  }).filter(e => e.event_id > 0);
 }
 
 async function getRound(login, password, event_id, round_number) {
   const body = await apiPost({ login, password, function: 'getEventRound',
     event_id, round_number, output_type: 'json' });
-  const rows = parseCsv(body);
-  return rows.map(r => ({
-    pilot:   `${r.First_Name ?? ''} ${r.Last_Name ?? ''}`.trim(),
+  return parseCsv(body).map(r => ({
+    pilot: `${r.First_Name ?? ''} ${r.Last_Name ?? ''}`.trim(),
     seconds: parseFloat(r.seconds || '0'),
-    wind:    parseFloat(r.wind_speed_avg || '0'),
+    wind: parseFloat(r.wind_speed_avg || '0'),
   })).filter(r => r.seconds > 0).sort((a, b) => a.seconds - b.seconds);
 }
 
-// ── Sous-composants ───────────────────────────────────────────────────────────
-function RoundCard({ round, rows, targetPilot }) {
+async function getStandings(login, password, event_id) {
+  const body = await apiPost({ login, password, function: 'getEventStandings',
+    event_id, output_type: 'json' });
+  const lines = body.trim().split('\n');
+  if (!lines[0] || lines[0].trim() !== '1') return [];
+  // Ligne 0=statut, ligne 1=info event, ligne 2=header CSV, ligne 3+=données
+  const csvBody = '1\n' + lines.slice(2).join('\n');
+  return parseCsv(csvBody).map(r => ({
+    rank:       parseInt(r.Rank || '0'),
+    pilot:      r['Pilot Name'] || '',
+    total:      parseFloat(r.Total_Score || '0'),
+    diff:       parseFloat(r.Difference || '0'),
+    subtotal:   parseFloat(r.Subtotal || '0'),
+    drops:      parseFloat(r.Drops || '0'),
+    percentage: parseFloat(r.Percentage || '0'),
+  })).filter(r => r.rank > 0).sort((a, b) => a.rank - b.rank);
+}
+
+// ── Composants ────────────────────────────────────────────────────────────────
+function RoundCard({ round, rows, target }) {
   if (!rows.length) return null;
+  const n = rows.length;
   const t_best = rows[0].seconds;
-  const n      = rows.length;
   const t_p25  = rows[Math.floor(0.25 * n)]?.seconds ?? t_best;
   const t_p5   = rows[Math.max(0, Math.floor(0.05 * n))]?.seconds ?? t_best;
   const irp    = ((t_p5 / t_p25) * 10 / REF_IRP).toFixed(3);
   const wind   = rows[0].wind;
-  const joIdx  = rows.findIndex(r => r.pilot.toLowerCase().includes(targetPilot.toLowerCase()));
-  const joRank = joIdx >= 0 ? joIdx + 1 : null;
+  const joIdx  = rows.findIndex(r => r.pilot.toLowerCase().includes(target.toLowerCase()));
 
   return (
     <div style={{ background:'#0f0f0f', border:'0.5px solid #1e2535',
       borderRadius:10, padding:'10px 12px', marginBottom:8 }}>
-      <div style={{ display:'flex', justifyContent:'space-between', marginBottom:8 }}>
+      <div style={{ display:'flex', justifyContent:'space-between', marginBottom:6 }}>
         <span style={{ fontSize:11, color:'#8b949e', fontWeight:700, letterSpacing:1 }}>
           ROUND {round}
         </span>
@@ -74,51 +103,124 @@ function RoundCard({ round, rows, targetPilot }) {
           {wind > 0 ? `${wind.toFixed(1)} m/s` : '—'} · K {irp}
         </span>
       </div>
-
-      {/* Top 5 */}
       {rows.slice(0, 5).map((r, i) => {
         const isJo = joIdx === i;
         return (
-          <div key={i} style={{
-            display:'flex', alignItems:'center', gap:8,
-            padding:'4px 6px', borderRadius:6, marginBottom:2,
+          <div key={i} style={{ display:'flex', gap:8, padding:'3px 6px', borderRadius:5,
             background: isJo ? '#0d1f2d' : 'transparent',
-            border: isJo ? '0.5px solid #4a9eff44' : 'none',
-          }}>
+            border: isJo ? '0.5px solid #4a9eff44' : 'none' }}>
             <span style={{ fontSize:10, color:'#444', minWidth:18 }}>{i+1}.</span>
             <span style={{ fontSize:12, color: isJo ? '#4a9eff' : '#ccc', flex:1 }}>{r.pilot}</span>
-            <span style={{ fontSize:14, fontWeight:500, color: isJo ? '#4a9eff' : '#e8eaf0',
+            <span style={{ fontSize:13, fontWeight:500, color: isJo ? '#4a9eff' : '#e8eaf0',
               fontVariantNumeric:'tabular-nums' }}>{r.seconds.toFixed(2)}s</span>
           </div>
         );
       })}
-
-      {/* Jo hors top 5 */}
       {joIdx >= 5 && (
         <div style={{ borderTop:'0.5px solid #1a2535', marginTop:4, paddingTop:4 }}>
-          <div style={{ display:'flex', alignItems:'center', gap:8, padding:'4px 6px',
-            background:'#0d1f2d', borderRadius:6, border:'0.5px solid #4a9eff44' }}>
-            <span style={{ fontSize:10, color:'#4a9eff', minWidth:18 }}>{joRank}.</span>
+          <div style={{ display:'flex', gap:8, padding:'3px 6px', background:'#0d1f2d',
+            borderRadius:5, border:'0.5px solid #4a9eff44' }}>
+            <span style={{ fontSize:10, color:'#4a9eff', minWidth:18 }}>{joIdx+1}.</span>
             <span style={{ fontSize:12, color:'#4a9eff', flex:1 }}>{rows[joIdx].pilot}</span>
-            <span style={{ fontSize:14, fontWeight:500, color:'#4a9eff',
+            <span style={{ fontSize:13, fontWeight:500, color:'#4a9eff',
               fontVariantNumeric:'tabular-nums' }}>{rows[joIdx].seconds.toFixed(2)}s</span>
           </div>
-          {joRank > 1 && (
-            <div style={{ fontSize:10, color:'#555', textAlign:'right', marginTop:2 }}>
-              +{(rows[joIdx].seconds - rows[joRank-2].seconds).toFixed(2)}s vs #{joRank-1}
-            </div>
-          )}
         </div>
       )}
-
-      <div style={{ fontSize:9, color:'#444', textAlign:'right', marginTop:4 }}>
+      <div style={{ fontSize:9, color:'#333', textAlign:'right', marginTop:3 }}>
         {n} pilotes · T_best {t_best.toFixed(2)}s · T_P25 {t_p25.toFixed(2)}s
       </div>
     </div>
   );
 }
 
-// ── Composant principal LiveView ──────────────────────────────────────────────
+function StandingsCard({ standings, target }) {
+  if (!standings.length) return null;
+  const joIdx = standings.findIndex(r => r.pilot.toLowerCase().includes(target.toLowerCase()));
+  const jo    = standings[joIdx];
+
+  // Concurrent direct au-dessus et en-dessous
+  const above = joIdx > 0 ? standings[joIdx - 1] : null;
+  const below = joIdx >= 0 && joIdx < standings.length - 1 ? standings[joIdx + 1] : null;
+
+  return (
+    <div style={{ background:'#0f0f0f', border:'0.5px solid #ffd70033',
+      borderRadius:10, padding:'10px 12px', marginBottom:8 }}>
+      <div style={{ fontSize:11, color:'#ffd700', fontWeight:700, letterSpacing:1, marginBottom:8 }}>
+        CLASSEMENT GÉNÉRAL — {standings.length} pilotes
+      </div>
+
+      {/* Jo + concurrents directs */}
+      {jo && (
+        <div style={{ marginBottom:8 }}>
+          {above && (
+            <div style={{ display:'flex', gap:8, padding:'4px 6px', borderRadius:5,
+              background:'#111', marginBottom:2 }}>
+              <span style={{ fontSize:10, color:'#555', minWidth:22, textAlign:'right' }}>{above.rank}.</span>
+              <span style={{ fontSize:12, color:'#888', flex:1 }}>{above.pilot}</span>
+              <span style={{ fontSize:12, fontVariantNumeric:'tabular-nums', color:'#888' }}>
+                {above.total.toFixed(0)} pts
+              </span>
+              <span style={{ fontSize:10, color:'#E24B4A', minWidth:60, textAlign:'right' }}>
+                +{(above.total - jo.total).toFixed(0)} pts
+              </span>
+            </div>
+          )}
+          <div style={{ display:'flex', gap:8, padding:'6px 8px', borderRadius:7,
+            background:'#0d1f2d', border:'1px solid #ffd70066', marginBottom:2 }}>
+            <span style={{ fontSize:11, color:'#ffd700', minWidth:22, textAlign:'right',
+              fontWeight:700 }}>{jo.rank}.</span>
+            <span style={{ fontSize:13, color:'#ffd700', flex:1, fontWeight:600 }}>{jo.pilot}</span>
+            <span style={{ fontSize:14, fontWeight:700, fontVariantNumeric:'tabular-nums',
+              color:'#ffd700' }}>{jo.total.toFixed(0)} pts</span>
+            <span style={{ fontSize:10, color:'#1D9E75', minWidth:48, textAlign:'right' }}>
+              {jo.percentage.toFixed(1)}%
+            </span>
+          </div>
+          {below && (
+            <div style={{ display:'flex', gap:8, padding:'4px 6px', borderRadius:5,
+              background:'#111' }}>
+              <span style={{ fontSize:10, color:'#555', minWidth:22, textAlign:'right' }}>{below.rank}.</span>
+              <span style={{ fontSize:12, color:'#888', flex:1 }}>{below.pilot}</span>
+              <span style={{ fontSize:12, fontVariantNumeric:'tabular-nums', color:'#888' }}>
+                {below.total.toFixed(0)} pts
+              </span>
+              <span style={{ fontSize:10, color:'#1D9E75', minWidth:60, textAlign:'right' }}>
+                −{(jo.total - below.total).toFixed(0)} pts
+              </span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Top 5 complet */}
+      <div style={{ borderTop:'0.5px solid #1a1a1a', paddingTop:6 }}>
+        <div style={{ fontSize:9, color:'#444', marginBottom:4, letterSpacing:1 }}>TOP 5</div>
+        {standings.slice(0, 5).map((r, i) => {
+          const isJo = joIdx === i;
+          return (
+            <div key={i} style={{ display:'flex', gap:8, padding:'3px 6px', borderRadius:5,
+              background: isJo ? '#0d1f2d' : 'transparent' }}>
+              <span style={{ fontSize:10, color: isJo ? '#ffd700' : '#444', minWidth:22, textAlign:'right' }}>
+                {r.rank}.
+              </span>
+              <span style={{ fontSize:11, color: isJo ? '#ffd700' : '#888', flex:1 }}>{r.pilot}</span>
+              <span style={{ fontSize:11, color: isJo ? '#ffd700' : '#666',
+                fontVariantNumeric:'tabular-nums' }}>{r.total.toFixed(0)}</span>
+              {i > 0 && (
+                <span style={{ fontSize:10, color:'#E24B4A', minWidth:50, textAlign:'right' }}>
+                  {standings[i].diff.toFixed(0)}
+                </span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ── Composant principal ───────────────────────────────────────────────────────
 export default function LiveView({ onBack }) {
   const [login, setLogin]       = useState('');
   const [password, setPassword] = useState('');
@@ -127,39 +229,34 @@ export default function LiveView({ onBack }) {
   const [eventId, setEventId]   = useState(null);
   const [eventName, setEventName] = useState('');
   const [target, setTarget]     = useState('Carrion');
-  const [rounds, setRounds]     = useState({});   // { round_number: rows[] }
+  const [rounds, setRounds]     = useState({});
+  const [standings, setStandings] = useState([]);
   const [lastRound, setLastRound] = useState(0);
   const [polling, setPolling]   = useState(false);
   const [lastUpdate, setLastUpdate] = useState(null);
+  const [tab, setTab]           = useState('rounds'); // 'rounds' | 'classement'
   const [error, setError]       = useState('');
   const timerRef = useRef(null);
-  const creds    = { login, password };
 
-  // Recherche events
   async function doSearch() {
     if (!login || !password || !search) return;
     setError('');
     try {
       const res = await searchEvents(login, password, search);
       setEvents(res);
-    } catch(e) { setError('Erreur réseau'); }
+    } catch { setError('Erreur réseau'); }
   }
 
-  // Charge un round
   const loadRound = useCallback(async (rn) => {
-    try {
-      const rows = await getRound(login, password, eventId, rn);
-      if (rows.length > 0) {
-        setRounds(prev => ({ ...prev, [rn]: rows }));
-        setLastRound(rn);
-        setLastUpdate(new Date().toLocaleTimeString('fr-FR'));
-        return true;
-      }
-      return false;
-    } catch { return false; }
+    const rows = await getRound(login, password, eventId, rn);
+    if (rows.length > 0) {
+      setRounds(prev => ({ ...prev, [rn]: rows }));
+      setLastRound(rn);
+      return true;
+    }
+    return false;
   }, [login, password, eventId]);
 
-  // Polling : charge tous les rounds depuis le dernier connu
   const doPoll = useCallback(async () => {
     if (!eventId) return;
     let rn = Math.max(1, lastRound);
@@ -168,9 +265,12 @@ export default function LiveView({ onBack }) {
       if (!ok) break;
       rn++;
     }
-  }, [eventId, lastRound, loadRound]);
+    // Classement général
+    const st = await getStandings(login, password, eventId);
+    if (st.length) setStandings(st);
+    setLastUpdate(new Date().toLocaleTimeString('fr-FR'));
+  }, [eventId, lastRound, loadRound, login, password]);
 
-  // Démarre/arrête le polling
   useEffect(() => {
     if (!polling || !eventId) return;
     doPoll();
@@ -184,8 +284,7 @@ export default function LiveView({ onBack }) {
     fontFamily:'inherit', outline:'none', boxSizing:'border-box',
   };
 
-  const sortedRounds = Object.entries(rounds)
-    .sort(([a],[b]) => parseInt(b) - parseInt(a));
+  const sortedRounds = Object.entries(rounds).sort(([a],[b]) => parseInt(b) - parseInt(a));
 
   return (
     <div style={{ height:'100%', display:'flex', flexDirection:'column',
@@ -193,16 +292,16 @@ export default function LiveView({ onBack }) {
       overflowY:'auto', boxSizing:'border-box', gap:8 }}>
 
       {/* Header */}
-      <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:4 }}>
-        <button onClick={onBack} style={{ background:'none', border:'none',
-          color:'#4a9eff', fontSize:18, cursor:'pointer', padding:'0 4px' }}>←</button>
+      <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+        <button onClick={onBack} style={{ background:'#1a1a2e', border:'0.5px solid #1a3a5a',
+          color:'#4a9eff', fontSize:13, cursor:'pointer', padding:'6px 12px',
+          borderRadius:8, fontWeight:700, touchAction:'manipulation',
+          WebkitTapHighlightColor:'transparent' }}>← Retour</button>
         <div style={{ flex:1 }}>
-          <div style={{ fontSize:11, color:'#8b949e', textTransform:'uppercase', letterSpacing:1 }}>
+          <div style={{ fontSize:10, color:'#8b949e', textTransform:'uppercase', letterSpacing:1 }}>
             Live F3XVault
           </div>
-          {eventName && (
-            <div style={{ fontSize:13, fontWeight:600, color:'#58a6ff' }}>{eventName}</div>
-          )}
+          {eventName && <div style={{ fontSize:12, fontWeight:600, color:'#58a6ff' }}>{eventName}</div>}
         </div>
         {polling && (
           <div style={{ fontSize:9, color:'#1D9E75', border:'0.5px solid #1D9E7544',
@@ -220,14 +319,11 @@ export default function LiveView({ onBack }) {
           <input style={inputStyle} type="password" placeholder="Mot de passe"
             value={password} onChange={e => setPassword(e.target.value)} />
           <div style={{ display:'flex', gap:6 }}>
-            <input style={{...inputStyle, flex:1}} placeholder="Nom du concours (ex: Sederon)"
+            <input style={{...inputStyle, flex:1}} placeholder="Nom du concours"
               value={search} onChange={e => setSearch(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && doSearch()} />
-            <button onClick={doSearch} style={{
-              background:'#1f6feb', border:'none', color:'#fff',
-              borderRadius:8, padding:'0 14px', cursor:'pointer', fontWeight:600 }}>
-              ⌕
-            </button>
+            <button onClick={doSearch} style={{ background:'#1f6feb', border:'none', color:'#fff',
+              borderRadius:8, padding:'0 14px', cursor:'pointer', fontWeight:600 }}>⌕</button>
           </div>
           {error && <div style={{ fontSize:11, color:'#f85149' }}>{error}</div>}
           {events.map((ev, i) => (
@@ -241,29 +337,53 @@ export default function LiveView({ onBack }) {
         </div>
       )}
 
-      {/* Pilote cible + contrôles */}
+      {/* Contrôles + tabs */}
       {eventId && (
         <>
           <div style={{ display:'flex', gap:6 }}>
             <input style={{...inputStyle, flex:1}} placeholder="Pilote à suivre"
               value={target} onChange={e => setTarget(e.target.value)} />
             <button onClick={() => setPolling(p => !p)} style={{
-              background: polling ? '#2ea043' : '#1f6feb',
-              border:'none', color:'#fff', borderRadius:8,
-              padding:'0 14px', cursor:'pointer', fontWeight:600, whiteSpace:'nowrap' }}>
-              {polling ? '⏹ Stop' : '▶ Start'}
+              background: polling ? '#2ea043' : '#1f6feb', border:'none', color:'#fff',
+              borderRadius:8, padding:'0 14px', cursor:'pointer', fontWeight:600 }}>
+              {polling ? '⏹' : '▶'}
             </button>
           </div>
 
-          {/* Rounds */}
-          {sortedRounds.length === 0 && polling && (
-            <div style={{ color:'#555', fontSize:12, textAlign:'center', padding:20 }}>
-              Chargement des rounds…
-            </div>
+          {/* Tabs rounds / classement */}
+          <div style={{ display:'flex', gap:6 }}>
+            {[['rounds','Rounds'], ['classement','Classement']].map(([id, label]) => (
+              <button key={id} onClick={() => setTab(id)} style={{
+                flex:1, padding:'8px 0', borderRadius:8, border:'none', cursor:'pointer',
+                background: tab === id ? '#1c2128' : '#161b22',
+                color: tab === id ? '#58a6ff' : '#666',
+                fontSize:12, fontWeight: tab === id ? 600 : 400,
+                outline: tab === id ? '1px solid #58a6ff44' : 'none',
+              }}>{label}</button>
+            ))}
+          </div>
+
+          {/* Contenu */}
+          {tab === 'rounds' && (
+            <>
+              {sortedRounds.length === 0 && polling && (
+                <div style={{ color:'#555', fontSize:12, textAlign:'center', padding:20 }}>
+                  Chargement…
+                </div>
+              )}
+              {sortedRounds.map(([rn, rows]) => (
+                <RoundCard key={rn} round={parseInt(rn)} rows={rows} target={target} />
+              ))}
+            </>
           )}
-          {sortedRounds.map(([rn, rows]) => (
-            <RoundCard key={rn} round={parseInt(rn)} rows={rows} targetPilot={target} />
-          ))}
+
+          {tab === 'classement' && (
+            standings.length === 0
+              ? <div style={{ color:'#555', fontSize:12, textAlign:'center', padding:20 }}>
+                  {polling ? 'Chargement classement…' : 'Lance le polling pour charger le classement'}
+                </div>
+              : <StandingsCard standings={standings} target={target} />
+          )}
         </>
       )}
     </div>
