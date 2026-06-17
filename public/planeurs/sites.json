@@ -1,9 +1,9 @@
 {
-  "version": "6.0",
+  "version": "6.1",
   "ref": 230,
   "ref_note": "Saint Ferriol V5 median (CDF 2026 + CDM 2024)",
   "indice_875": 0.875,
-  "updated": "2026-06-16",
+  "updated": "2026-06-17",
   "sites": [
     {
       "name": "Neutre",
@@ -28,7 +28,8 @@
       "confidence": "HIGH",
       "manches": 263,
       "note": "Reference V4 — terrain pilote Jo",
-      "note_v4": "K=1.000 reference absolue"
+      "note_v4": "K=1.000 reference absolue",
+      "irp_formula": "T_P5/T_P25 x10"
     },
     {
       "name": "Rognac",
@@ -37,9 +38,11 @@
       "manches": 0,
       "note": "Estime",
       "irp_p25": 8.21,
-      "k_v4": 0.987,
+      "k_v4": 0.994,
       "n_rounds": 329,
-      "ref_v4": "Escueillens"
+      "ref_v4": "Escueillens",
+      "k": 0.994,
+      "irp_formula": "T_P5/T_P25 x10"
     },
     {
       "name": "Font d'Urles",
@@ -48,9 +51,11 @@
       "manches": 11,
       "note": "11 manches",
       "irp_p25": 8.727,
-      "k_v4": 1.05,
+      "k_v4": 1.022,
       "n_rounds": 71,
-      "ref_v4": "Escueillens"
+      "ref_v4": "Escueillens",
+      "k": 1.022,
+      "irp_formula": "T_P5/T_P25 x10"
     },
     {
       "name": "Hanstholm Danemark",
@@ -69,11 +74,12 @@
       "manches": 30,
       "note": "CDF+CDM mediane",
       "irp_p25": 7.588,
-      "k_v4": 0.998,
+      "k_v4": 0.988,
       "n_rounds": 128,
       "ref_v4": "Escueillens",
-      "k": 0.998,
-      "note_v4": "Ajuste terrain pilote Jo — moins irregulier que calcul F3XVault (0.913)"
+      "k": 0.988,
+      "note_v4": "Ajuste terrain pilote Jo — moins irregulier que calcul F3XVault (0.913)",
+      "irp_formula": "T_P5/T_P25 x10"
     },
     {
       "name": "Col du Glandon",
@@ -82,9 +88,11 @@
       "manches": 9,
       "note": "9 manches",
       "irp_p25": 8.289,
-      "k_v4": 0.997,
+      "k_v4": 1.011,
       "n_rounds": 70,
-      "ref_v4": "Escueillens"
+      "ref_v4": "Escueillens",
+      "k": 1.011,
+      "irp_formula": "T_P5/T_P25 x10"
     },
     {
       "name": "Col des Faisses",
@@ -93,9 +101,11 @@
       "manches": 9,
       "note": "9 manches",
       "irp_p25": 8.337,
-      "k_v4": 1.003,
+      "k_v4": 0.991,
       "n_rounds": 76,
-      "ref_v4": "Escueillens"
+      "ref_v4": "Escueillens",
+      "k": 0.991,
+      "irp_formula": "T_P5/T_P25 x10"
     },
     {
       "name": "Sceautres",
@@ -104,9 +114,11 @@
       "manches": 9,
       "note": "9 manches",
       "irp_p25": 7.977,
-      "k_v4": 0.959,
+      "k_v4": 0.999,
       "n_rounds": 117,
-      "ref_v4": "Escueillens"
+      "ref_v4": "Escueillens",
+      "k": 0.999,
+      "irp_formula": "T_P5/T_P25 x10"
     },
     {
       "name": "Route des Crêtes",
@@ -115,9 +127,11 @@
       "manches": 11,
       "note": "V=7m/s, 40 pilotes",
       "irp_p25": 7.413,
-      "k_v4": 0.892,
+      "k_v4": 0.95,
       "n_rounds": 223,
-      "ref_v4": "Escueillens"
+      "ref_v4": "Escueillens",
+      "k": 0.95,
+      "irp_formula": "T_P5/T_P25 x10"
     },
     {
       "name": "Séderon",
@@ -126,9 +140,11 @@
       "manches": 20,
       "note": "20 manches",
       "irp_p25": 9.102,
-      "k_v4": 1.095,
+      "k_v4": 1.034,
       "n_rounds": 57,
-      "ref_v4": "Escueillens"
+      "ref_v4": "Escueillens",
+      "k": 1.034,
+      "irp_formula": "T_P5/T_P25 x10"
     },
     {
       "name": "Serra de Busa",
@@ -137,12 +153,15 @@
       "manches": 16,
       "note": "16 manches",
       "irp_p25": 8.984,
-      "k_v4": 1.081,
+      "k_v4": 1.072,
       "n_rounds": 60,
-      "ref_v4": "Escueillens"
+      "ref_v4": "Escueillens",
+      "k": 1.072,
+      "irp_formula": "T_P5/T_P25 x10"
     }
   ],
   "ref_v4": "Escueillens",
   "irp_p25_ref": 8.314,
-  "ref_note_v4": "IRP_site V4 (P25) — T_best/T_P25 x10, ref=Escueillens 8.314"
+  "ref_note_v4": "IRP_site V4 (P25) — T_best/T_P25 x10, ref=Escueillens 8.314",
+  "irp_formula": "T_P5/T_P25 x10 (V6)"
 }
