@@ -14,6 +14,11 @@ db.version(3).stores({
     if (!run.session_id) run.session_id = run.t_start || 0;
   });
 });
+db.version(4).stores({
+  runs: '++id, pilote_id, manche, session_id, t_start',
+  sites_k: 'name',
+});
+export { db };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function formatDuree(ms) {

@@ -41,6 +41,7 @@ const FALLBACK_SITES = [
 const SITES_URL = import.meta.env.BASE_URL + 'planeurs/sites.json'
 
 import { useIrpStore } from '../../stores/irpStore'
+import { db } from '../Chrono/ChronoPage'
 import { useESPStore } from '../../stores/espStore'
 
 const V_RANGE = Array.from({ length: 226 }, (_, i) => 4.0 + i * 0.05)
@@ -98,6 +99,16 @@ export default function Poly4Page({ onNavigate } = {}) {
   const offsetTerrain = offsetStore / 1000
   const offsetKg    = offsetADN + offsetTerrain
 
+  // ── Charge ajustements K depuis Dexie ──────────────────────────────────────
+  useEffect(() => {
+    db.sites_k.toArray().then(rows => {
+      if (!rows.length) return
+      setSites(prev => prev.map(s => {
+        const row = rows.find(r => r.name === s.name)
+        return row ? { ...s, k: row.k_v4, k_v4: row.k_v4 } : s
+      }))
+    }).catch(() => {})
+  }, [])
   // ── Fetch sites.json on mount ──
   useEffect(() => {
     fetch(SITES_URL)
@@ -195,12 +206,6 @@ export default function Poly4Page({ onNavigate } = {}) {
       setParam('vent', Math.round(next * 10) / 10)
     } else if (mode === 'offset') {
       const next42 = offsetStore + dir * 42; const nextOff = (offsetStore !== 0 && Math.sign(next42) !== Math.sign(offsetStore)) ? 0 : Math.max(-500, Math.min(500, next42)); setOffset(nextOff)
-    } else if (mode === 'kpente') {
-      const cur = currentSite?.k_v4 ?? currentSite?.k ?? 1.0
-      const next = Math.round(Math.max(0.7, Math.min(1.3, cur + dir * 0.005)) * 1000) / 1000
-      setSites(prev => prev.map(s => s.name === currentSite?.name ? { ...s, k: next, k_v4: next } : s))
-      setActiveSite({ ...currentSite, k: next, k_v4: next })
-      setApplied(false)
     } else {
       const nextIdx = (siteIdx + dir + allSites.length) % allSites.length
       setSiteIdx(nextIdx)
@@ -209,6 +214,15 @@ export default function Poly4Page({ onNavigate } = {}) {
     }
   }, [mode, vent, sites, allSites, siteIdx, setParam, offsetStore, setOffset, setActiveSite, setSiteRef, currentSite, setSites])
 
+  const adjustK = (dir) => {
+    const cur = currentSite?.k_v4 ?? currentSite?.k ?? 1.0
+    const next = Math.round(Math.max(0.7, Math.min(1.3, cur + dir * 0.005)) * 1000) / 1000
+    const updated = sites.map(s => s.name === currentSite?.name ? { ...s, k: next, k_v4: next } : s)
+    setSites(updated)
+    localStorage.setItem('mbi_sites_v5', JSON.stringify(updated))
+    db.sites_k.put({ name: currentSite.name, k_v4: next, updated: Date.now() }).catch(() => {})
+    setActiveSite({ ...currentSite, k: next, k_v4: next })
+  }
   const startPress = (dir) => {
     handleChange(dir)
     pressTimer.current = setInterval(() => handleChange(dir), 120)
@@ -306,8 +320,7 @@ padding: '10px', overflowY: 'auto', boxSizing: 'border-box',
           {/* Onglets mode */}
           <div style={{ display: 'flex', gap: 6 }}>
             {[
-              { id: 'vent',   label: 'Vent',    val: `${vent.toFixed(1)} m/s` },
-              { id: 'kpente', label: 'K Pente', val: kPente.toFixed(3) },
+              { id: 'vent',   label: 'Vent',   val: `${vent.toFixed(1)} m/s` },
               { id: 'offset', label: 'Offset', val: (offsetStore >= 0 ? '+' : '') + offsetStore + 'g' },
             ].map(tab => (
               <div key={tab.id} onClick={() => setMode(tab.id)} style={{
@@ -325,6 +338,32 @@ padding: '10px', overflowY: 'auto', boxSizing: 'border-box',
                 </div>
               </div>
             ))}
+            {/* Tuile K PENTE avec boutons - + */}
+            <div onClick={() => setMode('site')} style={{
+              flex: 1, borderRadius: 10, padding: '8px 10px', cursor: 'pointer',
+              background: mode === 'site' ? '#1c2128' : '#161b22',
+              border: `1px solid ${mode === 'site' ? '#58a6ff' : '#21262d'}`,
+            }}>
+              <div style={{ fontSize: '0.62rem', color: '#8b949e', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 3 }}>
+                K Pente
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <button onPointerDown={() => adjustK(-1)} style={{
+                  background: '#21262d', border: 'none', color: '#c9d1d9', borderRadius: 4,
+                  width: 22, height: 22, fontSize: 14, cursor: 'pointer', lineHeight: 1,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                }}>−</button>
+                <div style={{ fontSize: '1.1rem', fontWeight: 'bold', fontFamily: 'monospace',
+                  color: '#58a6ff', flex: 1, textAlign: 'center' }}>
+                  {kPente.toFixed(3)}
+                </div>
+                <button onPointerDown={() => adjustK(1)} style={{
+                  background: '#21262d', border: 'none', color: '#c9d1d9', borderRadius: 4,
+                  width: 22, height: 22, fontSize: 14, cursor: 'pointer', lineHeight: 1,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                }}>+</button>
+              </div>
+            </div>
           </div>
 
           {/* Formulaire + bouton */}
