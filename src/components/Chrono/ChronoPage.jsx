@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import Dexie from 'dexie';
 import LiveView from './LiveView';
 
@@ -123,7 +123,7 @@ function JournalView({ onBack }) {
       });
       const txt = `F3F PIT Journal\n${lines.join('\n')}`;
       if (navigator.share) navigator.share({ text: txt });
-      else navigator.clipboard-.writeText(txt);
+      else navigator.clipboard?.writeText(txt);
     }).catch(() => {});
   }
 
@@ -161,7 +161,7 @@ function JournalView({ onBack }) {
               <div onClick={() => toggleSession(s.session_id)} style={{
                 display:'flex', alignItems:'center', gap:8,
                 background:'#0f0f0f', border:'0.5px solid #1a1a1a',
-                borderRadius: isExpanded - '8px 8px 0 0' : 8,
+                borderRadius: isExpanded ? '8px 8px 0 0' : 8,
                 padding:'10px 12px', cursor:'pointer',
                 touchAction:'manipulation', WebkitTapHighlightColor:'transparent',
               }}>
@@ -171,27 +171,27 @@ function JournalView({ onBack }) {
                     <span style={{ fontSize:10, color:'#555', marginLeft:8 }}>{fmtTime(s.t_start)}</span>
                   </div>
                   <div style={{ fontSize:10, color:'#555', marginTop:2 }}>
-                    {s.count} run{s.count > 1 - 's' : ''}
-                    {s.best - ` - best ${formatDuree(s.best)}s` : ''}
+                    {s.count} run{s.count > 1 ? 's' : ''}
+                    {s.best ? ` · best ${formatDuree(s.best)}s` : ''}
                   </div>
                 </div>
                 <button onClick={e => { e.stopPropagation(); if (runs.length) exportSession(s.session_id); else toggleSession(s.session_id); }}
                   style={{ background:'#141414', border:'0.5px solid #1a3a5a', borderRadius:6,
                     color:'#60a5fa', fontSize:10, padding:'0 8px', height:24, cursor:'pointer' }}>
-                  - JSON
+                  ↓ JSON
                 </button>
                 <span style={{ color:'#444', fontSize:14,
-                  transform: isExpanded - 'rotate(90deg)' : 'none', transition:'transform 0.15s' }}>-</span>
+                  transform: isExpanded ? 'rotate(90deg)' : 'none', transition:'transform 0.15s' }}>›</span>
               </div>
               {isExpanded && (
                 <div style={{ background:'#080808', border:'0.5px solid #1a1a1a',
                   borderTop:'none', borderRadius:'0 0 8px 8px', padding:'6px 8px' }}>
                   {runs.length === 0
-                    - <div style={{ color:'#333', fontSize:11, textAlign:'center', padding:8 }}>Chargement-</div>
+                    ? <div style={{ color:'#333', fontSize:11, textAlign:'center', padding:8 }}>Chargement…</div>
                     : runs.sort((a,b) => a.t_start - b.t_start).map((r, i) => {
-                        const col = COULEURS[r.pilote_id] -- '#888';
+                        const col = COULEURS[r.pilote_id] ?? '#888';
                         return (
-                          <div key={r.id -- i} style={{ display:'flex', alignItems:'center',
+                          <div key={r.id ?? i} style={{ display:'flex', alignItems:'center',
                             gap:6, padding:'4px 6px', borderBottom:'0.5px solid #111' }}>
                             <span style={{ fontSize:9, color:'#444', minWidth:22 }}>M{r.manche}</span>
                             <span style={{ width:5, height:5, borderRadius:'50%', background:col, flexShrink:0 }} />
@@ -224,10 +224,10 @@ function JournalView({ onBack }) {
         <div style={{ display:'flex', gap:6, padding:'8px 12px 16px',
           flexShrink:0, borderTop:'0.5px solid #1a1a1a' }}>
           <button onClick={shareText} style={{...btnFooter, color:'#3fb950', borderColor:'#1a3a2a'}}>
-            - Partager
+            🏔 Partager
           </button>
           <button onClick={exportAll} style={{...btnFooter, color:'#60a5fa', borderColor:'#1a3a5a'}}>
-            - JSON tout
+            ↓ JSON tout
           </button>
         </div>
       )}
