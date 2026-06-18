@@ -258,7 +258,7 @@ function StandingsCard({ standings, target }) {
 }
 
 // ── Composant principal ───────────────────────────────────────────────────────
-export default function LiveView({ onBack }) {
+export default function LiveView({ onBack } = {}) {
   const [login, setLogin]       = useState('');
   const [password, setPassword] = useState('');
   const [search, setSearch]     = useState('');
@@ -330,7 +330,7 @@ export default function LiveView({ onBack }) {
 
       {/* Header */}
       <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-        <button onClick={onBack} style={{ background:'#1a1a2e', border:'0.5px solid #1a3a5a',
+        <button onClick={onBack || (() => {})} style={{ display: onBack ? 'flex' : 'none' }} style={{ background:'#1a1a2e', border:'0.5px solid #1a3a5a',
           color:'#4a9eff', fontSize:13, cursor:'pointer', padding:'6px 12px',
           borderRadius:8, fontWeight:700, touchAction:'manipulation',
           WebkitTapHighlightColor:'transparent' }}>← Retour</button>
