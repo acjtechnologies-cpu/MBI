@@ -60,6 +60,7 @@ async function getRound(login, password, event_id, round_number) {
     pilot: `${r.First_Name ?? ''} ${r.Last_Name ?? ''}`.trim(),
     seconds: parseFloat(r.seconds || '0'),
     wind: parseFloat(r.wind_speed_avg || '0'),
+    windDir: parseFloat(r.wind_dir_avg || '0'),
   })).filter(r => r.seconds > 0).sort((a, b) => a.seconds - b.seconds);
 }
 
@@ -90,6 +91,7 @@ function RoundCard({ round, rows, target }) {
   const t_p5   = rows[Math.max(0, Math.floor(0.05 * n))]?.seconds ?? t_best;
   const irp    = ((t_p5 / t_p25) * 10 / REF_IRP).toFixed(3);
   const wind   = rows[0].wind;
+  const windDir = rows[0].windDir ?? 0;
   const joIdx  = rows.findIndex(r => r.pilot.toLowerCase().includes(target.toLowerCase()));
 
   return (
@@ -100,7 +102,7 @@ function RoundCard({ round, rows, target }) {
           ROUND {round}
         </span>
         <span style={{ fontSize:11, color:'#4a9eff' }}>
-          {wind > 0 ? `${wind.toFixed(1)} m/s` : '—'} · K {irp}
+          {wind > 0 ? `${wind.toFixed(1)} m/s` : '—'}{windDir ? ` ${windDir.toFixed(0)}°` : ''} · K {irp}
         </span>
       </div>
       {rows.slice(0, 5).map((r, i) => {
@@ -135,9 +137,12 @@ function RoundCard({ round, rows, target }) {
 }
 
 function StandingsCard({ standings, target }) {
+  const [rival, setRival] = useState(() => localStorage.getItem('f3xv_rival') || '');
   if (!standings.length) return null;
   const joIdx = standings.findIndex(r => r.pilot.toLowerCase().includes(target.toLowerCase()));
   const jo    = standings[joIdx];
+  const rivalIdx = rival ? standings.findIndex(r => r.pilot.toLowerCase().includes(rival.toLowerCase())) : -1;
+  const rivalData = rivalIdx >= 0 ? standings[rivalIdx] : null;
 
   // Concurrent direct au-dessus et en-dessous
   const above = joIdx > 0 ? standings[joIdx - 1] : null;
@@ -193,44 +198,79 @@ function StandingsCard({ standings, target }) {
         </div>
       )}
 
-      {/* Top 5 complet */}
+      {/* Rival manuel */}
+      <div style={{ borderTop:'0.5px solid #1a1a1a', paddingTop:6, marginBottom:6 }}>
+        <div style={{ fontSize:9, color:'#444', marginBottom:4, letterSpacing:1 }}>CONCURRENT CIBLÉ</div>
+        <input
+          placeholder="Nom du concurrent..." value={rival}
+          onChange={e => { setRival(e.target.value); localStorage.setItem('f3xv_rival', e.target.value); }}
+          style={{ background:'#131720', border:'0.5px solid #30363d', color:'#e8eaf0',
+            borderRadius:6, padding:'5px 10px', fontSize:12, width:'100%', boxSizing:'border-box',
+            fontFamily:'inherit', outline:'none', marginBottom:4 }}
+        />
+        {rivalData && jo && (
+          <div style={{ display:'flex', gap:8, padding:'5px 8px', borderRadius:6,
+            background: rivalData.rank < jo.rank ? '#1a0d0d' : '#0d1a0d',
+            border: rivalData.rank < jo.rank ? '0.5px solid #E24B4A44' : '0.5px solid #1D9E7544' }}>
+            <span style={{ fontSize:10, color:'#666', minWidth:22, textAlign:'right' }}>{rivalData.rank}.</span>
+            <span style={{ fontSize:12, color:'#ccc', flex:1 }}>{rivalData.pilot}</span>
+            <span style={{ fontSize:12, fontVariantNumeric:'tabular-nums', color:'#ccc' }}>{rivalData.total.toFixed(0)}</span>
+            <span style={{ fontSize:11, fontWeight:700, minWidth:60, textAlign:'right',
+              color: rivalData.rank < jo.rank ? '#E24B4A' : '#1D9E75' }}>
+              {rivalData.rank < jo.rank
+                ? '+' + (rivalData.total - jo.total).toFixed(0) + ' pts'
+                : '-' + (jo.total - rivalData.total).toFixed(0) + ' pts'}
+            </span>
+          </div>
+        )}
+        {rival && !rivalData && <div style={{ fontSize:10, color:'#555' }}>Pilote non trouvé</div>}
+      </div>
+
+      {/* Classement complet scrollable */}
       <div style={{ borderTop:'0.5px solid #1a1a1a', paddingTop:6 }}>
-        <div style={{ fontSize:9, color:'#444', marginBottom:4, letterSpacing:1 }}>TOP 5</div>
-        {standings.slice(0, 5).map((r, i) => {
+        <div style={{ fontSize:9, color:'#444', marginBottom:4, letterSpacing:1 }}>CLASSEMENT COMPLET</div>
+        <div style={{ maxHeight:320, overflowY:'auto' }}>
+        {standings.map((r, i) => {
           const isJo = joIdx === i;
+          const isRival = rivalIdx === i;
           return (
-            <div key={i} style={{ display:'flex', gap:8, padding:'3px 6px', borderRadius:5,
-              background: isJo ? '#0d1f2d' : 'transparent' }}>
-              <span style={{ fontSize:10, color: isJo ? '#ffd700' : '#444', minWidth:22, textAlign:'right' }}>
-                {r.rank}.
-              </span>
-              <span style={{ fontSize:11, color: isJo ? '#ffd700' : '#888', flex:1 }}>{r.pilot}</span>
-              <span style={{ fontSize:11, color: isJo ? '#ffd700' : '#666',
-                fontVariantNumeric:'tabular-nums' }}>{r.total.toFixed(0)}</span>
-              {i > 0 && (
-                <span style={{ fontSize:10, color:'#E24B4A', minWidth:50, textAlign:'right' }}>
-                  {standings[i].diff.toFixed(0)}
+            <div key={i} style={{ display:'flex', gap:8, padding:'4px 6px', borderRadius:5,
+              marginBottom:1,
+              background: isJo ? '#0d1f2d' : isRival ? (r.rank < jo?.rank ? '#1a0d0d' : '#0d1a0d') : 'transparent',
+              border: isJo ? '0.5px solid #ffd70044' : isRival ? '0.5px solid #88888844' : 'none' }}>
+              <span style={{ fontSize:10, minWidth:22, textAlign:'right',
+                color: isJo ? '#ffd700' : isRival ? '#aaa' : '#444' }}>{r.rank}.</span>
+              <span style={{ fontSize:11, flex:1,
+                color: isJo ? '#ffd700' : isRival ? '#ccc' : '#888',
+                fontWeight: isJo || isRival ? 600 : 400 }}>{r.pilot}</span>
+              <span style={{ fontSize:11, fontVariantNumeric:'tabular-nums',
+                color: isJo ? '#ffd700' : isRival ? '#ccc' : '#666' }}>{r.total.toFixed(0)}</span>
+              {jo && !isJo && (
+                <span style={{ fontSize:9, minWidth:50, textAlign:'right',
+                  color: r.total > jo.total ? '#E24B4A' : '#1D9E75' }}>
+                  {r.total > jo.total ? '+' : '-'}{Math.abs(r.total - jo.total).toFixed(0)}
                 </span>
               )}
             </div>
           );
         })}
+        </div>
       </div>
     </div>
   );
 }
 
 // ── Composant principal ───────────────────────────────────────────────────────
-export default function LiveView({ onBack }) {
-  const [login, setLogin]       = useState('');
-  const [password, setPassword] = useState('');
+export default function LiveView({ onBack } = {}) {
+  const [login, setLogin]       = useState(() => localStorage.getItem('f3xv_login') || '');
+  const [password, setPassword] = useState(() => localStorage.getItem('f3xv_pwd') || '');
   const [search, setSearch]     = useState('');
   const [events, setEvents]     = useState([]);
-  const [eventId, setEventId]   = useState(null);
-  const [eventName, setEventName] = useState('');
-  const [target, setTarget]     = useState('Carrion');
-  const [rounds, setRounds]     = useState({});
-  const [standings, setStandings] = useState([]);
+  const [eventId, setEventId]   = useState(() => { const v = localStorage.getItem('f3xv_event_id'); return v ? parseInt(v) : null; });
+  const [eventName, setEventName] = useState(() => localStorage.getItem('f3xv_event_name') || '');
+  const [target, setTarget]     = useState(() => localStorage.getItem('f3xv_target') || 'Carrion');
+  const [rounds, setRounds]     = useState(() => { try { return JSON.parse(localStorage.getItem('f3xv_rounds') || '{}'); } catch { return {}; } });
+  const [standings, setStandings] = useState(() => { try { return JSON.parse(localStorage.getItem('f3xv_standings') || '[]'); } catch { return []; } });
   const [lastRound, setLastRound] = useState(0);
   const [polling, setPolling]   = useState(false);
   const [lastUpdate, setLastUpdate] = useState(null);
@@ -250,7 +290,7 @@ export default function LiveView({ onBack }) {
   const loadRound = useCallback(async (rn) => {
     const rows = await getRound(login, password, eventId, rn);
     if (rows.length > 0) {
-      setRounds(prev => ({ ...prev, [rn]: rows }));
+      setRounds(prev => { const next = { ...prev, [rn]: rows }; localStorage.setItem('f3xv_rounds', JSON.stringify(next)); return next; });
       setLastRound(rn);
       return true;
     }
@@ -267,7 +307,7 @@ export default function LiveView({ onBack }) {
     }
     // Classement général
     const st = await getStandings(login, password, eventId);
-    if (st.length) setStandings(st);
+    if (st.length) { setStandings(st); localStorage.setItem('f3xv_standings', JSON.stringify(st)); }
     setLastUpdate(new Date().toLocaleTimeString('fr-FR'));
   }, [eventId, lastRound, loadRound, login, password]);
 
@@ -293,10 +333,12 @@ export default function LiveView({ onBack }) {
 
       {/* Header */}
       <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-        <button onClick={onBack} style={{ background:'#1a1a2e', border:'0.5px solid #1a3a5a',
-          color:'#4a9eff', fontSize:13, cursor:'pointer', padding:'6px 12px',
-          borderRadius:8, fontWeight:700, touchAction:'manipulation',
-          WebkitTapHighlightColor:'transparent' }}>← Retour</button>
+        {onBack && (
+          <button onClick={onBack} style={{ background:'#1a1a2e', border:'0.5px solid #1a3a5a',
+            color:'#4a9eff', fontSize:13, cursor:'pointer', padding:'6px 12px',
+            borderRadius:8, fontWeight:700, touchAction:'manipulation',
+            WebkitTapHighlightColor:'transparent' }}>← Retour</button>
+        )}
         <div style={{ flex:1 }}>
           <div style={{ fontSize:10, color:'#8b949e', textTransform:'uppercase', letterSpacing:1 }}>
             Live F3XVault
@@ -315,9 +357,9 @@ export default function LiveView({ onBack }) {
       {!eventId && (
         <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
           <input style={inputStyle} placeholder="Login F3XVault"
-            value={login} onChange={e => setLogin(e.target.value)} />
+            value={login} onChange={e => { setLogin(e.target.value); localStorage.setItem('f3xv_login', e.target.value); }} />
           <input style={inputStyle} type="password" placeholder="Mot de passe"
-            value={password} onChange={e => setPassword(e.target.value)} />
+            value={password} onChange={e => { setPassword(e.target.value); localStorage.setItem('f3xv_pwd', e.target.value); }} />
           <div style={{ display:'flex', gap:6 }}>
             <input style={{...inputStyle, flex:1}} placeholder="Nom du concours"
               value={search} onChange={e => setSearch(e.target.value)}
@@ -327,7 +369,7 @@ export default function LiveView({ onBack }) {
           </div>
           {error && <div style={{ fontSize:11, color:'#f85149' }}>{error}</div>}
           {events.map((ev, i) => (
-            <div key={i} onClick={() => { setEventId(ev.event_id); setEventName(ev.name); }}
+            <div key={i} onClick={() => { setEventId(ev.event_id); setEventName(ev.name); localStorage.setItem('f3xv_event_id', ev.event_id); localStorage.setItem('f3xv_event_name', ev.name); }}
               style={{ background:'#161b22', border:'0.5px solid #21262d',
                 borderRadius:8, padding:'8px 12px', cursor:'pointer' }}>
               <div style={{ fontSize:12, fontWeight:500 }}>{ev.name}</div>
@@ -342,7 +384,7 @@ export default function LiveView({ onBack }) {
         <>
           <div style={{ display:'flex', gap:6 }}>
             <input style={{...inputStyle, flex:1}} placeholder="Pilote à suivre"
-              value={target} onChange={e => setTarget(e.target.value)} />
+              value={target} onChange={e => { setTarget(e.target.value); localStorage.setItem('f3xv_target', e.target.value); }} />
             <button onClick={() => setPolling(p => !p)} style={{
               background: polling ? '#2ea043' : '#1f6feb', border:'none', color:'#fff',
               borderRadius:8, padding:'0 14px', cursor:'pointer', fontWeight:600 }}>
