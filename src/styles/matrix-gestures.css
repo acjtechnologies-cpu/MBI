@@ -1,0 +1,40 @@
+/* --- Animation de soute pleine (feedback erreur) --- */
+@keyframes mbShakeAnim {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-4px); }
+  40%, 80% { transform: translateX(4px); }
+}
+
+.mb-m-side.shake {
+  animation: mbShakeAnim 0.3s ease-in-out;
+  border-color: #f85149 !important; /* Flash rouge */
+  background: rgba(248, 81, 73, 0.15) !important;
+}
+
+/* --- Dock de lests --- */
+.mb-m-dock {
+  display: flex;
+  justify-content: center;
+  margin-top: 6px;
+}
+
+.mb-dock-chip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 7px;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: grab;
+  touch-action: none;
+  background: #161b22;
+  transition: transform 0.1s ease, background 0.1s ease;
+  user-select: none;
+}
+
+.mb-dock-chip:active {
+  cursor: grabbing;
+  transform: scale(0.95);
+  background: #21262d;
+}

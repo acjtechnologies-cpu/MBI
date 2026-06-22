@@ -5,6 +5,8 @@ import { useShallow } from 'zustand/react/shallow'
 import { useModelStore } from '../../stores/modelStore'
 import GliderBrowser from '../GliderBrowser'
 import MatriceInteractive from './MatriceInteractive'
+import { useMatrixStore } from './matrixStore'
+import '../../styles/matrix-gestures.css'
 import NezCGLine from './NezCGLine'
 
 // -”€ Poly4 fallback (Mamba - pas de model.poly4) -”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-
@@ -184,6 +186,7 @@ export default function DashboardPilote() {
   const [showBrowser,  setShowBrowser]   = useState(false)
   const importModel    = useModelStore(s => s.importModel)
   const setActiveModel = useModelStore(s => s.setActiveModel)
+  const updateMatrix  = useModelStore(s => s.updateMatrix)
   const [matrixIdx,     setMatrixIdx]     = useState(null)
   const [cfgAppliquee,  setCfgAppliquee]  = useState(null)
   const [gpsStatus,     setGpsStatus]     = useState('')
@@ -225,7 +228,8 @@ export default function DashboardPilote() {
   const faiMax         = Math.round((model.surface || 57) * 75)
   const isFaiOver      = targetG > faiMax
   const ci            = matrix.length > 0 && targetG > model.masseVide ? findNearest(matrix, targetG) : -1
-  const cfg           = ci >= 0 ? matrix[ci] : null
+ 
+ const cfg           = ci >= 0 ? matrix[ci] : null
   const dm            = cfg ? cfg.m - targetG : 0
   const cgD           = cfg ? cfg.cg - model.cgVide : 0
   const cgClass       = Math.abs(cgD) < 0.5 ? 'neutre' : cgD < 0 ? 'avant' : 'arriere'
@@ -262,7 +266,12 @@ export default function DashboardPilote() {
       })
     }
   }, [kgVal, cfg, model, modelOffset])
-
+useEffect(() => {
+    if (!model || !soutes || !matrix?.length) return
+    const already = useMatrixStore.getState().model
+    if (already?.nom === model.nom) return
+    useMatrixStore.getState().init(model, soutes, MAT_KEYS, matrix)
+  }, [model])
   // -”€ Helpers rendu slots - supporte les 2 formats -”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-
   function renderBaroSide(sideKey, souteIdx, cap) {
     const matKey = MAT_KEYS[souteIdx] || 'av'
@@ -581,13 +590,9 @@ export default function DashboardPilote() {
         {/* TAB MATRICE */}
         {tab === 'matrix' && matrix.length > 0 && (
           <MatriceInteractive
-            model={model}
-            soutes={soutes}
-            matrix={matrix}
-            MAT_KEYS={MAT_KEYS}
-            ci={ci}
             targetGAuto={targetGAuto}
-            onAppliquer={(masse) => { setCfgAppliquee(masse); setSelectedParam('vent'); setTab('calc') }}
+            onBack={() => setTab('calc')}
+            onAppliquer={(masse) => { updateMatrix(useMatrixStore.getState().matrix); setCfgAppliquee(masse); setSelectedParam('vent'); setTab('calc') }}
           />
         )}
         {/* -”€ GPS OVERLAY -”€ */}

@@ -101,6 +101,13 @@ const useModelStore = create(
         return state.models[state.activeModelId] || null
       },
 
+      updateMatrix: (matrix) => {
+        set((state) => {
+          const id = state.activeModelId
+          if (!id || !state.models[id]) return state
+          return { models: { ...state.models, [id]: { ...state.models[id], matrix } } }
+        })
+      },
       setActiveModel: (modelId) => {
         const state = get()
         if (state.models && state.models[modelId]) {
