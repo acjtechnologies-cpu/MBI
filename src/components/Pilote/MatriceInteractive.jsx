@@ -65,7 +65,7 @@ function dmToVisualPercent(dm) {
   return 50 + sign * 20 + sign * (excess / (DM_VISUAL_MAX - DM_OPTIMAL_MARGIN)) * 30
 }
 
-export default function MatriceInteractive({ targetGAuto, onAppliquer, onBack }) {
+export default function MatriceInteractive({ targetGAuto, onAppliquer }) {
   const model = useMatrixStore(s => s.model)
   const soutes = useMatrixStore(s => s.soutes)
   const MAT_KEYS = useMatrixStore(s => s.MAT_KEYS)
@@ -76,8 +76,7 @@ export default function MatriceInteractive({ targetGAuto, onAppliquer, onBack })
   const [drag, setDrag] = useState(null)
   const [shakeKey, setShakeKey] = useState(null)
   const zonesRef = useRef({})
-  const dragActiveRef = useRef(false)
-  const lastGestureRef = useRef(0)
+  const dragActiveRef = useRef(false) // verrou anti-doublon mobile
 
   const setZoneRef = (souteId, side) => (node) => {
     if (node) zonesRef.current[`${souteId}-${side}`] = node
@@ -92,8 +91,7 @@ export default function MatriceInteractive({ targetGAuto, onAppliquer, onBack })
         const x = e.clientX, y = e.clientY
         if (d.type === 'add') {
           let targetSide = null
-          const draggedUp = (d.startY || d.y) - y
-          if (draggedUp > 20) for (const side of ['G', 'D']) {
+          for (const side of ['G', 'D']) {
             const zone = zonesRef.current[`${d.souteId}-${side}`]
             if (zone && pointInRect(x, y, zone.getBoundingClientRect())) { targetSide = side; break }
           }
@@ -104,43 +102,41 @@ export default function MatriceInteractive({ targetGAuto, onAppliquer, onBack })
       })
     }
     handlers.up = (e) => {
+      const d = dragStateRef.current
+      dragStateRef.current = null
       lastGestureRef.current = Date.now()
       dragActiveRef.current = false
       window.removeEventListener('pointermove', handlers.move)
       window.removeEventListener('pointerup', handlers.up)
-      let committed = false
-      setDrag((d) => {
-        if (!d || committed) return null
-        committed = true
-        const st = useMatrixStore.getState()
+      setDrag(null)
 
-        if (d.type === 'add' && d.targetSide) {
-          const before = countAt(st.matrix, st.soutes, st.MAT_KEYS, st.ci, d.souteId, d.targetSide)
-          st.addBloc(st.ci, d.souteId, d.targetSide)
-          const after = countAt(useMatrixStore.getState().matrix, st.soutes, st.MAT_KEYS, st.ci, d.souteId, d.targetSide)
-          if (after === before) {
-            const key = `${d.souteId}-${d.targetSide}`
-            setShakeKey(key)
-            window.setTimeout(() => setShakeKey(k => (k === key ? null : k)), 300)
-          }
-        } else if (d.type === 'remove' && d.moved) {
-          const zone = zonesRef.current[`${d.souteId}-${d.side}`]
-          const rect = zone?.getBoundingClientRect()
-          const stillInside = rect && pointInRect(e.clientX, e.clientY, rect)
-          if (!stillInside) st.removeBloc(st.ci, d.souteId, d.side)
+      if (!d) return
+      const st = useMatrixStore.getState()
+
+      if (d.type === 'add' && d.targetSide) {
+        const before = countAt(st.matrix, st.soutes, st.MAT_KEYS, st.ci, d.souteId, d.targetSide)
+        st.addBloc(st.ci, d.souteId, d.targetSide)
+        const after = countAt(useMatrixStore.getState().matrix, st.soutes, st.MAT_KEYS, st.ci, d.souteId, d.targetSide)
+        if (after === before) {
+          const key = `${d.souteId}-${d.targetSide}`
+          setShakeKey(key)
+          window.setTimeout(() => setShakeKey(k => (k === key ? null : k)), 300)
         }
-        return null
-      })
+      } else if (d.type === 'remove' && d.moved) {
+        const zone = zonesRef.current[`${d.souteId}-${d.side}`]
+        const rect = zone?.getBoundingClientRect()
+        const stillInside = rect && pointInRect(e.clientX, e.clientY, rect)
+        if (!stillInside) st.removeBloc(st.ci, d.souteId, d.side)
+      }
     }
   }
 
   function startGesture(initial) {
-    if (dragActiveRef.current) return
-    if (Date.now() - lastGestureRef.current < 200) return
+    if (dragActiveRef.current) return // geste déjà en cours
     dragActiveRef.current = true
     setDrag(initial)
     window.addEventListener('pointermove', handlers.move)
-    window.addEventListener('pointerup', handlers.up)
+    window.addEventListener('pointerup', handlers.up, { once: true })
   }
 
   if (!model || !matrix[ci]) return null
@@ -183,7 +179,7 @@ export default function MatriceInteractive({ targetGAuto, onAppliquer, onBack })
 
   return (
     <div className="mb-matrix" style={{ position: 'relative' }}>
-<div className="mb-m-hdr">
+      <div className="mb-m-hdr">
         <div>
           <div style={{ fontSize: 13, fontWeight: 800 }}>🎯 {model.nom} — Matrice Prédicteur</div>
           <div style={{ fontSize: 9, color: '#8b949e', marginTop: 1 }}>
@@ -252,7 +248,6 @@ export default function MatriceInteractive({ targetGAuto, onAppliquer, onBack })
                   }}
                   onPointerDown={(e) => {
                     if (!bG.length) return
-                    e.currentTarget.setPointerCapture(e.pointerId)
                     startGesture({ type: 'remove', souteId: soute.id, side: 'G', x: e.clientX, y: e.clientY, startX: e.clientX, startY: e.clientY, moved: false })
                   }}
                 >
@@ -268,7 +263,6 @@ export default function MatriceInteractive({ targetGAuto, onAppliquer, onBack })
                   }}
                   onPointerDown={(e) => {
                     if (!bD.length) return
-                    e.currentTarget.setPointerCapture(e.pointerId)
                     startGesture({ type: 'remove', souteId: soute.id, side: 'D', x: e.clientX, y: e.clientY, startX: e.clientX, startY: e.clientY, moved: false })
                   }}
                 >
@@ -282,8 +276,7 @@ export default function MatriceInteractive({ targetGAuto, onAppliquer, onBack })
                   style={{ border: `1px solid ${col.border}`, color: col.label }}
                   onPointerDown={(e) => {
                     e.stopPropagation()
-                    e.currentTarget.setPointerCapture(e.pointerId)
-                    startGesture({ type: 'add', souteId: soute.id, material: mat, x: e.clientX, y: e.clientY, startY: e.clientY, targetSide: null })
+                    startGesture({ type: 'add', souteId: soute.id, material: mat, x: e.clientX, y: e.clientY, targetSide: null })
                   }}
                 >
                   {mat.nom} {mat.masse}g
@@ -355,13 +348,8 @@ export default function MatriceInteractive({ targetGAuto, onAppliquer, onBack })
               <div style={{ fontSize: 9, color: '#8b949e' }}>CG</div>
             </div>
           </div>
-          <div style={{ display:'flex', gap:6, width:'100%' }}>
-          {onBack && (
-            <button onClick={onBack} style={{ width:44, height:36, background:'#161b22', border:'1px solid #30363d', borderRadius:8, color:'#58a6ff', fontSize:20, cursor:'pointer', touchAction:'manipulation', flexShrink:0 }}>&#8592;</button>
-          )}
           <button
             onClick={() => onAppliquer(masseAff)}
-            onPointerDown={(e) => e.stopPropagation()}
             style={{
               flex: 1, height: 36,
               background: isOptimalConfig ? '#0d4a36' : '#21262d',
@@ -373,7 +361,6 @@ export default function MatriceInteractive({ targetGAuto, onAppliquer, onBack })
           >
             ✓ APPLIQUER LA CONFIGURATION {isOptimalConfig ? 'IDÉALE' : ''}
           </button>
-          </div>
         </div>
       </div>
 
