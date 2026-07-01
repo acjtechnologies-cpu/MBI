@@ -158,6 +158,20 @@ const useModelStore = create(
         }))
       },
 
+      duplicateModel: (sourceId) => {
+        const state = get()
+        const source = state.models?.[sourceId]
+        if (!source) return null
+        const newId  = sourceId + '-' + Date.now().toString(36)
+        const newModel = JSON.parse(JSON.stringify(source))
+        newModel.id  = newId
+        newModel.nom = source.nom + ' (copie)'
+        set((state) => ({
+          models: { ...state.models, [newId]: newModel },
+          activeModelId: newId,
+        }))
+        return newId
+      },
       createModel: (model) => {
         set((state) => ({
           models: { ...state.models, [model.id]: model }

@@ -1,22 +1,38 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useModelStore } from '../../stores/modelStore'
 import { Edit3, Trash2, Copy, Download, Settings, Save, X, Plus } from 'lucide-react'
 import SouteEditor from './SouteEditor'
 import NezConfig from '../Pilote/NezConfig'
 import GliderBrowser from '../GliderBrowser'
+import MatriceInteractive from '../Pilote/MatriceInteractive'
+import { useMatrixStore } from '../Pilote/matrixStore'
 
 export default function ModelManager() {
   const {
     models, activeModelId, getActiveModel, setActiveModel,
-    updateModel, deleteModel, duplicateModel,
+    updateModel, deleteModel, duplicateModel, updateMatrix,
     addSoute, updateSoute, deleteSoute, exportModel, importModel
   } = useModelStore()
 
   const [editingModel, setEditingModel] = useState(null)
   const [editingSoute, setEditingSoute] = useState(null)
   const [showBrowser, setShowBrowser] = useState(false)
+  const [showMatrice, setShowMatrice] = useState(false)
 
   const activeModel = getActiveModel()
+
+
+  // Init matrixStore quand on ouvre l onglet matrice
+  useEffect(() => {
+    if (!showMatrice || !activeModel) return
+    const soutes = activeModel.soutes ? Object.values(activeModel.soutes) : []
+    const MAT_KEYS = soutes.map((_, i) => ['av', 'c', 'ar'][i] || 's' + i)
+    const already = useMatrixStore.getState().model
+    if (already?.nom !== activeModel.nom) {
+      useMatrixStore.getState().init(activeModel, soutes, MAT_KEYS, activeModel.matrix || [])
+    }
+    useMatrixStore.getState().setCi(0)
+  }, [showMatrice, activeModel?.id])
 
   const handleBrowserImport = (modelData) => {
     importModel(modelData)
@@ -152,6 +168,37 @@ export default function ModelManager() {
           </div>
 
           <NezConfig />
+
+          {/* Onglet Matrice */}
+          <div style={{ marginTop: 8 }}>
+            <button
+              onClick={() => setShowMatrice(v => !v)}
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-left font-semibold flex items-center justify-between"
+              style={{ touchAction: 'manipulation' }}
+            >
+              <span>🎯 Matrice de lestage ({activeModel?.matrix?.length || 0} configs)</span>
+              <span style={{ fontSize: 12, color: '#8b949e' }}>{showMatrice ? '▲ Fermer' : '▼ Ouvrir'}</span>
+            </button>
+            {showMatrice && activeModel?.matrix?.length > 0 && (
+              <div style={{ marginTop: 8 }}>
+                <MatriceInteractive
+                  targetGAuto={Math.round((activeModel.masse_ref_8ms || 3.330) * 1000)}
+                  onAppliquer={(masse) => {
+                    const st = useMatrixStore.getState()
+                    const soutes = activeModel.soutes ? Object.values(activeModel.soutes) : []
+                    const MAT_KEYS = soutes.map((_, i) => ['av', 'c', 'ar'][i] || 's' + i)
+                    updateMatrix(st.matrix)
+                    setShowMatrice(false)
+                  }}
+                />
+              </div>
+            )}
+            {showMatrice && (!activeModel?.matrix || activeModel.matrix.length === 0) && (
+              <div style={{ marginTop: 8, padding: 16, background: '#161b22', borderRadius: 8, color: '#8b949e', fontSize: 12, textAlign: 'center' }}>
+                Aucune configuration. Importez un modèle avec une matrice depuis le catalogue.
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Footer actions */}
