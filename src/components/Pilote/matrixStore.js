@@ -70,14 +70,14 @@ export const useMatrixStore = create((set) => ({
 
   // Ajout centre -> extérieur (même règle que addBloc existant : on prend le matériau
   // du dernier bloc du côté, sinon le matériau par défaut de la soute)
-  addBloc: (idx, souteId, side) => set((state) => {
+  addBloc: (idx, souteId, side, forcedMaterial) => set((state) => {
     const { model, soutes, MAT_KEYS, matrix } = state
     const s = soutes.find(x => x.id === souteId)
     const slots = rowToSlots(soutes, MAT_KEYS, matrix[idx])
     const cur = slots[souteId][side]
     if (cur.length >= (s?.capacite || 5)) return state // soute pleine -> no-op (shake côté UI)
 
-    const mat = cur.length > 0 ? cur[cur.length - 1] : (s.materiaux?.[0] || { nom: 'Laiton', masse: 71 })
+    const mat = forcedMaterial || (cur.length > 0 ? cur[cur.length - 1] : (s.materiaux?.[0] || { nom: 'Laiton', masse: 71 }))
     slots[souteId] = { ...slots[souteId], [side]: [...cur, { ...mat }] }
 
     const newMatrix = [...matrix]
