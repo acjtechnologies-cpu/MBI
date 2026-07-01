@@ -19,16 +19,17 @@ export default function ModelManager() {
   const [showBrowser, setShowBrowser] = useState(false)
   const [showMatrice, setShowMatrice] = useState(false)
 
-  const activeModel = getActiveModel()
+  const activeModel = useModelStore(s => s.models?.[s.activeModelId] ?? null)
 
 
   // Init matrixStore quand on ouvre l onglet matrice
   useEffect(() => {
     if (!showMatrice || !activeModel) return
-    const soutes = activeModel.soutes ? Object.values(activeModel.soutes) : []
-    const MAT_KEYS = soutes.map((_, i) => ['av', 'c', 'ar'][i] || 's' + i)
+    const soutesRaw = activeModel.soutes ? Object.values(activeModel.soutes) : []
+    const soutes = [...soutesRaw].sort((a, b) => a.distanceBA - b.distanceBA)
+    const MAT_KEYS = ['av', 'c', 'ar'].slice(0, soutes.length)
     const already = useMatrixStore.getState().model
-    if (already?.nom !== activeModel.nom) {
+    if (already?.id !== activeModel.id) {
       useMatrixStore.getState().init(activeModel, soutes, MAT_KEYS, activeModel.matrix || [])
     }
     useMatrixStore.getState().setCi(0)
@@ -65,8 +66,16 @@ export default function ModelManager() {
 
   const handleDuplicate = () => {
     if (!activeModel) return
+    if (activeModel.nom.endsWith('(copie)')) {
+      alert('Renommez ce modele avant de le dupliquer a nouveau.')
+      setEditingModel(activeModel.id)
+      return
+    }
     const newId = duplicateModel(activeModel.id)
-    if (newId) setActiveModel(newId)
+    if (newId) {
+      setActiveModel(newId)
+      setTimeout(() => setEditingModel(newId), 100)
+    }
   }
 
   // — Aucun modèle : afficher le catalogue GitHub

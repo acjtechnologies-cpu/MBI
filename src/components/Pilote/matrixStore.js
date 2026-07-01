@@ -31,9 +31,12 @@ function rowToSlots(soutes, MAT_KEYS, row) {
     if (Array.isArray(b.G)) {
       slots[s.id] = { G: b.G.map(x => ({ ...x })), D: (b.D || []).map(x => ({ ...x })) }
     } else {
+      const findMat = (nom) => (s.materiaux || []).find(m => m.nom === nom) || mat
+      const matG = findMat(b.matG)
+      const matD = findMat(b.matD)
       slots[s.id] = {
-        G: Array.from({ length: b.G || 0 }, () => ({ nom: b.matG || mat.nom, masse: mat.masse })),
-        D: Array.from({ length: b.D || 0 }, () => ({ nom: b.matD || mat.nom, masse: mat.masse })),
+        G: Array.from({ length: b.G || 0 }, () => ({ nom: matG.nom, masse: matG.masse })),
+        D: Array.from({ length: b.D || 0 }, () => ({ nom: matD.nom, masse: matD.masse })),
       }
     }
   })
