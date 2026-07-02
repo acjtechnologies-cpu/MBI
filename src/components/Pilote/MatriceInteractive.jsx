@@ -62,13 +62,14 @@ function dmToVisualPercent(dm) {
   return 50 + sign * 20 + sign * (excess / (DM_VIS_MAX - DM_OPT_MARGIN)) * 30
 }
 
-export default function MatriceInteractive({ targetGAuto, onAppliquer, onBack }) {
+export default function MatriceInteractive({ targetGAuto, onAppliquer, onBack, onSaveMatrix }) {
   const model    = useMatrixStore(s => s.model)
   const soutes   = useMatrixStore(s => s.soutes)
   const MAT_KEYS = useMatrixStore(s => s.MAT_KEYS)
   const matrix   = useMatrixStore(s => s.matrix)
   const ci       = useMatrixStore(s => s.ci)
-  const setCi    = useMatrixStore(s => s.setCi)
+  const setCi           = useMatrixStore(s => s.setCi)
+  const duplicateConfig = useMatrixStore(s => s.duplicateConfig)
 
   const [drag,     setDrag]     = useState(null)
   const [shakeKey, setShakeKey] = useState(null)
@@ -77,6 +78,8 @@ export default function MatriceInteractive({ targetGAuto, onAppliquer, onBack })
   const dragActiveRef  = useRef(false)
   const lastGestureRef = useRef(0)
   const dragStateRef   = useRef(null)
+  const onSaveRef      = useRef(null)
+  onSaveRef.current = onSaveMatrix
 
   const setZoneRef = (souteId, side) => (node) => {
     if (node) zonesRef.current[`${souteId}-${side}`] = node
@@ -122,7 +125,7 @@ export default function MatriceInteractive({ targetGAuto, onAppliquer, onBack })
 
     if (d.type === 'add' && d.targetSide) {
       const before = countAt(st.matrix, st.soutes, st.MAT_KEYS, st.ci, d.souteId, d.targetSide)
-      st.addBloc(st.ci, d.souteId, d.targetSide, d.material)
+      st.addBloc(st.ci, d.souteId, d.targetSide)
       const after  = countAt(useMatrixStore.getState().matrix, st.soutes, st.MAT_KEYS, st.ci, d.souteId, d.targetSide)
       if (after === before) {
         const key = `${d.souteId}-${d.targetSide}`
@@ -353,6 +356,17 @@ export default function MatriceInteractive({ targetGAuto, onAppliquer, onBack })
                 style={{ width: 44, height: 36, background: '#161b22', border: '1px solid #30363d', borderRadius: 8, color: '#58a6ff', fontSize: 20, cursor: 'pointer', touchAction: 'manipulation', flexShrink: 0 }}
               >←</button>
             )}
+            <button
+              onClick={() => {
+                onSaveMatrix?.()
+                const next = (ci + 1) % matrix.length
+                duplicateConfig(ci, next)
+              }}
+              onPointerDown={e => e.stopPropagation()}
+              style={{ height: 36, padding: '0 12px', background: '#1a2a4a', border: '1px solid #1a73e8', borderRadius: 8, color: '#60a5fa', fontSize: 11, fontWeight: 700, cursor: 'pointer', touchAction: 'manipulation', flexShrink: 0 }}
+            >
+              +Config
+            </button>
             <button
               onClick={() => onAppliquer(masseAff)}
               onPointerDown={e => e.stopPropagation()}
