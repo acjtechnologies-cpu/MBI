@@ -1,11 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useModelStore } from '../../stores/modelStore'
 import { Edit3, Trash2, Copy, Download, Settings, Save, X, Plus } from 'lucide-react'
 import SouteEditor from './SouteEditor'
 import NezConfig from '../Pilote/NezConfig'
 import GliderBrowser from '../GliderBrowser'
 
-export default function ModelManager() {
+export default function ModelManager({ initialEdit, onEditDone, onChangePlaneur }) {
   const {
     models, activeModelId, getActiveModel, setActiveModel,
     updateModel, deleteModel, duplicateModel,
@@ -17,6 +17,7 @@ export default function ModelManager() {
   const [showBrowser, setShowBrowser] = useState(false)
 
   const activeModel = getActiveModel()
+  useEffect(() => { if (initialEdit && activeModel) { setEditingModel(activeModel.id); onEditDone?.() } }, [initialEdit, activeModel?.id])
 
   const handleBrowserImport = (modelData) => {
     importModel(modelData)
@@ -70,7 +71,7 @@ export default function ModelManager() {
             <div className="text-sm mt-1 text-gray-500">Télécharge un planeur depuis le catalogue</div>
           </div>
           <button
-            onClick={() => setShowBrowser(true)}
+            onClick={() => onChangePlaneur ? onChangePlaneur() : setShowBrowser(true)}
             className="bg-blue-600 hover:bg-blue-500 px-6 py-3 rounded-lg font-semibold flex items-center gap-2"
             style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}
           >
@@ -101,7 +102,7 @@ export default function ModelManager() {
               <div className="text-white font-semibold mt-0.5">{activeModel.drapeau} {activeModel.nom}</div>
             </div>
             <button
-              onClick={() => setShowBrowser(true)}
+              onClick={() => onChangePlaneur ? onChangePlaneur() : setShowBrowser(true)}
               className="bg-blue-600 hover:bg-blue-500 px-3 py-1.5 rounded text-sm font-semibold flex items-center gap-1"
               style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}
             >

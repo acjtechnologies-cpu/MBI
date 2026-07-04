@@ -19,13 +19,14 @@ const TABS = [
 function App() {
   const [activeTab, setActiveTab] = useState('pilote')
   const [gliderChosen, setGliderChosen] = useState(false)
+  const [editOnOpen, setEditOnOpen] = useState(false)
   const m = useModelStore(s => s.models[s.activeModelId])
-  if (!gliderChosen) return <WelcomePage onSelect={() => setGliderChosen(true)} />
+  if (!gliderChosen) return <WelcomePage onSelect={(tab, edit) => { setGliderChosen(true); if (tab) setActiveTab(tab); setEditOnOpen(!!edit) }} />
 
   const renderPage = () => {
     switch (activeTab) {
- case 'pilote':  return <DashboardPilote />
-      case 'soute':   return <ModelManager />
+ case 'pilote':  return <DashboardPilote onChangePlaneur={() => setGliderChosen(false)} />
+      case 'soute':   return <ModelManager initialEdit={editOnOpen} onEditDone={() => setEditOnOpen(false)} onChangePlaneur={() => setGliderChosen(false)} />
       case 'poly4':   return <Poly4Component onNavigate={setActiveTab} />
       case 'station': return <StationPage />
       case 'chrono':  return <ChronoPage onNavigate={setActiveTab} />

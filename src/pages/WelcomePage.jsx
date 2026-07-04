@@ -31,7 +31,7 @@ const GLIDERS_LOCAL = [
 ]
 
 // Modal browser GitHub
-function GliderBrowser({ onClose, onImport }) {
+function GliderBrowser({ onClose, onImport, onNewModel }) {
   const [loading, setLoading] = useState(true)
   const [list, setList] = useState([])
   const [importing, setImporting] = useState(null)
@@ -117,18 +117,54 @@ function GliderBrowser({ onClose, onImport }) {
             </button>
           </div>
         ))}
+        {/* Nouveau modele */}
+        <div style={{marginBottom:10}}>
+        <div style={{
+          background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.12)',
+          borderRadius:14, padding:'14px 16px',
+          display:'flex', alignItems:'center', gap:12, cursor:'pointer', overflow:'hidden',
+        }} onClick={() => onNewModel?.()}>
+          <div style={{fontSize:28,flexShrink:0}}>✏️</div>
+          <div style={{flex:1}}>
+            <div style={{color:'#fff',fontSize:15,fontWeight:500}}>Nouveau modele</div>
+            <div style={{color:'rgba(255,255,255,0.4)',fontSize:11,marginTop:2}}>Personnalise · a definir</div>
+          </div>
+          <button
+            onClick={e => { e.stopPropagation(); onNewModel?.() }}
+            style={{background:'rgba(63,185,80,0.25)',border:'1px solid rgba(63,185,80,0.5)',borderRadius:10,padding:'8px 14px',color:'#3fb950',fontSize:12,fontWeight:600,cursor:'pointer',flexShrink:0,touchAction:'manipulation'}}
+          >
+            Creer
+          </button>
+        </div>
+      </div>
       </div>
     </div>
   )
 }
 
 export default function WelcomePage({ onSelect }) {
-  const { setActiveModel, loadFromGitHub, models } = useModelStore()
+  const { setActiveModel, loadFromGitHub } = useModelStore()
+  const models = useModelStore(s => s.models || {})
   const [showBrowser, setShowBrowser] = useState(false)
 
   const handleSelect = (gliderId) => {
     setActiveModel(gliderId)
     if (onSelect) onSelect()
+  }
+
+  const handleNewModel = () => {
+    const { createModel, importModel } = useModelStore.getState()
+    const newId = 'custom-' + Date.now().toString(36)
+    const tempGlider = {
+      id: newId, nom: 'Nouveau modele', drapeau: '🛩️',
+      constructeur: '', masseVide: 2500, cgVide: 100, surface: 57,
+      masse_ref_8ms: 3.330, offset: 0, nezDist: 0,
+      soutes: {}, matrix: [], version: '1.0',
+    }
+    importModel(tempGlider)
+    setActiveModel(newId)
+    setShowBrowser(false)
+    if (onSelect) onSelect('soute', true)
   }
 
   const handleImport = (modelData) => {
@@ -147,6 +183,7 @@ export default function WelcomePage({ onSelect }) {
         <GliderBrowser
           onClose={() => setShowBrowser(false)}
           onImport={handleImport}
+          onNewModel={handleNewModel}
         />
       )}
 
@@ -177,14 +214,14 @@ export default function WelcomePage({ onSelect }) {
         <div style={{position:'relative',zIndex:1,padding:'0 14px 28px'}}>
           <div style={{color:'rgba(255,255,255,0.55)',fontSize:10,letterSpacing:2.5,marginBottom:10,paddingLeft:2}}>MON PLANEUR</div>
 
-          {GLIDERS_LOCAL.map((g) => (
+          {Object.values(models).map((g) => (
             <div
               key={g.id}
               onClick={() => handleSelect(g.id)}
               style={{
                 borderRadius:18, marginBottom:10,
-                background: g.card.bg,
-                border: `2px solid ${g.card.border}`,
+                background: GLIDERS_LOCAL.find(x=>x.id===g.id)?.card.bg || 'rgba(20,20,40,0.75)',
+                border: `2px solid ${GLIDERS_LOCAL.find(x=>x.id===g.id)?.card.border || 'rgba(100,100,180,0.9)'}`,
                 position:'relative', overflow:'hidden',
                 cursor:'pointer', minHeight:96, touchAction:'manipulation', WebkitTapHighlightColor:'transparent',
               }}
@@ -205,9 +242,9 @@ export default function WelcomePage({ onSelect }) {
                 pointerEvents:'none',
               }} />
               <div style={{position:'relative',zIndex:2,padding:'16px'}}>
-                <div style={{fontSize:16,fontWeight:600,color:'#fff'}}>{g.name}</div>
-                <div style={{fontSize:11,color:'rgba(255,255,255,0.6)',marginTop:3}}>{g.spec}</div>
-                <div style={{fontSize:10,padding:'3px 8px',borderRadius:10,marginTop:6,display:'inline-block',...g.badgeStyle}}>{g.badge}</div>
+                <div style={{fontSize:16,fontWeight:600,color:'#fff'}}>{g.nom}</div>
+                <div style={{fontSize:11,color:'rgba(255,255,255,0.6)',marginTop:3}}>{g.masseVide}g · CG {g.cgVide}mm · {g.soutes ? Object.values(g.soutes).length : 0} soutes</div>
+                <div style={{fontSize:10,padding:'3px 8px',borderRadius:10,marginTop:6,display:'inline-block',background:'rgba(80,120,220,0.35)',color:'#aac0ff'}}>Poly4 · IRP · Matrix</div>
               </div>
               <div style={{position:'absolute',right:14,top:'50%',transform:'translateY(-50%)',zIndex:2,color:'rgba(255,255,255,0.5)',fontSize:22}}>›</div>
             </div>

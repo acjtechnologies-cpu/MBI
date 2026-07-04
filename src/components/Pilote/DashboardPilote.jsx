@@ -152,7 +152,7 @@ const CSS = `
 .mb-overlay-box{width:100%;max-width:420px;background:#0d1117;border-radius:16px 16px 0 0;border:1px solid #30363d;padding:16px;max-height:85vh;overflow-y:auto}
 `
 
-export default function DashboardPilote() {
+export default function DashboardPilote({ onChangePlaneur }) {
   // -”€ Stores -”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-
   const {
     params, offset, activeSite,
@@ -559,7 +559,7 @@ useEffect(() => {
               </div>
               <div style={{ display:'flex', gap:4 }}>
                 <button
-                  onClick={() => setShowBrowser(true)}
+                  onClick={() => onChangePlaneur ? onChangePlaneur() : setShowBrowser(true)}
                   style={{ flex:1, padding:'6px 0', borderRadius:6, border: '1px solid #30363d', background: 'transparent', color: '#58a6ff', fontSize:11, fontWeight:700, cursor:'pointer', touchAction:'manipulation', WebkitTapHighlightColor:'transparent' }}>
                   PLANEUR
                 </button>
