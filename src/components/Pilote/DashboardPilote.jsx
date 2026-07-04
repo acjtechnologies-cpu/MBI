@@ -269,13 +269,9 @@ export default function DashboardPilote() {
 useEffect(() => {
     if (!model || !soutes || !matrix?.length) return
     const already = useMatrixStore.getState().model
-    if (already?.id === model.id && useMatrixStore.getState().matrix?.length === matrix?.length) return
-    const soutesArr = Array.isArray(soutes) ? soutes : Object.values(soutes || {}).sort((a,b) => a.distanceBA - b.distanceBA)
-    const matKeysArr = ['av','c','ar'].slice(0, soutesArr.length)
-    useMatrixStore.getState().init(model, soutesArr, matKeysArr, matrix)
+    if (already?.nom === model.nom) return
+    useMatrixStore.getState().init(model, soutes, MAT_KEYS, matrix)
   }, [model])
-
-
   // -”€ Helpers rendu slots - supporte les 2 formats -”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-
   function renderBaroSide(sideKey, souteIdx, cap) {
     const matKey = MAT_KEYS[souteIdx] || 'av'
@@ -596,7 +592,6 @@ useEffect(() => {
           <MatriceInteractive
             targetGAuto={targetGAuto}
             onBack={() => setTab('calc')}
-            onSaveMatrix={() => { const m = useMatrixStore.getState().matrix; console.log('[SAVE] matrix ci0 m:', m?.[0]?.m, 'total rows:', m?.length); updateMatrix(m) }}
             onAppliquer={(masse) => { updateMatrix(useMatrixStore.getState().matrix); setCfgAppliquee(masse); setSelectedParam('vent'); setTab('calc') }}
           />
         )}

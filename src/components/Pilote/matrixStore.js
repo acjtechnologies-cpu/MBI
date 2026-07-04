@@ -31,12 +31,9 @@ function rowToSlots(soutes, MAT_KEYS, row) {
     if (Array.isArray(b.G)) {
       slots[s.id] = { G: b.G.map(x => ({ ...x })), D: (b.D || []).map(x => ({ ...x })) }
     } else {
-      const findMat = (nom) => (s.materiaux || []).find(m => m.nom === nom) || mat
-      const matG = findMat(b.matG)
-      const matD = findMat(b.matD)
       slots[s.id] = {
-        G: Array.from({ length: b.G || 0 }, () => ({ nom: matG.nom, masse: matG.masse })),
-        D: Array.from({ length: b.D || 0 }, () => ({ nom: matD.nom, masse: matD.masse })),
+        G: Array.from({ length: b.G || 0 }, () => ({ nom: b.matG || mat.nom, masse: mat.masse })),
+        D: Array.from({ length: b.D || 0 }, () => ({ nom: b.matD || mat.nom, masse: mat.masse })),
       }
     }
   })
@@ -73,14 +70,14 @@ export const useMatrixStore = create((set) => ({
 
   // Ajout centre -> extérieur (même règle que addBloc existant : on prend le matériau
   // du dernier bloc du côté, sinon le matériau par défaut de la soute)
-  addBloc: (idx, souteId, side, forcedMaterial) => set((state) => {
+  addBloc: (idx, souteId, side) => set((state) => {
     const { model, soutes, MAT_KEYS, matrix } = state
     const s = soutes.find(x => x.id === souteId)
     const slots = rowToSlots(soutes, MAT_KEYS, matrix[idx])
     const cur = slots[souteId][side]
     if (cur.length >= (s?.capacite || 5)) return state // soute pleine -> no-op (shake côté UI)
 
-    const mat = forcedMaterial || (cur.length > 0 ? cur[cur.length - 1] : (s.materiaux?.[0] || { nom: 'Laiton', masse: 71 }))
+    const mat = cur.length > 0 ? cur[cur.length - 1] : (s.materiaux?.[0] || { nom: 'Laiton', masse: 71 })
     slots[souteId] = { ...slots[souteId], [side]: [...cur, { ...mat }] }
 
     const newMatrix = [...matrix]
