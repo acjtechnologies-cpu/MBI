@@ -116,7 +116,7 @@ export default function MatriceInteractive({ targetGAuto, onAppliquer, onBack })
 
         if (d.type === 'add' && d.targetSide) {
           const before = countAt(st.matrix, st.soutes, st.MAT_KEYS, st.ci, d.souteId, d.targetSide)
-          st.addBloc(st.ci, d.souteId, d.targetSide)
+          st.addBloc(st.ci, d.souteId, d.targetSide, d.material)
           const after = countAt(useMatrixStore.getState().matrix, st.soutes, st.MAT_KEYS, st.ci, d.souteId, d.targetSide)
           if (after === before) {
             const key = `${d.souteId}-${d.targetSide}`
@@ -276,18 +276,25 @@ export default function MatriceInteractive({ targetGAuto, onAppliquer, onBack })
                 </div>
               </div>
 
-              <div className="mb-m-dock" style={{ display: 'flex', justifyContent: 'center', marginTop: 4 }}>
-                <button
-                  className="mb-dock-chip"
-                  style={{ border: `1px solid ${col.border}`, color: col.label }}
-                  onPointerDown={(e) => {
-                    e.stopPropagation()
-                    e.currentTarget.setPointerCapture(e.pointerId)
-                    startGesture({ type: 'add', souteId: soute.id, material: mat, x: e.clientX, y: e.clientY, startY: e.clientY, targetSide: null })
-                  }}
-                >
-                  {mat.nom} {mat.masse}g
-                </button>
+              <div className="mb-m-dock" style={{ display: 'flex', justifyContent: 'center', gap: 4, marginTop: 4, flexWrap: 'wrap' }}>
+                {(soute.materiaux || [mat]).filter(m => m.masse > 0).map((matChip, mi) => {
+                  const n = (matChip.nom || '').toLowerCase()
+                  const chipBorder = n.includes('tungst') ? 'rgba(26,115,232,.55)' : n.includes('plomb') ? 'rgba(160,160,180,.45)' : 'rgba(255,215,0,.4)'
+                  const chipColor  = n.includes('tungst') ? 'rgba(100,170,255,.9)' : n.includes('plomb') ? 'rgba(200,200,210,.9)' : 'rgba(255,200,80,.9)'
+                  return (
+                    <button
+                      key={mi}
+                      className="mb-dock-chip"
+                      style={{ border: `1px solid ${chipBorder}`, color: chipColor }}
+                      onPointerDown={(e) => {
+                        e.stopPropagation()
+                        startGesture({ type: 'add', souteId: soute.id, material: matChip, x: e.clientX, y: e.clientY, startY: e.clientY, targetSide: null })
+                      }}
+                    >
+                      {matChip.nom} {matChip.masse}g
+                    </button>
+                  )
+                })}
               </div>
             </div>
           )

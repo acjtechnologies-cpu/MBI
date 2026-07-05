@@ -269,8 +269,12 @@ export default function DashboardPilote({ onChangePlaneur }) {
 useEffect(() => {
     if (!model || !soutes || !matrix?.length) return
     const already = useMatrixStore.getState().model
-    if (already?.nom === model.nom) return
-    useMatrixStore.getState().init(model, soutes, MAT_KEYS, matrix)
+    if (already?.id === model.id) return
+    const soutesArr = Array.isArray(soutes)
+      ? [...soutes].sort((a,b) => a.distanceBA - b.distanceBA)
+      : Object.values(soutes||{}).sort((a,b) => a.distanceBA - b.distanceBA)
+    const matKeysArr = ['av','c','ar'].slice(0, soutesArr.length)
+    useMatrixStore.getState().init(model, soutesArr, matKeysArr, matrix)
   }, [model])
   // -”€ Helpers rendu slots - supporte les 2 formats -”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-
   function renderBaroSide(sideKey, souteIdx, cap) {
