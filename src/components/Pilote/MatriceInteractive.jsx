@@ -143,7 +143,16 @@ export default function MatriceInteractive({ targetGAuto, onAppliquer, onBack })
     window.addEventListener('pointerup', handlers.up)
   }
 
-  if (!model || !matrix[ci]) return null
+  if (!model) return null
+  const storeModel = useMatrixStore(s => s.model)
+  const hasMatrix = storeModel && matrix?.length > 0
+  if (!hasMatrix) return (
+    <div style={{ padding: 24, textAlign: 'center', color: '#8b949e' }}>
+      <div style={{ fontSize: 32, marginBottom: 12 }}>🎯</div>
+      <div style={{ fontSize: 14, marginBottom: 8 }}>Aucune matrice pour ce modele</div>
+      <div style={{ fontSize: 11, color: '#4a5568' }}>Importez un modele avec une matrice depuis le catalogue</div>
+    </div>
+  )
 
   const displayCfg = matrix[ci]
 

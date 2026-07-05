@@ -267,7 +267,7 @@ export default function DashboardPilote({ onChangePlaneur }) {
     }
   }, [kgVal, cfg, model, modelOffset])
 useEffect(() => {
-    if (!model || !soutes || !matrix?.length) return
+    if (!model || !soutes) return
     const already = useMatrixStore.getState().model
     if (already?.id === model.id) return
     const soutesArr = Array.isArray(soutes)
@@ -567,7 +567,7 @@ useEffect(() => {
                   style={{ flex:1, padding:'6px 0', borderRadius:6, border: '1px solid #30363d', background: 'transparent', color: '#58a6ff', fontSize:11, fontWeight:700, cursor:'pointer', touchAction:'manipulation', WebkitTapHighlightColor:'transparent' }}>
                   PLANEUR
                 </button>
-                {matrix.length > 0 && (
+                {(
                   <button
                     onClick={() => setTab('matrix')}
                     style={{ flex:1, padding:'6px 0', borderRadius:6, border: tab === 'matrix' ? '1px solid #3fb950' : '1px solid #30363d', background: tab === 'matrix' ? '#161b22' : 'transparent', color: tab === 'matrix' ? '#fff' : '#4a5568', fontSize:11, fontWeight:700, cursor:'pointer', touchAction:'manipulation', WebkitTapHighlightColor:'transparent' }}>
@@ -592,7 +592,14 @@ useEffect(() => {
         )}
 
         {/* TAB MATRICE */}
-        {tab === 'matrix' && matrix.length > 0 && (
+        {tab === 'matrix' && !matrix?.length && (
+          <div style={{ padding:24, textAlign:'center', color:'#8b949e', marginTop:40 }}>
+            <div style={{ fontSize:32, marginBottom:12 }}>🎯</div>
+            <div style={{ fontSize:14, marginBottom:8 }}>Aucune matrice pour ce modele</div>
+            <div style={{ fontSize:11, color:'#4a5568' }}>Importez un modele avec une matrice depuis le catalogue</div>
+          </div>
+        )}
+        {tab === 'matrix' && matrix?.length > 0 && (
           <MatriceInteractive
             targetGAuto={targetGAuto}
             onBack={() => setTab('calc')}
