@@ -5,7 +5,7 @@ import { useShallow } from 'zustand/react/shallow'
 import { useModelStore } from '../../stores/modelStore'
 import GliderBrowser from '../GliderBrowser'
 import MatriceInteractive from './MatriceInteractive'
-import { useMatrixStore } from './matrixStore'
+import { useMatrixStore, generateEmptyMatrix } from './matrixStore'
 import '../../styles/matrix-gestures.css'
 import NezCGLine from './NezCGLine'
 
@@ -202,13 +202,12 @@ export default function DashboardPilote({ onChangePlaneur }) {
   )
 
   // -”€ Données modèle -”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-
-  const matrix  = model.matrix || []
+  const matrix  = useModelStore(s => s.models?.[s.activeModelId]?.matrix || [])
   const soutes  = model.soutes
     ? Object.values(model.soutes).sort((a, b) => a.distanceBA - b.distanceBA)
     : []
 
   // MAT_KEYS dynamiques : 2 soutes - av/ar, 3 soutes - av/c/ar
-  const MAT_KEYS = getMatKeys(soutes.length)
 
   // -”€ Calculs -”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€
   const vent          = params.vent
@@ -269,16 +268,15 @@ export default function DashboardPilote({ onChangePlaneur }) {
 useEffect(() => {
     if (!model || !soutes) return
     const already = useMatrixStore.getState().model
-    if (already?.id === model.id) return
     const soutesArr = Array.isArray(soutes)
       ? [...soutes].sort((a,b) => a.distanceBA - b.distanceBA)
       : Object.values(soutes||{}).sort((a,b) => a.distanceBA - b.distanceBA)
-    const matKeysArr = ['av','c','ar'].slice(0, soutesArr.length)
-    useMatrixStore.getState().init(model, soutesArr, matKeysArr, matrix)
+    useMatrixStore.getState().init(model, soutesArr, matrix)
   }, [model])
   // -”€ Helpers rendu slots - supporte les 2 formats -”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-
   function renderBaroSide(sideKey, souteIdx, cap) {
-    const matKey = MAT_KEYS[souteIdx] || 'av'
+    const MATRIX_KEYS = cfg ? ['av','c','ar','ar2'].filter(k => k in cfg) : ['av','c','ar']
+    const matKey = soutes[souteIdx]?.id in (cfg||{}) ? soutes[souteIdx]?.id : (MATRIX_KEYS[souteIdx] || MATRIX_KEYS[0])
     const b = cfg ? (cfg[matKey] || {}) : {}
     const side = sideKey === 'G' ? b.G : b.D
 
@@ -298,7 +296,7 @@ useEffect(() => {
   }
 
   function renderMatSide(sideKey, souteIdx, cap, row) {
-    const matKey = MAT_KEYS[souteIdx] || 'av'
+    const matKey = soutes[souteIdx]?.id
     const b = row ? (row[matKey] || {}) : {}
     const side = sideKey === 'G' ? b.G : b.D
 
@@ -569,7 +567,7 @@ useEffect(() => {
                 </button>
                 {(
                   <button
-                    onClick={() => setTab('matrix')}
+                    onClick={() => { const sArr = Object.values(soutes||{}).sort((a,b)=>a.distanceBA-b.distanceBA); useMatrixStore.getState().init(model, sArr, matrix); setTab('matrix') }}
                     style={{ flex:1, padding:'6px 0', borderRadius:6, border: tab === 'matrix' ? '1px solid #3fb950' : '1px solid #30363d', background: tab === 'matrix' ? '#161b22' : 'transparent', color: tab === 'matrix' ? '#fff' : '#4a5568', fontSize:11, fontWeight:700, cursor:'pointer', touchAction:'manipulation', WebkitTapHighlightColor:'transparent' }}>
                     MATRICE
                   </button>
@@ -592,18 +590,27 @@ useEffect(() => {
         )}
 
         {/* TAB MATRICE */}
-        {tab === 'matrix' && !matrix?.length && (
-          <div style={{ padding:24, textAlign:'center', color:'#8b949e', marginTop:40 }}>
-            <div style={{ fontSize:32, marginBottom:12 }}>🎯</div>
-            <div style={{ fontSize:14, marginBottom:8 }}>Aucune matrice pour ce modele</div>
-            <div style={{ fontSize:11, color:'#4a5568' }}>Importez un modele avec une matrice depuis le catalogue</div>
-          </div>
-        )}
+        {tab === 'matrix' && !matrix?.length && soutes && Object.values(soutes).length > 0 && (() => {
+          // Init automatique avec 20 configs vides quand on ouvre MATRICE sans matrice
+          const soutesArr = Object.values(soutes).sort((a,b) => a.distanceBA - b.distanceBA)
+          const MAT_KEYS = ['av','c','ar'].slice(0, soutesArr.length)
+          const emptyMatrix = Array.from({length:20}, (_,i) => {
+            const row = { n: i+1, m: model.masseVide, cg: model.cgVide }
+            soutesArr.forEach((s, si) => { row[s.id] = { G:[], D:[] } })
+            return row
+          })
+          setTimeout(() => {
+            useMatrixStore.getState().init(model, soutesArr, emptyMatrix)
+            updateMatrix(emptyMatrix)
+          }, 0)
+          return null
+        })()}
         {tab === 'matrix' && matrix?.length > 0 && (
           <MatriceInteractive
             targetGAuto={targetGAuto}
-            onBack={() => setTab('calc')}
-            onAppliquer={(masse) => { updateMatrix(useMatrixStore.getState().matrix); setCfgAppliquee(masse); setSelectedParam('vent'); setTab('calc') }}
+            onBack={() => { setMatrixIdx(null); setTab('calc') }}
+            onSaveMatrix={() => updateMatrix(useMatrixStore.getState().matrix)}
+            onAppliquer={(masse) => { updateMatrix(useMatrixStore.getState().matrix); setMatrixIdx(null); setCfgAppliquee(null); setTimeout(() => setCfgAppliquee(masse), 50); setSelectedParam('vent'); setTab('calc') }}
           />
         )}
         {/* -”€ GPS OVERLAY -”€ */}
