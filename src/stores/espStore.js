@@ -7,6 +7,8 @@
  */
 import { create } from 'zustand'
 import { ESP32_CONFIG } from '../constants'
+import { useAppStore } from './appStore'
+import { useSiteEnergyStore, Q_REF_ESC } from './siteEnergyStore'
 
 const WS_URL = 'ws://192.168.4.1:81'
 
@@ -72,6 +74,7 @@ export const useESPStore = create((set, get) => ({
 
   q: null,
   irpx: null,
+  energiePct: null,
 
   turbBuf: Array(60).fill(0),
   turbSigma: 0,
@@ -89,19 +92,28 @@ export const useESPStore = create((set, get) => ({
     }))
 
 
-    // IRPX: pression dynamique + IQA temps reel
+    // Energie / IQA / IRPX : trois indicateurs distincts (K_site dynamique)
     const spd = next.SPD || 0
     const iqa = next.IQA || 0
-    // Q_REF dynamique : RHO station > ALT GPS > ISA sea level
+    // rho LOCAL au site (station > ALT GPS > ISA sea level) -- jamais RHO_ESC,
+    // deux sites au meme vent mais a des altitudes differentes ont une energie differente
     const rho = next.RHO != null && next.RHO > 0
       ? next.RHO
       : next.ALT != null
         ? 1.225 * Math.exp(-next.ALT / 8500)
         : 1.225
-    const Q_REF = 0.5 * rho * 64  // ref 8 m/s, densite locale
-    const q = spd > 0 ? +(0.5 * rho * spd * spd).toFixed(1) : null
-    const irpx = (q !== null && iqa > 0) ? +((q / Q_REF) * iqa).toFixed(3) : null
-    set({ q, irpx })
+
+    const activeSiteName = useAppStore.getState().activeSite?.name
+    const kSite = activeSiteName
+      ? (useSiteEnergyStore.getState().getKDyn(activeSiteName) ?? 1)
+      : 1
+
+    const q = spd > 0 ? 0.5 * rho * spd * spd : null
+    const energy = q !== null ? (q / Q_REF_ESC) * kSite : null
+    const energiePct = energy !== null ? +(energy * 100).toFixed(1) : null
+    const irpx = (energy !== null && iqa > 0) ? +(energy * iqa).toFixed(3) : null
+
+    set({ q: q !== null ? +q.toFixed(1) : null, irpx, energiePct })
 
     // Altitude -> appStore partage
     if (incoming.ALT !== undefined && incoming.ALT > 0 && setAltitude) {
@@ -267,6 +279,6 @@ export const useESPStore = create((set, get) => ({
     get().wsStop()
     get().stopDemo()
     set({ connected: false, wsStatus: 'off', lastUpdate: null, error: null, demo: false,
-          sdActive: false, turbBuf: Array(60).fill(0), turbSigma: 0, q: null, irpx: null })
+          sdActive: false, turbBuf: Array(60).fill(0), turbSigma: 0, q: null, irpx: null, energiePct: null })
   },
 }))
