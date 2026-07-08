@@ -6,18 +6,6 @@
   "updated": "2026-06-17",
   "sites": [
     {
-      "name": "Neutre",
-      "irp": 230,
-      "irp_p25": 8.314,
-      "k_v4": 1.0,
-      "k": 1.0,
-      "n_rounds": 263,
-      "ref_v4": "Escueillens",
-      "confidence": "HIGH",
-      "manches": 263,
-      "note": "Reference Escueillens — K=1.000 par definition"
-    },
-    {
       "name": "Escueillens",
       "irp": 207,
       "irp_p25": 8.314,
@@ -29,7 +17,16 @@
       "manches": 263,
       "note": "Reference V4 — terrain pilote Jo",
       "note_v4": "K=1.000 reference absolue",
-      "irp_formula": "T_P5/T_P25 x10"
+      "irp_formula": "T_P5/T_P25 x10",
+      "altitude": 480,
+      "energy": {
+        "kMedian": null,
+        "qMedian": null,
+        "qP25": null,
+        "qP75": null,
+        "samples": [],
+        "updated": null
+      }
     },
     {
       "name": "Rognac",
@@ -42,7 +39,16 @@
       "n_rounds": 329,
       "ref_v4": "Escueillens",
       "k": 0.994,
-      "irp_formula": "T_P5/T_P25 x10"
+      "irp_formula": "T_P5/T_P25 x10",
+      "altitude": null,
+      "energy": {
+        "kMedian": null,
+        "qMedian": null,
+        "qP25": null,
+        "qP75": null,
+        "samples": [],
+        "updated": null
+      }
     },
     {
       "name": "Font d'Urles",
@@ -55,7 +61,16 @@
       "n_rounds": 71,
       "ref_v4": "Escueillens",
       "k": 1.022,
-      "irp_formula": "T_P5/T_P25 x10"
+      "irp_formula": "T_P5/T_P25 x10",
+      "altitude": null,
+      "energy": {
+        "kMedian": null,
+        "qMedian": null,
+        "qP25": null,
+        "qP75": null,
+        "samples": [],
+        "updated": null
+      }
     },
     {
       "name": "Hanstholm Danemark",
@@ -65,7 +80,16 @@
       "note": "Estime",
       "irp_p25": null,
       "k_v4": null,
-      "n_rounds": 0
+      "n_rounds": 0,
+      "altitude": null,
+      "energy": {
+        "kMedian": null,
+        "qMedian": null,
+        "qP25": null,
+        "qP75": null,
+        "samples": [],
+        "updated": null
+      }
     },
     {
       "name": "Saint Ferriol",
@@ -79,7 +103,16 @@
       "ref_v4": "Escueillens",
       "k": 0.988,
       "note_v4": "Ajuste terrain pilote Jo — moins irregulier que calcul F3XVault (0.913)",
-      "irp_formula": "T_P5/T_P25 x10"
+      "irp_formula": "T_P5/T_P25 x10",
+      "altitude": null,
+      "energy": {
+        "kMedian": null,
+        "qMedian": null,
+        "qP25": null,
+        "qP75": null,
+        "samples": [],
+        "updated": null
+      }
     },
     {
       "name": "Col du Glandon",
@@ -92,7 +125,16 @@
       "n_rounds": 70,
       "ref_v4": "Escueillens",
       "k": 1.011,
-      "irp_formula": "T_P5/T_P25 x10"
+      "irp_formula": "T_P5/T_P25 x10",
+      "altitude": null,
+      "energy": {
+        "kMedian": null,
+        "qMedian": null,
+        "qP25": null,
+        "qP75": null,
+        "samples": [],
+        "updated": null
+      }
     },
     {
       "name": "Col des Faisses",
@@ -105,7 +147,16 @@
       "n_rounds": 76,
       "ref_v4": "Escueillens",
       "k": 0.991,
-      "irp_formula": "T_P5/T_P25 x10"
+      "irp_formula": "T_P5/T_P25 x10",
+      "altitude": null,
+      "energy": {
+        "kMedian": null,
+        "qMedian": null,
+        "qP25": null,
+        "qP75": null,
+        "samples": [],
+        "updated": null
+      }
     },
     {
       "name": "Sceautres",
@@ -118,7 +169,16 @@
       "n_rounds": 117,
       "ref_v4": "Escueillens",
       "k": 0.999,
-      "irp_formula": "T_P5/T_P25 x10"
+      "irp_formula": "T_P5/T_P25 x10",
+      "altitude": null,
+      "energy": {
+        "kMedian": null,
+        "qMedian": null,
+        "qP25": null,
+        "qP75": null,
+        "samples": [],
+        "updated": null
+      }
     },
     {
       "name": "Route des Crêtes",
@@ -131,7 +191,16 @@
       "n_rounds": 223,
       "ref_v4": "Escueillens",
       "k": 0.95,
-      "irp_formula": "T_P5/T_P25 x10"
+      "irp_formula": "T_P5/T_P25 x10",
+      "altitude": null,
+      "energy": {
+        "kMedian": null,
+        "qMedian": null,
+        "qP25": null,
+        "qP75": null,
+        "samples": [],
+        "updated": null
+      }
     },
     {
       "name": "Séderon",
@@ -144,7 +213,16 @@
       "n_rounds": 57,
       "ref_v4": "Escueillens",
       "k": 1.034,
-      "irp_formula": "T_P5/T_P25 x10"
+      "irp_formula": "T_P5/T_P25 x10",
+      "altitude": null,
+      "energy": {
+        "kMedian": null,
+        "qMedian": null,
+        "qP25": null,
+        "qP75": null,
+        "samples": [],
+        "updated": null
+      }
     },
     {
       "name": "Serra de Busa",
@@ -157,7 +235,16 @@
       "n_rounds": 60,
       "ref_v4": "Escueillens",
       "k": 1.072,
-      "irp_formula": "T_P5/T_P25 x10"
+      "irp_formula": "T_P5/T_P25 x10",
+      "altitude": null,
+      "energy": {
+        "kMedian": null,
+        "qMedian": null,
+        "qP25": null,
+        "qP75": null,
+        "samples": [],
+        "updated": null
+      }
     }
   ],
   "ref_v4": "Escueillens",
