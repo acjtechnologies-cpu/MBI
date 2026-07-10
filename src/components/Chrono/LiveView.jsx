@@ -4,6 +4,8 @@
 // ═══════════════════════════════════════════════════════════════════════════════
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useAppStore } from '../../stores/appStore';
+import { useSiteEnergyStore, Q_REF_ESC } from '../../stores/siteEnergyStore';
 
 const API_URL  = 'https://www.f3xvault.com/api.php';
 const POLL_MS  = 120_000;
@@ -261,6 +263,33 @@ function StandingsCard({ standings, target }) {
 }
 
 // ── Composant principal ───────────────────────────────────────────────────────
+function SiteSelector() {
+  const sitesRaw = useSiteEnergyStore(s => s.sitesRaw);
+  const loaded = useSiteEnergyStore(s => s.loaded);
+  const activeSiteName = useAppStore(s => s.activeSite?.name || '');
+  const setActiveSite = useAppStore(s => s.setActiveSite);
+
+  if (!loaded || !sitesRaw) return null;
+
+  return (
+    <select
+      value={activeSiteName}
+      onChange={e => {
+        const site = sitesRaw.sites.find(s => s.name === e.target.value);
+        if (site) setActiveSite({ name: site.name, irp: site.irp, k: site.k });
+      }}
+      style={{ background:'#131720', border:'0.5px solid #30363d', color:'#e8eaf0',
+        borderRadius:8, padding:'8px 12px', fontSize:13, width:'100%',
+        fontFamily:'inherit', outline:'none', boxSizing:'border-box', marginBottom:6 }}
+    >
+      <option value="">-- Choisir un site --</option>
+      {sitesRaw.sites.map(s => (
+        <option key={s.name} value={s.name}>{s.name}</option>
+      ))}
+    </select>
+  );
+}
+
 export default function LiveView({ onBack } = {}) {
   const [login, setLogin]       = useState(() => localStorage.getItem('f3xv_login') || '');
   const [password, setPassword] = useState(() => localStorage.getItem('f3xv_pwd') || '');
@@ -277,6 +306,11 @@ export default function LiveView({ onBack } = {}) {
   const [tab, setTab]           = useState('rounds'); // 'rounds' | 'classement'
   const [error, setError]       = useState('');
   const timerRef = useRef(null);
+  const lastRoundRef = useRef(0);
+
+  useEffect(() => {
+    useSiteEnergyStore.getState().init();
+  }, []);
 
   async function doSearch() {
     if (!login || !password || !search) return;
@@ -292,14 +326,41 @@ export default function LiveView({ onBack } = {}) {
     if (rows.length > 0) {
       setRounds(prev => { const next = { ...prev, [rn]: rows }; localStorage.setItem('f3xv_rounds', JSON.stringify(next)); return next; });
       setLastRound(rn);
+      lastRoundRef.current = rn;
+
+      const activeSiteName = useAppStore.getState().activeSite?.name;
+      if (activeSiteName) {
+        const seStore = useSiteEnergyStore.getState();
+        if (!seStore.session[activeSiteName]) {
+          seStore.startSession(activeSiteName);
+        }
+        const alreadyLogged = seStore.session[activeSiteName]?.samples?.some(s => s.round === rn);
+        const row = rows.find(r => r.pilot.toLowerCase().includes(target.toLowerCase()));
+        if (!alreadyLogged && row && row.seconds > 0 && row.wind > 0) {
+          const site = seStore.getSite(activeSiteName);
+          const rho = site && site.altitude != null
+            ? 1.225 * Math.exp(-site.altitude / 8500)
+            : undefined;
+          seStore.addSample(activeSiteName, {
+            date: new Date().toISOString().slice(0, 10),
+            round: rn,
+            seconds: row.seconds,
+            wind: row.wind,
+            rho,
+            q_ref: Q_REF_ESC,
+            source: 'f3xvault',
+          });
+        }
+      }
+
       return true;
     }
     return false;
-  }, [login, password, eventId]);
+  }, [login, password, eventId, target]);
 
   const doPoll = useCallback(async () => {
     if (!eventId) return;
-    let rn = Math.max(1, lastRound);
+    let rn = Math.max(1, lastRoundRef.current);
     while (true) {
       const ok = await loadRound(rn);
       if (!ok) break;
@@ -309,7 +370,7 @@ export default function LiveView({ onBack } = {}) {
     const st = await getStandings(login, password, eventId);
     if (st.length) { setStandings(st); localStorage.setItem('f3xv_standings', JSON.stringify(st)); }
     setLastUpdate(new Date().toLocaleTimeString('fr-FR'));
-  }, [eventId, lastRound, loadRound, login, password]);
+  }, [eventId, loadRound, login, password]);
 
   useEffect(() => {
     if (!polling || !eventId) return;
@@ -382,6 +443,8 @@ export default function LiveView({ onBack } = {}) {
       {/* Contrôles + tabs */}
       {eventId && (
         <>
+                    <SiteSelector />
+
           <div style={{ display:'flex', gap:6 }}>
             <input style={{...inputStyle, flex:1}} placeholder="Pilote à suivre"
               value={target} onChange={e => { setTarget(e.target.value); localStorage.setItem('f3xv_target', e.target.value); }} />
@@ -391,6 +454,18 @@ export default function LiveView({ onBack } = {}) {
               {polling ? '⏹' : '▶'}
             </button>
           </div>
+
+          <button onClick={() => {
+            const activeSiteName = useAppStore.getState().activeSite?.name;
+            if (!activeSiteName) return;
+            useSiteEnergyStore.getState().closeSession(activeSiteName);
+            useSiteEnergyStore.getState().exportSitesJson();
+          }} style={{
+            background:'#3a2a1a', border:'0.5px solid #8a5a2a', color:'#e8b84a',
+            fontSize:12, cursor:'pointer', padding:'8px 0', borderRadius:8,
+            fontWeight:600, touchAction:'manipulation', WebkitTapHighlightColor:'transparent' }}>
+            Cloturer session (site)
+          </button>
 
           {/* Tabs rounds / classement */}
           <div style={{ display:'flex', gap:6 }}>

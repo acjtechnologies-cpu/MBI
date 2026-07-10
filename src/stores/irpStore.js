@@ -1,25 +1,21 @@
-/**
- * IRP Store v2 — K_dyn = IRP_raw / IRP_site_ref
+﻿/**
+ * IRP Store v3 — kActuel = miroir reactif du kDyn de siteEnergyStore
  *
- * Calibration par pente :
- *   Trend     = T_median × (1 - σ_T)
- *   IRP_raw   = Trend × V_moy^0.7
- *   K_dyn     = clamp(IRP_raw / IRP_site_ref, 0.85, 1.15)
- *   IQA_hyb   = 0.6 × IQA_station + 0.4 × IQA_pilot
+ * L'ancien systeme V5 (Trend/IRP_raw/K_dyn base sur T_best/V_moy) est
+ * entierement retire. kActuel suit maintenant le K_site dynamique
+ * calcule par siteEnergyStore pour le site actif (voir siteEnergyStore.js).
  *
- * Confiance = f(nbRuns, σ_T)
- *   LOW    : < 5 runs ou σ_T > 0.15
- *   MEDIUM : 5-15 runs et σ_T < 0.15
- *   HIGH   : > 15 runs et σ_T < 0.10
+ * confidence = f(nbRuns session courante, sigma des k de la session)
+ *   LOW    : < 5 runs ou sigma_K > 0.15
+ *   MEDIUM : 5-15 runs et sigma_K < 0.15
+ *   HIGH   : > 15 runs et sigma_K < 0.10
+ *
+ * Systeme manche (IRPX Run temps reel, addManche/_recalcManche) INCHANGE
+ * — chantier separe, voir backlog "ΔMasse temps reel"
  */
 import { create } from 'zustand'
-
-function median(arr) {
-  if (!arr.length) return 0
-  const s = [...arr].sort((a, b) => a - b)
-  const m = Math.floor(s.length / 2)
-  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2
-}
+import { useAppStore } from './appStore'
+import { useSiteEnergyStore } from './siteEnergyStore'
 
 function stdDev(arr) {
   if (arr.length < 2) return 0
@@ -27,66 +23,50 @@ function stdDev(arr) {
   return Math.sqrt(arr.reduce((a, b) => a + (b - mean) ** 2, 0) / arr.length)
 }
 
-const INDICE_875 = 0.875  // T_best/T_median ratio F3F
-// Constantes K_MIN/K_MAX/GAIN_G supprimées — calcul ΔMasse retiré
-const DEFAULT_SITE_REF = 230  // Saint Ferriol V5 median (CDF+CDM)
-
 export const useIrpStore = create((set, get) => ({
 
-  // Runs validés de la session courante
-  runs: [],
-
-  // Référence site active
-  siteRef: DEFAULT_SITE_REF,
+  // Miroir reactif du kDyn de siteEnergyStore pour le site actif
+  kActuel: null,
+  confidence: null,
+  nbRuns: 0,
   siteName: '',
 
-  // Résultats calculés
-  trend: null,
-  irp: null,          // IRP_raw (absolu)
-  kDyn: null,         // K_dyn = IRP_raw / siteRef
-  kActuel: null,      // Alias pour compatibilité (= kDyn)
-  sigmaT: null,
-  vMoy: null,
-  tMedian: null,
-  iqaHybrid: null,
-  iqaPilot: null,
-  nbRuns: 0,
-  confidence: null,   // 'LOW' | 'MEDIUM' | 'HIGH'
-  deltaPerf: null,    // (ref/IRP_raw - 1) × 100
-
-  // IRPX Run system (q_snap + irpx_snap -> ref médiane)
-  mancheResults: [],
-  mancheIrp: null,      // dernier irpxRun
-  mancheK: null,
-  mancheRef: null,      // mediane irpx M1-M3
-
-  // Changer la référence site (appelé quand on navigue les pentes)
+  // Compat externe (Poly4Page appelle setSiteRef(irp, name))
   setSiteRef: (irp, name) => {
-    set({ siteRef: irp || DEFAULT_SITE_REF, siteName: name || '' })
-    get()._recalc()
+    set({ siteName: name || '' })
+    get()._syncFromSiteEnergy()
   },
 
-  // Ajouter un run (appelé depuis ChronoPage au STOP)
-  addRun: (run) => {
-    const runs = [...get().runs, run]
-    set({ runs })
-    get()._recalc()
+  _syncFromSiteEnergy: () => {
+    const activeSiteName = useAppStore.getState().activeSite?.name
+    if (!activeSiteName) {
+      set({ kActuel: null, confidence: null, nbRuns: 0 })
+      return
+    }
+    const seState = useSiteEnergyStore.getState()
+    const kDyn = seState.getKDyn(activeSiteName)
+    const session = seState.session[activeSiteName]
+    const kVals = (session?.samples ?? []).map(s => s.k).filter(v => v != null)
+    const nbRuns = kVals.length
+
+    let confidence = null
+    if (nbRuns > 0) {
+      const mean = kVals.reduce((a, b) => a + b, 0) / nbRuns
+      const sigmaK = mean !== 0 ? stdDev(kVals) / mean : 0
+      confidence = 'LOW'
+      if (nbRuns >= 15 && sigmaK < 0.10) confidence = 'HIGH'
+      else if (nbRuns >= 5 && sigmaK < 0.15) confidence = 'MEDIUM'
+    }
+
+    set({ kActuel: kDyn, confidence, nbRuns })
   },
 
-  // Réinitialiser (nouvelle session)
-  reset: () => set({
-    runs: [], trend: null, irp: null, kDyn: null, kActuel: null, deltaPerf: null,
-    sigmaT: null, vMoy: null, tMedian: null,
-    iqaHybrid: null, iqaPilot: null, nbRuns: 0, confidence: null,
-  }),
+  // ── Systeme manche (IRPX Run temps reel) — INCHANGE ──
+  mancheResults: [],
+  mancheIrp: null,
+  mancheK: null,
+  mancheRef: null,
 
-  // Charger des runs existants (depuis Dexie au montage)
-  loadRuns: (runs) => {
-    set({ runs })
-    get()._recalc()
-  },
-
-  // IRPX Run: ajouter un resultat de manche (q_snap + irpx_snap depuis ESP)
   addManche: (tBest, vMoy, masseVol, kPente, qSnap, irpxSnap) => {
     const m = [...get().mancheResults, {
       tBest, vMoy,
@@ -108,20 +88,17 @@ export const useIrpStore = create((set, get) => ({
     const { mancheResults } = get()
     if (!mancheResults.length) return
 
-    // Extraire irpxSnap valides
     const irpxVals = mancheResults
       .map(m => m.irpxSnap)
       .filter(v => v !== null && v > 0)
 
     if (!irpxVals.length) {
-      // Pas de donnees IRPX station -> pas de calcul
       set({ mancheIrp: null, mancheK: null, mancheRef: null })
       return
     }
 
     const lastIrpx = irpxVals[irpxVals.length - 1]
 
-    // Ref : mediane des 3 premieres manches avec irpx valide, puis fixe
     const refVals = irpxVals.slice(0, 3)
     const sorted  = [...refVals].sort((a, b) => a - b)
     const mid     = Math.floor(sorted.length / 2)
@@ -134,80 +111,14 @@ export const useIrpStore = create((set, get) => ({
       mancheRef:  +ref.toFixed(3),
     })
   },
-
-  // Recalcul interne
-  _recalc: () => {
-    const { runs, siteRef } = get()
-
-    // Filtrer les runs valides (> 20s, < 2min, avec vent)
-    const valid = runs.filter(r =>
-      r.duree_ms > 20000 && r.duree_ms < 120000 &&
-      r.vent_snap > 0
-    )
-
-    if (valid.length < 2) {
-      set({ trend: null, irp: null, kDyn: null, kActuel: null,
-            sigmaT: null, vMoy: null, tMedian: null,
-            iqaHybrid: null, iqaPilot: null,
-            nbRuns: valid.length, confidence: null })
-      return
-    }
-
-    // Temps en secondes
-    const times = valid.map(r => r.duree_ms / 1000)
-    const vents = valid.map(r => r.vent_snap)
-    const iqas  = valid.map(r => r.iqa_snap).filter(x => x != null && x > 0)
-
-    const tMed   = median(times)
-    const sigma  = stdDev(times)
-    const tMean  = times.reduce((a, b) => a + b, 0) / times.length
-    const sigmaT = tMean > 0 ? sigma / tMean : 0
-
-    // Trend = T_median × (1 - σ_T)
-    const trend = tMed * (1 - sigmaT)
-
-    // V_moy des runs
-    const vMoy = vents.reduce((a, b) => a + b, 0) / vents.length
-
-    // IRP_raw = Trend × V_moy^0.7
-    const irpRaw = trend * Math.pow(vMoy, 0.7)
-
-    // K_dyn = clamp(IRP_raw / IRP_site_ref, 0.85, 1.15)
-    const ref = DEFAULT_SITE_REF
-    const kDyn = Math.max(K_MIN, Math.min(K_MAX, ref / irpRaw))
-
-    // DeltaPerf = ecart en % par rapport a la reference
-    const deltaPerf = +((kDyn - 1) * 100).toFixed(1)
-
-    // Confiance
-    let confidence = 'LOW'
-    if (valid.length >= 15 && sigmaT < 0.10) confidence = 'HIGH'
-    else if (valid.length >= 5 && sigmaT < 0.15) confidence = 'MEDIUM'
-
-    // IQA pilot
-    const iqaPilot = Math.max(0, Math.min(10, (60 - trend) / 3))
-
-    // IQA hybrid
-    const iqaStationMoy = iqas.length > 0
-      ? iqas.reduce((a, b) => a + b, 0) / iqas.length
-      : null
-    const iqaHybrid = (iqaPilot !== null && iqaStationMoy !== null)
-      ? 0.6 * iqaStationMoy + 0.4 * iqaPilot
-      : iqaStationMoy
-
-    set({
-      trend:      +trend.toFixed(2),
-      irp:        +irpRaw.toFixed(1),
-      kDyn:       +kDyn.toFixed(3),
-      kActuel:    +kDyn.toFixed(3),    // Compatibilité
-      sigmaT:     +sigmaT.toFixed(3),
-      vMoy:       +vMoy.toFixed(1),
-      tMedian:    +tMed.toFixed(2),
-      iqaHybrid:  iqaHybrid !== null ? +iqaHybrid.toFixed(2) : null,
-      iqaPilot:   iqaPilot !== null ? +iqaPilot.toFixed(2) : null,
-      nbRuns:     valid.length,
-      confidence,
-      deltaPerf,
-    })
-  },
 }))
+
+// Sync automatique quand siteEnergyStore ou le site actif changent
+useSiteEnergyStore.subscribe(() => {
+  useIrpStore.getState()._syncFromSiteEnergy()
+})
+useAppStore.subscribe((state, prevState) => {
+  if (state.activeSite?.name !== prevState.activeSite?.name) {
+    useIrpStore.getState()._syncFromSiteEnergy()
+  }
+})
