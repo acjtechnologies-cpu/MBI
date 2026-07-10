@@ -18,7 +18,7 @@
       "note": "Reference V4 — terrain pilote Jo",
       "note_v4": "K=1.000 reference absolue",
       "irp_formula": "T_P5/T_P25 x10",
-      "altitude": 480,
+      "altitude": 421,
       "energy": {
         "kMedian": null,
         "qMedian": null,
@@ -104,7 +104,7 @@
       "k": 0.988,
       "note_v4": "Ajuste terrain pilote Jo — moins irregulier que calcul F3XVault (0.913)",
       "irp_formula": "T_P5/T_P25 x10",
-      "altitude": null,
+      "altitude": 446,
       "energy": {
         "kMedian": null,
         "qMedian": null,

@@ -1,7 +1,7 @@
 ﻿import { create } from "zustand"
 
 const SITES_URL = `${import.meta.env.BASE_URL}planeurs/sites.json`
-export const Q_REF_ESC = 44.441  // Pa, calcule 7 juillet 2026 sur event_id 4225
+export const Q_REF_ESC = 44.751  // Pa, recalcule 10 juillet 2026 avec altitude IGN Escueillens=421m (etait 44.441 sur 480m)
 
 function median(arr) {
   if (!arr.length) return null
