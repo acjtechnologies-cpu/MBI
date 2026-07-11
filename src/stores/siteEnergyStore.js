@@ -19,10 +19,32 @@ function percentile(arr, p) {
   return s[lo] + (s[hi] - s[lo]) * (idx - lo)
 }
 
+const SESSION_STORAGE_KEY = "f3xv_site_session"
+
+function loadSessionFromStorage() {
+  try {
+    const raw = localStorage.getItem(SESSION_STORAGE_KEY)
+    return raw ? JSON.parse(raw) : {}
+  } catch {
+    return {}
+  }
+}
+
+function saveSessionToStorage(session) {
+  try {
+    if (session && Object.keys(session).length > 0) {
+      localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session))
+    } else {
+      localStorage.removeItem(SESSION_STORAGE_KEY)
+    }
+  } catch {}
+}
+
 export const useSiteEnergyStore = create((set, get) => ({
   sitesRaw: null,
   loaded: false,
-  session: {}, // { [siteName]: { samples: [{date,round,seconds,wind,rho,q,k,source}], kDyn, tp5Frozen, tp25Frozen } }
+  // Restaure automatiquement le tampon de session au demarrage (survit a un reload accidentel)
+  session: loadSessionFromStorage(), // { [siteName]: { samples: [{date,round,seconds,wind,rho,q,k,source}], kDyn, tp5Frozen, tp25Frozen } }
 
   init: async () => {
     const res = await fetch(SITES_URL)
@@ -44,9 +66,9 @@ export const useSiteEnergyStore = create((set, get) => ({
     const secs = hist.map(s => s.seconds).filter(v => v != null)
     const tp5Frozen = percentile(secs, 5)
     const tp25Frozen = percentile(secs, 25)
-    set(state => ({
-      session: { ...state.session, [name]: { samples: [], kDyn: null, tp5Frozen, tp25Frozen } }
-    }))
+    const newSession = { ...get().session, [name]: { samples: [], kDyn: null, tp5Frozen, tp25Frozen } }
+    set({ session: newSession })
+    saveSessionToStorage(newSession)
   },
 
   // Appele a chaque calcul valide (station ou F3XVault) — alimente uniquement la session
@@ -67,7 +89,9 @@ export const useSiteEnergyStore = create((set, get) => ({
     const samples = [...sess.samples, { date, round, seconds, wind, rho: rhoVal, q, k, source }]
     const kDyn = median(samples.map(s => s.k).filter(v => v != null))
 
-    set({ session: { ...session, [name]: { ...sess, samples, kDyn } } })
+    const newSession = { ...session, [name]: { ...sess, samples, kDyn } }
+    set({ session: newSession })
+    saveSessionToStorage(newSession)
   },
 
   // Consolide la session dans l'historique persistant (fin de session)
@@ -97,11 +121,13 @@ export const useSiteEnergyStore = create((set, get) => ({
 
     const { [name]: _discarded, ...restSessions } = session
     set({ sitesRaw: { ...sitesRaw, sites }, session: restSessions })
+    saveSessionToStorage(restSessions)
   },
 
   discardSession: (name) => {
     const { [name]: _discarded, ...rest } = get().session
     set({ session: rest })
+    saveSessionToStorage(rest)
   },
 
   exportSitesJson: () => {
