@@ -47,7 +47,9 @@ export const useSiteEnergyStore = create((set, get) => ({
   session: loadSessionFromStorage(), // { [siteName]: { samples: [{date,round,seconds,wind,rho,q,k,source}], kDyn, tp5Frozen, tp25Frozen } }
 
   init: async () => {
-    const res = await fetch(SITES_URL)
+    // cache-buster : evite le cache HTTP navigateur ET le CDN GitHub Pages
+    // qui peuvent servir une vieille copie de sites.json malgre le bump du service worker
+    const res = await fetch(`${SITES_URL}?t=${Date.now()}`, { cache: "no-store" })
     const data = await res.json()
     set({ sitesRaw: data, loaded: true })
   },
