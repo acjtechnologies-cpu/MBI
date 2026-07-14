@@ -8,7 +8,7 @@
 import { create } from 'zustand'
 import { ESP32_CONFIG } from '../constants'
 import { useAppStore } from './appStore'
-import { useSiteEnergyStore, Q_REF_ESC } from './siteEnergyStore'
+import { useSlopeStore, Q_REF_ESC } from './SlopeStore'
 
 const WS_URL = 'ws://192.168.4.1:81'
 
@@ -105,7 +105,7 @@ export const useESPStore = create((set, get) => ({
 
     const activeSiteName = useAppStore.getState().activeSite?.name
     const kSite = activeSiteName
-      ? (useSiteEnergyStore.getState().getKDyn(activeSiteName) ?? 1)
+      ? (useSlopeStore.getState().getKDyn(activeSiteName) ?? 1)
       : 1
 
     const q = spd > 0 ? 0.5 * rho * spd * spd : null

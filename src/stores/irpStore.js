@@ -1,9 +1,9 @@
 ﻿/**
- * IRP Store v3 — kActuel = miroir reactif du kDyn de siteEnergyStore
+ * IRP Store v3 — kActuel = miroir reactif du kDyn de SlopeStore
  *
  * L'ancien systeme V5 (Trend/IRP_raw/K_dyn base sur T_best/V_moy) est
  * entierement retire. kActuel suit maintenant le K_site dynamique
- * calcule par siteEnergyStore pour le site actif (voir siteEnergyStore.js).
+ * calcule par SlopeStore pour le site actif (voir SlopeStore.js).
  *
  * confidence = f(nbRuns session courante, sigma des k de la session)
  *   LOW    : < 5 runs ou sigma_K > 0.15
@@ -15,7 +15,7 @@
  */
 import { create } from 'zustand'
 import { useAppStore } from './appStore'
-import { useSiteEnergyStore } from './siteEnergyStore'
+import { useSlopeStore } from './SlopeStore'
 
 function stdDev(arr) {
   if (arr.length < 2) return 0
@@ -25,7 +25,7 @@ function stdDev(arr) {
 
 export const useIrpStore = create((set, get) => ({
 
-  // Miroir reactif du kDyn de siteEnergyStore pour le site actif
+  // Miroir reactif du kDyn de SlopeStore pour le site actif
   kActuel: null,
   confidence: null,
   nbRuns: 0,
@@ -43,7 +43,7 @@ export const useIrpStore = create((set, get) => ({
       set({ kActuel: null, confidence: null, nbRuns: 0 })
       return
     }
-    const seState = useSiteEnergyStore.getState()
+    const seState = useSlopeStore.getState()
     const kDyn = seState.getKDyn(activeSiteName)
     const session = seState.session[activeSiteName]
     const kVals = (session?.samples ?? []).map(s => s.k).filter(v => v != null)
@@ -113,8 +113,8 @@ export const useIrpStore = create((set, get) => ({
   },
 }))
 
-// Sync automatique quand siteEnergyStore ou le site actif changent
-useSiteEnergyStore.subscribe(() => {
+// Sync automatique quand SlopeStore ou le site actif changent
+useSlopeStore.subscribe(() => {
   useIrpStore.getState()._syncFromSiteEnergy()
 })
 useAppStore.subscribe((state, prevState) => {

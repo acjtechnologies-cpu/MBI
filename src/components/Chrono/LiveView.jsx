@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAppStore } from '../../stores/appStore';
-import { useSiteEnergyStore, Q_REF_ESC } from '../../stores/siteEnergyStore';
+import { useSlopeStore, Q_REF_ESC } from '../../stores/SlopeStore';
 
 const API_URL  = 'https://www.f3xvault.com/api.php';
 const POLL_MS  = 120_000;
@@ -264,8 +264,8 @@ function StandingsCard({ standings, target }) {
 
 // ── Composant principal ───────────────────────────────────────────────────────
 function SiteSelector() {
-  const sitesRaw = useSiteEnergyStore(s => s.sitesRaw);
-  const loaded = useSiteEnergyStore(s => s.loaded);
+  const sitesRaw = useSlopeStore(s => s.sitesRaw);
+  const loaded = useSlopeStore(s => s.loaded);
   const activeSiteName = useAppStore(s => s.activeSite?.name || '');
   const setActiveSite = useAppStore(s => s.setActiveSite);
 
@@ -309,7 +309,7 @@ export default function LiveView({ onBack } = {}) {
   const lastRoundRef = useRef(0);
 
   useEffect(() => {
-    useSiteEnergyStore.getState().init();
+    useSlopeStore.getState().init();
   }, []);
 
   async function doSearch() {
@@ -330,7 +330,7 @@ export default function LiveView({ onBack } = {}) {
 
       const activeSiteName = useAppStore.getState().activeSite?.name;
       if (activeSiteName) {
-        const seStore = useSiteEnergyStore.getState();
+        const seStore = useSlopeStore.getState();
         if (!seStore.session[activeSiteName]) {
           seStore.startSession(activeSiteName);
         }
@@ -458,8 +458,8 @@ export default function LiveView({ onBack } = {}) {
           <button onClick={() => {
             const activeSiteName = useAppStore.getState().activeSite?.name;
             if (!activeSiteName) return;
-            useSiteEnergyStore.getState().closeSession(activeSiteName);
-            useSiteEnergyStore.getState().exportSitesJson();
+            useSlopeStore.getState().closeSession(activeSiteName);
+            useSlopeStore.getState().exportSitesJson();
           }} style={{
             background:'#3a2a1a', border:'0.5px solid #8a5a2a', color:'#e8b84a',
             fontSize:12, cursor:'pointer', padding:'8px 0', borderRadius:8,

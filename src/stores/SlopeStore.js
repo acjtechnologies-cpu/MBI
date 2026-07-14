@@ -40,7 +40,7 @@ function saveSessionToStorage(session) {
   } catch {}
 }
 
-export const useSiteEnergyStore = create((set, get) => ({
+export const useSlopeStore = create((set, get) => ({
   sitesRaw: null,
   loaded: false,
   // Restaure automatiquement le tampon de session au demarrage (survit a un reload accidentel)
