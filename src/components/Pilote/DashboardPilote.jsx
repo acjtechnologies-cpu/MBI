@@ -174,8 +174,11 @@ export default function DashboardPilote({ onChangePlaneur }) {
     decrementNez:   s.decrementNez,
   })))
 
-  const altitude    = useAppStore(s => parseFloat(s.altitude) || 0)
+  const altitudeManuelle = useAppStore(s => parseFloat(s.altitude) || 0)
+  const siteAltitude  = useSlopeStore(s => s.sitesRaw?.sites?.find(x => x.name === activeSite?.name)?.altitude ?? 0)
+  const altitude      = siteAltitude > 0 ? siteAltitude : altitudeManuelle
   const espIrpx     = useSlopeStore(s => s.live.irpx)
+  useEffect(() => { useSlopeStore.getState().init() }, [])
   const espEnergiePct = useSlopeStore(s => s.live.energiePct)
   const espConnected = useESPStore(s => s.connected || s.demo)
   const setAltitude = useAppStore(s => s.setAltitude)
@@ -368,6 +371,7 @@ useEffect(() => {
       case 'offset':
         setOffset(Math.max(-500, Math.min(500, offsetVal + dir * 42))); break
       case 'alt':
+        if (siteAltitude > 0) break  // immuable : valeur du site
         setAltitude(Math.max(0, Math.min(3000, altitude + dir * 25))); break
       case 'nez':
         dir > 0 ? incrementNez() : decrementNez(); break
@@ -391,11 +395,13 @@ useEffect(() => {
             <div className={`mb-vent${selectedParam === 'vent' ? ' active' : ''}`} onClick={() => selectParam('vent')}>
               <div className="mb-vent-val">{vent.toFixed(1)}</div>
               <div className="mb-vent-lbl">{ventLabel}</div>
-              <button
-                className={`mb-gps-btn${gpsStatus === 'capturing' ? ' capturing' : ''}`}
-                onClick={e => { e.stopPropagation(); setGpsOpen(true); captureGPS() }}>
-                {gpsStatus === 'ok' ? '✅' : gpsStatus === 'err' ? '❌' : '📍'}
-              </button>
+              {siteAltitude === 0 && (
+                <button
+                  className={`mb-gps-btn${gpsStatus === 'capturing' ? ' capturing' : ''}`}
+                  onClick={e => { e.stopPropagation(); setGpsOpen(true); captureGPS() }}>
+                  {gpsStatus === 'ok' ? '✅' : gpsStatus === 'err' ? '❌' : '📍'}
+                </button>
+              )}
             </div>
 
             {/* Jauge Energie Live (0-100%+, K_site) */}
@@ -528,8 +534,10 @@ useEffect(() => {
                       <div className="mb-mode-lbl">{cfgAppliquee !== null ? '🔒 KG' : 'KG'}</div>
                     </button>
                     <button className={`mb-mode-btn${selectedParam === 'alt' ? ' active-alt' : ''}`} onClick={() => selectParam('alt')}>
-                      <div className="mb-mode-val">{altitude}</div>
-                      <div className="mb-mode-lbl">ALT m</div>
+                      <div className="mb-mode-val" style={siteAltitude > 0 ? { color:'#58a6ff' } : {}}>
+                        {siteAltitude > 0 ? siteAltitude : (altitude > 0 ? altitude : '—')}
+                      </div>
+                      <div className="mb-mode-lbl">{siteAltitude > 0 ? 'ALT m · site' : (altitude > 0 ? 'ALT m' : 'ALT m · a saisir')}</div>
                     </button>
                   </div>
                   {hasNez ? (
