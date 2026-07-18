@@ -40,7 +40,7 @@
       "ref_v4": "Escueillens",
       "k": 0.994,
       "irp_formula": "T_P5/T_P25 x10",
-      "altitude": null,
+      "altitude": 270,
       "energy": {
         "kMedian": null,
         "qMedian": null,
@@ -62,7 +62,7 @@
       "ref_v4": "Escueillens",
       "k": 1.022,
       "irp_formula": "T_P5/T_P25 x10",
-      "altitude": null,
+      "altitude": 1450,
       "energy": {
         "kMedian": null,
         "qMedian": null,
@@ -126,7 +126,7 @@
       "ref_v4": "Escueillens",
       "k": 1.011,
       "irp_formula": "T_P5/T_P25 x10",
-      "altitude": null,
+      "altitude": 1924,
       "energy": {
         "kMedian": null,
         "qMedian": null,
@@ -192,7 +192,7 @@
       "ref_v4": "Escueillens",
       "k": 0.95,
       "irp_formula": "T_P5/T_P25 x10",
-      "altitude": null,
+      "altitude": 1250,
       "energy": {
         "kMedian": null,
         "qMedian": null,
@@ -214,7 +214,7 @@
       "ref_v4": "Escueillens",
       "k": 1.034,
       "irp_formula": "T_P5/T_P25 x10",
-      "altitude": null,
+      "altitude": 1050,
       "energy": {
         "kMedian": null,
         "qMedian": null,
