@@ -30,7 +30,11 @@ function rhoAlt(altM) {
 // Fallback si fetch echoue
 // K_site = irp / REF_IRP (derive, jamais stocke)
 const REF_IRP = 230
-const deriveK = (irp, k_v4) => k_v4 != null ? k_v4 : Math.max(0.85, Math.min(1.15, irp / REF_IRP))
+const deriveK = (irp, k_v4) => {
+  if (k_v4 != null) return k_v4
+  if (irp == null) return 1.0
+  return Math.max(0.85, Math.min(1.15, irp / REF_IRP))
+}
 const FALLBACK_SITES = [
   { name: 'Neutre', irp: 230, k_v4: 1.000 },
   { name: 'Saint Ferriol', irp: 230, k_v4: 0.913 },
@@ -51,7 +55,7 @@ export default function Poly4Page({ onNavigate } = {}) {
   const vent          = useAppStore(s => s.params?.vent ?? 8.0)
   const setParam      = useAppStore(s => s.setParam)
   const setOffset     = useAppStore(s => s.setOffset)
-  const altitude      = useAppStore(s => s.altitude ?? 0)
+  const altitudeManuelle = useAppStore(s => s.altitude ?? 0)
   const offsetStore   = useAppStore(s => s.offset ?? -144)
   const irpK          = useIrpStore(s => s.kActuel)
   const irpConfidence = useIrpStore(s => s.confidence)
@@ -91,6 +95,9 @@ export default function Poly4Page({ onNavigate } = {}) {
   const allSites = sites
   const currentSite = allSites[siteIdx] ?? allSites[Math.min(6, allSites.length - 1)]
   const kPente      = currentSite?.k_v4 ?? currentSite?.k ?? 1.00
+  const altitude    = (currentSite?.altitude != null && currentSite.altitude > 0)
+    ? currentSite.altitude
+    : altitudeManuelle
   const rho         = useMemo(() => rhoAlt(altitude), [altitude])
   const offsetADN   = (model?.masse_ref_8ms || P4_REF_8MS) - P4_REF_8MS
   const offsetTerrain = offsetStore / 1000
