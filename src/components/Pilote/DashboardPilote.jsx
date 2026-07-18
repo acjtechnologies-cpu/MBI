@@ -1,6 +1,7 @@
 ﻿import { useState, useRef, useEffect } from 'react'
 import { useAppStore } from '../../stores/appStore'
 import { useESPStore } from '../../stores/espStore'
+import { useSlopeStore } from '../../stores/SlopeStore'
 import { useShallow } from 'zustand/react/shallow'
 import { useModelStore } from '../../stores/modelStore'
 import GliderBrowser from '../GliderBrowser'
@@ -174,8 +175,8 @@ export default function DashboardPilote({ onChangePlaneur }) {
   })))
 
   const altitude    = useAppStore(s => parseFloat(s.altitude) || 0)
-  const espIrpx     = useESPStore(s => s.irpx)
-  const espEnergiePct = useESPStore(s => s.energiePct)
+  const espIrpx     = useSlopeStore(s => s.live.irpx)
+  const espEnergiePct = useSlopeStore(s => s.live.energiePct)
   const espConnected = useESPStore(s => s.connected || s.demo)
   const setAltitude = useAppStore(s => s.setAltitude)
   const model       = useModelStore(s => s.models?.[s.activeModelId] ?? null)

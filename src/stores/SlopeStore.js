@@ -1,4 +1,5 @@
 ﻿import { create } from "zustand"
+import { useAppStore } from "./appStore"
 
 const SITES_URL = `${import.meta.env.BASE_URL}planeurs/sites.json`
 export const Q_REF_ESC = 44.751  // Pa, recalcule 10 juillet 2026 avec altitude IGN Escueillens=421m (etait 44.441 sur 480m)
@@ -45,6 +46,32 @@ export const useSlopeStore = create((set, get) => ({
   loaded: false,
   // Restaure automatiquement le tampon de session au demarrage (survit a un reload accidentel)
   session: loadSessionFromStorage(), // { [siteName]: { samples: [{date,round,seconds,wind,rho,q,k,source}], kDyn, tp5Frozen, tp25Frozen } }
+
+  // Section "live" : calculs metier temps reel (Phase 4 -- deplaces depuis espStore.js)
+  // espStore ne fait plus que transporter les trames brutes et appeler updateLive()
+  live: { q: null, irpx: null, energiePct: null },
+
+  // Calcule Energie/IQA/IRPX a partir des donnees brutes ESP32 (spd, iqa, rhoStation, alt)
+  // + du K_site du site actif -- SEULE fonction qui fait ce calcul desormais
+  updateLive: ({ spd, iqa, rhoStation, alt }) => {
+    const rho = rhoStation != null && rhoStation > 0
+      ? rhoStation
+      : alt != null
+        ? 1.225 * Math.exp(-alt / 8500)
+        : 1.225
+
+    const activeSiteName = useAppStore.getState().activeSite?.name
+    const kSite = activeSiteName
+      ? (get().getKDyn(activeSiteName) ?? 1)
+      : 1
+
+    const q = spd > 0 ? 0.5 * rho * spd * spd : null
+    const energy = q !== null ? (q / Q_REF_ESC) * kSite : null
+    const energiePct = energy !== null ? +(energy * 100).toFixed(1) : null
+    const irpx = (energy !== null && iqa > 0) ? +(energy * iqa).toFixed(3) : null
+
+    set({ live: { q: q !== null ? +q.toFixed(1) : null, irpx, energiePct } })
+  },
 
   init: async () => {
     // cache-buster : evite le cache HTTP navigateur ET le CDN GitHub Pages

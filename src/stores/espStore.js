@@ -72,10 +72,6 @@ export const useESPStore = create((set, get) => ({
     BULLE: 0,
   },
 
-  q: null,
-  irpx: null,
-  energiePct: null,
-
   turbBuf: Array(60).fill(0),
   turbSigma: 0,
   pid: { kp: 1.2, ki: 0.05, kd: 0.30 },
@@ -92,28 +88,14 @@ export const useESPStore = create((set, get) => ({
     }))
 
 
-    // Energie / IQA / IRPX : trois indicateurs distincts (K_site dynamique)
-    const spd = next.SPD || 0
-    const iqa = next.IQA || 0
-    // rho LOCAL au site (station > ALT GPS > ISA sea level) -- jamais RHO_ESC,
-    // deux sites au meme vent mais a des altitudes differentes ont une energie differente
-    const rho = next.RHO != null && next.RHO > 0
-      ? next.RHO
-      : next.ALT != null
-        ? 1.225 * Math.exp(-next.ALT / 8500)
-        : 1.225
-
-    const activeSiteName = useAppStore.getState().activeSite?.name
-    const kSite = activeSiteName
-      ? (useSlopeStore.getState().getKDyn(activeSiteName) ?? 1)
-      : 1
-
-    const q = spd > 0 ? 0.5 * rho * spd * spd : null
-    const energy = q !== null ? (q / Q_REF_ESC) * kSite : null
-    const energiePct = energy !== null ? +(energy * 100).toFixed(1) : null
-    const irpx = (energy !== null && iqa > 0) ? +(energy * iqa).toFixed(3) : null
-
-    set({ q: q !== null ? +q.toFixed(1) : null, irpx, energiePct })
+    // Phase 4 : le calcul metier (Energie/IQA/IRPX) est delegue a SlopeStore.updateLive()
+    // espStore ne fait plus que transporter les donnees brutes ESP32
+    useSlopeStore.getState().updateLive({
+      spd: next.SPD || 0,
+      iqa: next.IQA || 0,
+      rhoStation: next.RHO,
+      alt: next.ALT,
+    })
 
     // Altitude -> appStore partage
     if (incoming.ALT !== undefined && incoming.ALT > 0 && setAltitude) {
@@ -279,6 +261,6 @@ export const useESPStore = create((set, get) => ({
     get().wsStop()
     get().stopDemo()
     set({ connected: false, wsStatus: 'off', lastUpdate: null, error: null, demo: false,
-          sdActive: false, turbBuf: Array(60).fill(0), turbSigma: 0, q: null, irpx: null, energiePct: null })
+          sdActive: false, turbBuf: Array(60).fill(0), turbSigma: 0 })
   },
 }))
