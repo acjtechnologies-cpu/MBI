@@ -335,7 +335,6 @@ export default function LiveView({ onBack } = {}) {
       setRounds(prev => { const next = { ...prev, [rn]: rows }; localStorage.setItem('f3xv_rounds', JSON.stringify(next)); return next; });
       setLastRound(rn);
       lastRoundRef.current = rn;
-
       const activeSiteName = useAppStore.getState().activeSite?.name;
       if (activeSiteName) {
         const seStore = useSlopeStore.getState();
@@ -343,24 +342,35 @@ export default function LiveView({ onBack } = {}) {
           seStore.startSession(activeSiteName);
         }
         const alreadyLogged = seStore.session[activeSiteName]?.samples?.some(s => s.round === rn);
-        const row = rows.find(r => r.pilot.toLowerCase() === target.toLowerCase().trim());
-        if (!alreadyLogged && row && row.seconds > 0 && row.wind > 0) {
-          const site = seStore.getSite(activeSiteName);
-          const rho = site && site.altitude != null
-            ? 1.225 * Math.exp(-site.altitude / 8500)
-            : undefined;
-          seStore.addSample(activeSiteName, {
-            date: new Date().toISOString().slice(0, 10),
-            round: rn,
-            seconds: row.seconds,
-            wind: row.wind,
-            rho,
-            q_ref: Q_REF_ESC,
-            source: 'f3xvault',
-          });
+
+        // rows est deja trie par seconds croissant (voir getRound) : rows[0] = meilleur temps
+        const n = rows.length;
+        // seuil mini : en dessous de 4 pilotes un percentile 5/25 n'a pas grand sens statistique
+        if (!alreadyLogged && n >= 4) {
+          const t_p5  = rows[Math.max(0, Math.floor(0.05 * n))]?.seconds;
+          const t_p25 = rows[Math.floor(0.25 * n)]?.seconds;
+          const windAvg = rows.reduce((sum, r) => sum + r.wind, 0) / n;
+
+          if (t_p5 > 0 && t_p25 > 0 && windAvg > 0) {
+            const site = seStore.getSite(activeSiteName);
+            const rho = site && site.altitude != null
+              ? 1.225 * Math.exp(-site.altitude / 8500)
+              : undefined;
+            seStore.addSample(activeSiteName, {
+              date: new Date().toISOString().slice(0, 10),
+              round: rn,
+              t_p5,
+              t_p25,
+              wind: windAvg,
+              rho,
+              q_ref: Q_REF_ESC,
+              source: 'f3xvault',
+              agg: 'collective',
+              schema: 2,
+            });
+          }
         }
       }
-
       return true;
     }
     return false;

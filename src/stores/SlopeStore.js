@@ -89,12 +89,16 @@ export const useSlopeStore = create((set, get) => ({
   getKDyn: (name) => get().session[name]?.kDyn ?? null,
 
   // Demarre une session : fige T_P5/T_P25 depuis l'historique existant du site
+  // IMPORTANT : ne filtre QUE sur les samples schema=2 + agg="collective" (P5/P25 calcules
+  // sur l'ensemble des pilotes d'un round). Les vieux samples "individual" (temps d'un seul
+  // pilote suivi, format legacy pre-migration) sont ignores ici pour ne jamais melanger deux
+  // statistiques de nature differente dans le meme percentile fige.
   startSession: (name) => {
     const site = get().getSite(name)
-    const hist = site?.energy?.samples ?? []
-    const secs = hist.map(s => s.seconds).filter(v => v != null)
-    const tp5Frozen = percentile(secs, 5)
-    const tp25Frozen = percentile(secs, 25)
+    const hist = (site?.energy?.samples ?? []).filter(s => s.schema === 2 && s.agg === "collective")
+    const secs = hist.map(s => s.t_p5).filter(v => v != null)
+    const tp5Frozen = secs.length ? percentile(secs, 5) : null
+    const tp25Frozen = secs.length ? percentile(secs, 25) : null
     const newSession = { ...get().session, [name]: { samples: [], kDyn: null, tp5Frozen, tp25Frozen } }
     set({ session: newSession })
     saveSessionToStorage(newSession)
@@ -102,20 +106,37 @@ export const useSlopeStore = create((set, get) => ({
 
   // Appele a chaque calcul valide (station ou F3XVault) — alimente uniquement la session
   // q_ref = Q_REF_ESC, passe depuis irpStore
-  addSample: (name, { date, round, seconds, wind, rho, q_ref, source }) => {
+  //
+  // SCHEMA 2 (migration collective, depuis le backfill Puy de Manse) :
+  //   t_p5/t_p25  = percentiles calcules sur TOUS les pilotes du round (pas un pilote suivi)
+  //   ratio       = t_p5/t_p25, champ DIAGNOSTIQUE uniquement, n'entre dans aucun calcul de k
+  //   seconds     = alias legacy = t_p5, conserve en lecture seule pour compat affichage,
+  //                 sera supprime une fois la migration terminee sur tous les sites
+  //   k continue d'etre derive EXCLUSIVEMENT de tp5Frozen/tp25Frozen (figes a startSession),
+  //   jamais de ratio — ratio ne sert qu'a l'inspection/debug d'un round isole
+  addSample: (name, { date, round, t_p5, t_p25, wind, rho, q_ref, source, agg, schema = 2 }) => {
     const { session } = get()
     const sess = session[name]
     if (!sess) return // startSession() doit etre appele avant
 
     const rhoVal = rho ?? 1.225
     const q = 0.5 * rhoVal * wind * wind
+    const ratio = (t_p5 != null && t_p25 != null) ? t_p5 / t_p25 : null
 
     let k = 1  // bootstrap: pas d'historique -> K neutre par defaut
     if (sess.tp5Frozen != null && sess.tp25Frozen != null && q_ref) {
       k = (sess.tp5Frozen / sess.tp25Frozen) / (q / q_ref)
     }
 
-    const samples = [...sess.samples, { date, round, seconds, wind, rho: rhoVal, q, k, source }]
+    const sample = {
+      schema, agg,
+      date, round,
+      seconds: t_p5, // legacy alias, lecture seule
+      t_p5, t_p25, ratio,
+      wind, rho: rhoVal, q, k, source,
+    }
+
+    const samples = [...sess.samples, sample]
     const kDyn = median(samples.map(s => s.k).filter(v => v != null))
 
     const newSession = { ...session, [name]: { ...sess, samples, kDyn } }
