@@ -94,7 +94,7 @@ function RoundCard({ round, rows, target }) {
   const irp    = ((t_p5 / t_p25) * 10 / REF_IRP).toFixed(3);
   const wind   = rows[0].wind;
   const windDir = rows[0].windDir ?? 0;
-  const joIdx  = rows.findIndex(r => r.pilot.toLowerCase().includes(target.toLowerCase()));
+  const joIdx  = rows.findIndex(r => r.pilot.toLowerCase() === target.toLowerCase().trim());
 
   return (
     <div style={{ background:'#0f0f0f', border:'0.5px solid #1e2535',
@@ -141,7 +141,7 @@ function RoundCard({ round, rows, target }) {
 function StandingsCard({ standings, target }) {
   const [rival, setRival] = useState(() => localStorage.getItem('f3xv_rival') || '');
   if (!standings.length) return null;
-  const joIdx = standings.findIndex(r => r.pilot.toLowerCase().includes(target.toLowerCase()));
+  const joIdx = standings.findIndex(r => r.pilot.toLowerCase() === target.toLowerCase().trim());
   const jo    = standings[joIdx];
   const rivalIdx = rival ? standings.findIndex(r => r.pilot.toLowerCase().includes(rival.toLowerCase())) : -1;
   const rivalData = rivalIdx >= 0 ? standings[rivalIdx] : null;
@@ -335,7 +335,7 @@ export default function LiveView({ onBack } = {}) {
           seStore.startSession(activeSiteName);
         }
         const alreadyLogged = seStore.session[activeSiteName]?.samples?.some(s => s.round === rn);
-        const row = rows.find(r => r.pilot.toLowerCase().includes(target.toLowerCase()));
+        const row = rows.find(r => r.pilot.toLowerCase() === target.toLowerCase().trim());
         if (!alreadyLogged && row && row.seconds > 0 && row.wind > 0) {
           const site = seStore.getSite(activeSiteName);
           const rho = site && site.altitude != null
