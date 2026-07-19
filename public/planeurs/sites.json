@@ -129,7 +129,7 @@
       "ref_v4": "Escueillens",
       "k": 0.991,
       "irp_formula": "T_P5/T_P25 x10",
-      "altitude": null,
+      "altitude": 1800,
       "energy": {
         "kMedian": null,
         "qMedian": null,
@@ -144,14 +144,14 @@
       "irp": 205,
       "confidence": "MEDIUM",
       "manches": 9,
-      "note": "9 manches",
+      "note": "Meme sommet que TOA, face NO (TOA=SE)",
       "irp_p25": 7.977,
       "k_v4": 0.999,
       "n_rounds": 117,
       "ref_v4": "Escueillens",
       "k": 0.999,
       "irp_formula": "T_P5/T_P25 x10",
-      "altitude": null,
+      "altitude": 530,
       "energy": {
         "kMedian": null,
         "qMedian": null,
@@ -159,7 +159,9 @@
         "qP75": null,
         "samples": [],
         "updated": null
-      }
+      },
+      "latitude": 44.616667,
+      "longitude": 4.633333
     },
     {
       "name": "Route des Crêtes",
@@ -217,7 +219,7 @@
       "ref_v4": "Escueillens",
       "k": 1.072,
       "irp_formula": "T_P5/T_P25 x10",
-      "altitude": null,
+      "altitude": 1300,
       "energy": {
         "kMedian": null,
         "qMedian": null,
