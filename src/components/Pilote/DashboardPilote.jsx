@@ -176,6 +176,7 @@ export default function DashboardPilote({ onChangePlaneur }) {
 
   const altitudeManuelle = useAppStore(s => parseFloat(s.altitude) || 0)
   const siteAltitude  = useSlopeStore(s => s.sitesRaw?.sites?.find(x => x.name === activeSite?.name)?.altitude ?? 0)
+  const siteKMedian   = useSlopeStore(s => s.sitesRaw?.sites?.find(x => x.name === activeSite?.name)?.energy?.kMedian ?? null)
   const altitude      = siteAltitude > 0 ? siteAltitude : altitudeManuelle
   const espIrpx     = useSlopeStore(s => s.live.irpx)
   useEffect(() => { useSlopeStore.getState().init() }, [])
@@ -220,7 +221,7 @@ export default function DashboardPilote({ onChangePlaneur }) {
   const mAltkg        = getMasseAlt(m0kg, altitude)
   const modelOffset   = model.offset ?? Math.round(((model.masse_ref_8ms || P4_REF_8MS) - P4_REF_8MS) * 1000)
   const offsetVal     = parseFloat(offset) || 0
-  const kPente        = activeSite?.k_v4 ?? activeSite?.k ?? 1.00
+  const kPente        = siteKMedian ?? activeSite?.k_v4 ?? activeSite?.k ?? 1.00
   const altCorrection = Math.round((m0kg - mAltkg) * 1000)
   const targetGAuto   = Math.max(model.masseVide, Math.round(mAltkg * kPente * 1000 + modelOffset + offsetVal))
   const targetG       = cfgAppliquee !== null
