@@ -307,6 +307,14 @@ export default function LiveView({ onBack } = {}) {
   const [error, setError]       = useState('');
   const timerRef = useRef(null);
   const lastRoundRef = useRef(0);
+  const activeSiteName = useAppStore(s => s.activeSite?.name);
+
+  // Reinitialise le polling a chaque changement de site (evite de reprendre
+  // au milieu si lastRoundRef n'a pas ete remis a zero par un vrai reload)
+  useEffect(() => {
+    lastRoundRef.current = 0;
+    setLastRound(0);
+  }, [activeSiteName]);
 
   useEffect(() => {
     useSlopeStore.getState().init();
