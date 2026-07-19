@@ -287,12 +287,23 @@
       "name": "Puy de Manse",
       "altitude": 1269,
       "energy": {
-        "kMedian": null,
-        "qMedian": null,
-        "qP25": null,
-        "qP75": null,
-        "samples": [],
-        "updated": null
+        "kMedian": 1,
+        "qMedian": 82.14070843085833,
+        "qP25": 82.14070843085833,
+        "qP75": 82.14070843085833,
+        "samples": [
+          {
+            "date": "2026-07-19",
+            "round": 15,
+            "seconds": 37,
+            "wind": 12.478,
+            "rho": 1.055111793112452,
+            "q": 82.14070843085833,
+            "k": 1,
+            "source": "f3xvault"
+          }
+        ],
+        "updated": "2026-07-19T11:53:50.668Z"
       },
       "note": "Concours au col de Manse"
     },
