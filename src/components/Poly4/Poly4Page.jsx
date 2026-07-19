@@ -94,7 +94,7 @@ export default function Poly4Page({ onNavigate } = {}) {
   // ── Dérivés ───────────────────────────────────────────────────────────────
   const allSites = sites
   const currentSite = allSites[siteIdx] ?? allSites[Math.min(6, allSites.length - 1)]
-  const kPente      = currentSite?.k_v4 ?? currentSite?.k ?? 1.00
+  const kPente      = currentSite?.kMedian ?? currentSite?.k_v4 ?? currentSite?.k ?? 1.00
   const altitude    = (currentSite?.altitude != null && currentSite.altitude > 0)
     ? currentSite.altitude
     : altitudeManuelle
@@ -119,7 +119,7 @@ export default function Poly4Page({ onNavigate } = {}) {
       .then(r => r.ok ? r.json() : null)
       .then(data => {
         if (data?.sites?.length) {
-          const fetched = data.sites.map(s => ({ name: s.name, irp: s.irp, k_v4: s.k_v4 ?? null, k: deriveK(s.irp, s.k_v4) }))
+          const fetched = data.sites.map(s => ({ name: s.name, irp: s.irp, k_v4: s.k_v4 ?? null, k: deriveK(s.irp, s.k_v4), kMedian: s.energy?.kMedian ?? null, altitude: s.altitude ?? null }))
           // Applique les overrides terrain depuis Dexie
           db.sites_k.toArray().then(rows => {
             const merged = fetched.map(s => {
