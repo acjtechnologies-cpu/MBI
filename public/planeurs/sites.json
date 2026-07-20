@@ -289,10 +289,10 @@
       "name": "Puy de Manse",
       "altitude": 1269,
       "energy": {
-        "kMedian": 1,
-        "qMedian": 47.366159175508514,
-        "qP25": 17.08273038174945,
-        "qP75": 82.22136804279354,
+        "kMedian": 0.5377612945182215,
+        "qMedian": 68.24018024244106,
+        "qP25": 20.737411060371993,
+        "qP75": 95.29837747980498,
         "samples": [
           {
             "schema": 2,
@@ -307,7 +307,8 @@
             "rho": 1.055111793112452,
             "q": 47.366159175508514,
             "k": 1,
-            "source": "f3xvault"
+            "source": "f3xvault",
+            "bootstrap": true
           },
           {
             "schema": 2,
@@ -322,7 +323,8 @@
             "rho": 1.055111793112452,
             "q": 70.32853776639453,
             "k": 1,
-            "source": "f3xvault"
+            "source": "f3xvault",
+            "bootstrap": true
           },
           {
             "schema": 2,
@@ -337,7 +339,8 @@
             "rho": 1.055111793112452,
             "q": 74.69212427460205,
             "k": 1,
-            "source": "f3xvault"
+            "source": "f3xvault",
+            "bootstrap": true
           },
           {
             "schema": 2,
@@ -352,7 +355,8 @@
             "rho": 1.055111793112452,
             "q": 76.90452483011218,
             "k": 1,
-            "source": "f3xvault"
+            "source": "f3xvault",
+            "bootstrap": true
           },
           {
             "schema": 2,
@@ -367,7 +371,8 @@
             "rho": 1.055111793112452,
             "q": 65.513405745035,
             "k": 1,
-            "source": "f3xvault"
+            "source": "f3xvault",
+            "bootstrap": true
           },
           {
             "schema": 2,
@@ -382,7 +387,8 @@
             "rho": 1.055111793112452,
             "q": 75.50628079568662,
             "k": 1,
-            "source": "f3xvault"
+            "source": "f3xvault",
+            "bootstrap": true
           },
           {
             "schema": 2,
@@ -397,7 +403,8 @@
             "rho": 1.055111793112452,
             "q": 109.5045943683689,
             "k": 1,
-            "source": "f3xvault"
+            "source": "f3xvault",
+            "bootstrap": true
           },
           {
             "schema": 2,
@@ -412,7 +419,8 @@
             "rho": 1.055111793112452,
             "q": 59.79705545843799,
             "k": 1,
-            "source": "f3xvault"
+            "source": "f3xvault",
+            "bootstrap": true
           },
           {
             "schema": 2,
@@ -427,7 +435,8 @@
             "rho": 1.055111793112452,
             "q": 100.13142139138444,
             "k": 1,
-            "source": "f3xvault"
+            "source": "f3xvault",
+            "bootstrap": true
           },
           {
             "schema": 2,
@@ -442,7 +451,8 @@
             "rho": 1.055111793112452,
             "q": 96.37510134899402,
             "k": 1,
-            "source": "f3xvault"
+            "source": "f3xvault",
+            "bootstrap": true
           },
           {
             "schema": 2,
@@ -457,7 +467,8 @@
             "rho": 1.055111793112452,
             "q": 96.98172135774591,
             "k": 1,
-            "source": "f3xvault"
+            "source": "f3xvault",
+            "bootstrap": true
           },
           {
             "schema": 2,
@@ -472,7 +483,8 @@
             "rho": 1.055111793112452,
             "q": 82.22136804279354,
             "k": 1,
-            "source": "f3xvault"
+            "source": "f3xvault",
+            "bootstrap": true
           },
           {
             "schema": 2,
@@ -487,7 +499,8 @@
             "rho": 1.055111793112452,
             "q": 104.31047505083575,
             "k": 1,
-            "source": "f3xvault"
+            "source": "f3xvault",
+            "bootstrap": true
           },
           {
             "schema": 2,
@@ -502,7 +515,8 @@
             "rho": 1.055111793112452,
             "q": 99.33523225613608,
             "k": 1,
-            "source": "f3xvault"
+            "source": "f3xvault",
+            "bootstrap": true
           },
           {
             "schema": 2,
@@ -517,7 +531,8 @@
             "rho": 1.055111793112452,
             "q": 95.76197001901778,
             "k": 1,
-            "source": "f3xvault"
+            "source": "f3xvault",
+            "bootstrap": true
           },
           {
             "schema": 2,
@@ -532,7 +547,8 @@
             "rho": 1.055111793112452,
             "q": 8.802763411956272,
             "k": 1,
-            "source": "f3xvault"
+            "source": "f3xvault",
+            "bootstrap": true
           },
           {
             "schema": 2,
@@ -547,7 +563,8 @@
             "rho": 1.055111793112452,
             "q": 11.74040539072854,
             "k": 1,
-            "source": "f3xvault"
+            "source": "f3xvault",
+            "bootstrap": true
           },
           {
             "schema": 2,
@@ -562,7 +579,8 @@
             "rho": 1.055111793112452,
             "q": 26.065611943120828,
             "k": 1,
-            "source": "f3xvault"
+            "source": "f3xvault",
+            "bootstrap": true
           },
           {
             "schema": 2,
@@ -577,7 +595,8 @@
             "rho": 1.055111793112452,
             "q": 36.403338848997365,
             "k": 1,
-            "source": "f3xvault"
+            "source": "f3xvault",
+            "bootstrap": true
           },
           {
             "schema": 2,
@@ -592,7 +611,8 @@
             "rho": 1.055111793112452,
             "q": 15.219339644021144,
             "k": 1,
-            "source": "f3xvault"
+            "source": "f3xvault",
+            "bootstrap": true
           },
           {
             "schema": 2,
@@ -607,7 +627,8 @@
             "rho": 1.055111793112452,
             "q": 17.90829201821091,
             "k": 1,
-            "source": "f3xvault"
+            "source": "f3xvault",
+            "bootstrap": true
           },
           {
             "schema": 2,
@@ -622,7 +643,8 @@
             "rho": 1.055111793112452,
             "q": 17.08273038174945,
             "k": 1,
-            "source": "f3xvault"
+            "source": "f3xvault",
+            "bootstrap": true
           },
           {
             "schema": 2,
@@ -637,7 +659,8 @@
             "rho": 1.055111793112452,
             "q": 17.92489383826196,
             "k": 1,
-            "source": "f3xvault"
+            "source": "f3xvault",
+            "bootstrap": true
           },
           {
             "schema": 2,
@@ -652,7 +675,8 @@
             "rho": 1.055111793112452,
             "q": 16.03758580968928,
             "k": 1,
-            "source": "f3xvault"
+            "source": "f3xvault",
+            "bootstrap": true
           },
           {
             "schema": 2,
@@ -667,7 +691,8 @@
             "rho": 1.055111793112452,
             "q": 21.674916801075337,
             "k": 1,
-            "source": "f3xvault"
+            "source": "f3xvault",
+            "bootstrap": true
           },
           {
             "schema": 2,
@@ -682,7 +707,8 @@
             "rho": 1.055111793112452,
             "q": 26.890445319651874,
             "k": 1,
-            "source": "f3xvault"
+            "source": "f3xvault",
+            "bootstrap": true
           },
           {
             "schema": 2,
@@ -697,7 +723,8 @@
             "rho": 1.055111793112452,
             "q": 11.343642526610953,
             "k": 1,
-            "source": "f3xvault"
+            "source": "f3xvault",
+            "bootstrap": true
           },
           {
             "schema": 2,
@@ -712,7 +739,8 @@
             "rho": 1.055111793112452,
             "q": 14.046764499508965,
             "k": 1,
-            "source": "f3xvault"
+            "source": "f3xvault",
+            "bootstrap": true
           },
           {
             "schema": 2,
@@ -727,10 +755,187 @@
             "rho": 1.055111793112452,
             "q": 13.536709872835171,
             "k": 1,
-            "source": "f3xvault"
+            "source": "f3xvault",
+            "bootstrap": true
+          },
+          {
+            "schema": 2,
+            "agg": "collective",
+            "date": "2026-07-20",
+            "round": 1,
+            "seconds": 39,
+            "t_p5": 39,
+            "t_p25": 49.51,
+            "ratio": 0.7877196525954353,
+            "wind": 11.024166666666666,
+            "rho": 1.055111793112452,
+            "q": 64.11505547560365,
+            "k": 0.635408879780452,
+            "source": "f3xvault",
+            "bootstrap": false
+          },
+          {
+            "schema": 2,
+            "agg": "collective",
+            "date": "2026-07-20",
+            "round": 2,
+            "seconds": 40.7,
+            "t_p5": 40.7,
+            "t_p25": 47.33,
+            "ratio": 0.8599197126558209,
+            "wind": 11.18669230769231,
+            "rho": 1.055111793112452,
+            "q": 66.0194447367117,
+            "k": 0.6170799487830408,
+            "source": "f3xvault",
+            "bootstrap": false
+          },
+          {
+            "schema": 2,
+            "agg": "collective",
+            "date": "2026-07-20",
+            "round": 3,
+            "seconds": 35.54,
+            "t_p5": 35.54,
+            "t_p25": 45.56,
+            "ratio": 0.7800702370500439,
+            "wind": 13.429384615384617,
+            "rho": 1.055111793112452,
+            "q": 95.14384663340071,
+            "k": 0.4281861309832005,
+            "source": "f3xvault",
+            "bootstrap": false
+          },
+          {
+            "schema": 2,
+            "agg": "collective",
+            "date": "2026-07-20",
+            "round": 4,
+            "seconds": 39.32,
+            "t_p5": 39.32,
+            "t_p25": 41.36,
+            "ratio": 0.9506769825918763,
+            "wind": 14.32130769230769,
+            "rho": 1.055111793112452,
+            "q": 108.20163736988592,
+            "k": 0.37651256087325335,
+            "source": "f3xvault",
+            "bootstrap": false
+          },
+          {
+            "schema": 2,
+            "agg": "collective",
+            "date": "2026-07-20",
+            "round": 5,
+            "seconds": 39.24,
+            "t_p5": 39.24,
+            "t_p25": 40.98,
+            "ratio": 0.9575402635431919,
+            "wind": 15.00769230769231,
+            "rho": 1.055111793112452,
+            "q": 118.82185160991217,
+            "k": 0.34286013073218563,
+            "source": "f3xvault",
+            "bootstrap": false
+          },
+          {
+            "schema": 2,
+            "agg": "collective",
+            "date": "2026-07-20",
+            "round": 6,
+            "seconds": 38.32,
+            "t_p5": 38.32,
+            "t_p25": 38.63,
+            "ratio": 0.9919751488480455,
+            "wind": 15.145538461538461,
+            "rho": 1.055111793112452,
+            "q": 121.01464132752835,
+            "k": 0.33664749264969734,
+            "source": "f3xvault",
+            "bootstrap": false
+          },
+          {
+            "schema": 2,
+            "agg": "collective",
+            "date": "2026-07-20",
+            "round": 7,
+            "seconds": 32.27,
+            "t_p5": 32.27,
+            "t_p25": 39.15,
+            "ratio": 0.8242656449553002,
+            "wind": 11.332923076923077,
+            "rho": 1.055111793112452,
+            "q": 67.75671831641286,
+            "k": 0.6012580979286668,
+            "source": "f3xvault",
+            "bootstrap": false
+          },
+          {
+            "schema": 2,
+            "agg": "collective",
+            "date": "2026-07-20",
+            "round": 8,
+            "seconds": 38.09,
+            "t_p5": 38.09,
+            "t_p25": 45.61,
+            "ratio": 0.8351238763429073,
+            "wind": 12.042166666666665,
+            "rho": 1.055111793112452,
+            "q": 76.50287368044982,
+            "k": 0.5325195462196828,
+            "source": "f3xvault",
+            "bootstrap": false
+          },
+          {
+            "schema": 2,
+            "agg": "collective",
+            "date": "2026-07-20",
+            "round": 9,
+            "seconds": 37.89,
+            "t_p5": 37.89,
+            "t_p25": 41.84,
+            "ratio": 0.9055927342256214,
+            "wind": 11.983333333333334,
+            "rho": 1.055111793112452,
+            "q": 75.75717328877867,
+            "k": 0.5377612945182215,
+            "source": "f3xvault",
+            "bootstrap": false
+          },
+          {
+            "schema": 2,
+            "agg": "collective",
+            "date": "2026-07-20",
+            "round": 10,
+            "seconds": 34.52,
+            "t_p5": 34.52,
+            "t_p25": 38.33,
+            "ratio": 0.9006000521784504,
+            "wind": 11.413499999999999,
+            "rho": 1.055111793112452,
+            "q": 68.72364216846927,
+            "k": 0.5927985521626825,
+            "source": "f3xvault",
+            "bootstrap": false
+          },
+          {
+            "schema": 2,
+            "agg": "collective",
+            "date": "2026-07-20",
+            "round": 11,
+            "seconds": 34.14,
+            "t_p5": 34.14,
+            "t_p25": 40.82,
+            "ratio": 0.8363547280744733,
+            "wind": 11.915333333333331,
+            "rho": 1.055111793112452,
+            "q": 74.89983727743008,
+            "k": 0.5439167434492013,
+            "source": "f3xvault",
+            "bootstrap": false
           }
         ],
-        "updated": "2026-07-20T10:46:44.829Z"
+        "updated": "2026-07-20T11:15:28.882Z"
       },
       "note": "Concours au col de Manse"
     },

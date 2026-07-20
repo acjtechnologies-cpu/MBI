@@ -123,8 +123,14 @@ export const useSlopeStore = create((set, get) => ({
     const q = 0.5 * rhoVal * wind * wind
     const ratio = (t_p5 != null && t_p25 != null) ? t_p5 / t_p25 : null
 
+    // bootstrap = vrai si aucune reference figee n'existait au moment de CE sample
+    // (1ere session d'un site, ou historique encore vide a cet instant). Le flag est
+    // fige definitivement sur le sample -> permet d'exclure ces samples des agregats
+    // (kMedian/qMedian/...) meme apres fusion avec de futures sessions non-bootstrap.
+    const isBootstrap = sess.tp5Frozen == null || sess.tp25Frozen == null
+
     let k = 1  // bootstrap: pas d'historique -> K neutre par defaut
-    if (sess.tp5Frozen != null && sess.tp25Frozen != null && q_ref) {
+    if (!isBootstrap && q_ref) {
       k = (sess.tp5Frozen / sess.tp25Frozen) / (q / q_ref)
     }
 
@@ -134,6 +140,7 @@ export const useSlopeStore = create((set, get) => ({
       seconds: t_p5, // legacy alias, lecture seule
       t_p5, t_p25, ratio,
       wind, rho: rhoVal, q, k, source,
+      bootstrap: isBootstrap,
     }
 
     const samples = [...sess.samples, sample]
@@ -154,7 +161,13 @@ export const useSlopeStore = create((set, get) => ({
       if (s.name !== name) return s
       const energy = s.energy ?? { samples: [] }
       const samples = [...(energy.samples ?? []), ...sess.samples]
-      const ks = samples.map(x => x.k).filter(v => v != null)
+      // kMedian exclut les samples bootstrap : leur k=1 est un artefact de demarrage
+      // (aucune reference tp5Frozen/tp25Frozen n'existait encore), pas une vraie mesure.
+      // Les melanger a des k reels dans une meme mediane fausse silencieusement le
+      // resultat au fur et a mesure que l'historique grandit. qMedian/qP25/qP75 restent
+      // calcules sur TOUS les samples : q=0.5*rho*wind^2 est une grandeur physique
+      // reelle, valable qu'un sample soit bootstrap ou non.
+      const ks = samples.filter(x => !x.bootstrap).map(x => x.k).filter(v => v != null)
       const qs = samples.map(x => x.q).filter(v => v != null)
       return {
         ...s,
