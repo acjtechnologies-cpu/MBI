@@ -42,11 +42,13 @@ const FALLBACK_SITES = [
   { name: 'Serra de Busa', irp: 140, k_v4: 1.081 },
 ].map(s => ({ ...s, k: deriveK(s.irp, s.k_v4) }))
 
-const SITES_URL = import.meta.env.BASE_URL + 'planeurs/sites.json'
+// sites.json est desormais fetche exclusivement par SlopeStore.init() (source unique,
+// Phase 4) -- Poly4Page ne fait plus son propre fetch.
 
 import { useIrpStore } from '../../stores/irpStore'
 import { db } from '../Chrono/ChronoPage'
 import { useESPStore } from '../../stores/espStore'
+import { useSlopeStore } from '../../stores/SlopeStore'
 
 const V_RANGE = Array.from({ length: 226 }, (_, i) => 4.0 + i * 0.05)
 
@@ -67,6 +69,14 @@ export default function Poly4Page({ onNavigate } = {}) {
   const activeSite    = useAppStore(s => s.activeSite)
   const setActiveSite = useAppStore(s => s.setActiveSite)
   const model         = useModelStore(s => s.models?.[s.activeModelId] ?? null)
+  // SlopeStore = unique source de verite metier (regle Phase 4, 14 juillet) -- remplace
+  // l'ancien fetch() prive de Poly4Page vers sites.json. sitesRaw est deja tenu a jour
+  // en memoire par SlopeStore (init() au montage, closeSession() apres cloture Chrono),
+  // donc Poly4 voit desormais un kMedian frais SANS attendre le cycle manuel
+  // telecharger->recopier->commit->push->redeployer, tant qu'on reste dans la meme
+  // session d'app (le cycle manuel reste necessaire pour survivre a un reload complet).
+  const slopeSitesRaw = useSlopeStore(s => s.sitesRaw)
+  const slopeInit      = useSlopeStore(s => s.init)
 
   // ── State local ───────────────────────────────────────────────────────────
   const mode            = useAppStore(s => s.poly4Mode ?? 'vent')
@@ -113,29 +123,29 @@ export default function Poly4Page({ onNavigate } = {}) {
       }))
     }).catch(() => {})
   }, [])
-  // ── Fetch sites.json on mount ──
+  // ── Init SlopeStore au montage (idempotent si deja charge par un autre onglet) ──
   useEffect(() => {
-    fetch(SITES_URL)
-      .then(r => r.ok ? r.json() : null)
-      .then(data => {
-        if (data?.sites?.length) {
-          const fetched = data.sites.map(s => ({ name: s.name, irp: s.irp, k_v4: s.k_v4 ?? null, k: deriveK(s.irp, s.k_v4), kMedian: s.energy?.kMedian ?? null, altitude: s.altitude ?? null }))
-          // Applique les overrides terrain depuis Dexie
-          db.sites_k.toArray().then(rows => {
-            const merged = fetched.map(s => {
-              const row = rows.find(r => r.name === s.name)
-              return row ? { ...s, k: row.k_v4, k_v4: row.k_v4, kManualOverride: row.kManualOverride ?? null } : s
-            })
-            setSites(merged)
-            localStorage.setItem('mbi_sites_v5', JSON.stringify(merged))
-          }).catch(() => {
-            setSites(fetched)
-            localStorage.setItem('mbi_sites_v5', JSON.stringify(fetched))
-          })
-        }
+    slopeInit()
+  }, [slopeInit])
+  // ── Derive `sites` depuis SlopeStore.sitesRaw (source unique) + overrides Dexie ──
+  // Se redeclenche a chaque changement de sitesRaw (ex: closeSession() apres une
+  // cloture Chrono dans la meme session d'app) -- plus besoin de refetch manuel.
+  useEffect(() => {
+    if (!slopeSitesRaw?.sites?.length) return
+    const fetched = slopeSitesRaw.sites.map(s => ({ name: s.name, irp: s.irp, k_v4: s.k_v4 ?? null, k: deriveK(s.irp, s.k_v4), kMedian: s.energy?.kMedian ?? null, altitude: s.altitude ?? null }))
+    // Applique les overrides terrain depuis Dexie
+    db.sites_k.toArray().then(rows => {
+      const merged = fetched.map(s => {
+        const row = rows.find(r => r.name === s.name)
+        return row ? { ...s, k: row.k_v4, k_v4: row.k_v4, kManualOverride: row.kManualOverride ?? null } : s
       })
-      .catch(() => {})  // offline: use cache
-  }, [])
+      setSites(merged)
+      localStorage.setItem('mbi_sites_v5', JSON.stringify(merged))
+    }).catch(() => {
+      setSites(fetched)
+      localStorage.setItem('mbi_sites_v5', JSON.stringify(fetched))
+    })
+  }, [slopeSitesRaw])
 
   // ── masseFinale = poly4(vent) × rho(alt) × K_pente + offset/1000 ─────────
   const masseFinale = useMemo(() =>
