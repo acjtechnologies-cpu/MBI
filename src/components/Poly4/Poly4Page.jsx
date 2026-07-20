@@ -94,7 +94,7 @@ export default function Poly4Page({ onNavigate } = {}) {
   // ── Dérivés ───────────────────────────────────────────────────────────────
   const allSites = sites
   const currentSite = allSites[siteIdx] ?? allSites[Math.min(6, allSites.length - 1)]
-  const kPente      = currentSite?.kMedian ?? currentSite?.k_v4 ?? currentSite?.k ?? 1.00
+  const kPente      = currentSite?.kManualOverride ?? currentSite?.kMedian ?? currentSite?.k_v4 ?? currentSite?.k ?? 1.00
   const altitude    = (currentSite?.altitude != null && currentSite.altitude > 0)
     ? currentSite.altitude
     : altitudeManuelle
@@ -109,7 +109,7 @@ export default function Poly4Page({ onNavigate } = {}) {
       if (!rows.length) return
       setSites(prev => prev.map(s => {
         const row = rows.find(r => r.name === s.name)
-        return row ? { ...s, k: row.k_v4, k_v4: row.k_v4 } : s
+        return row ? { ...s, k: row.k_v4, k_v4: row.k_v4, kManualOverride: row.kManualOverride ?? null } : s
       }))
     }).catch(() => {})
   }, [])
@@ -124,7 +124,7 @@ export default function Poly4Page({ onNavigate } = {}) {
           db.sites_k.toArray().then(rows => {
             const merged = fetched.map(s => {
               const row = rows.find(r => r.name === s.name)
-              return row ? { ...s, k: row.k_v4, k_v4: row.k_v4 } : s
+              return row ? { ...s, k: row.k_v4, k_v4: row.k_v4, kManualOverride: row.kManualOverride ?? null } : s
             })
             setSites(merged)
             localStorage.setItem('mbi_sites_v5', JSON.stringify(merged))
@@ -228,14 +228,19 @@ export default function Poly4Page({ onNavigate } = {}) {
     }
   }, [mode, vent, sites, allSites, siteIdx, setParam, offsetStore, setOffset, setActiveSite, setSiteRef, currentSite, setSites])
 
+  // Ajustement manuel durable : part de la valeur ACTUELLEMENT affichee (kManualOverride
+  // deja pose, sinon kMedian calcule, sinon legacy k_v4/k), et fige le resultat dans
+  // kManualOverride -- qui devient prioritaire pour toujours sur ce site, y compris apres
+  // une future session F3XVault qui recalculerait kMedian. Persiste en Dexie (db.sites_k)
+  // pour survivre a un refresh de sites.json ou un reload de l'app.
   const adjustK = (dir) => {
-    const cur = currentSite?.k_v4 ?? currentSite?.k ?? 1.0
+    const cur = currentSite?.kManualOverride ?? currentSite?.kMedian ?? currentSite?.k_v4 ?? currentSite?.k ?? 1.0
     const next = Math.round(Math.max(0.7, Math.min(1.3, cur + dir * 0.005)) * 1000) / 1000
-    const updated = sites.map(s => s.name === currentSite?.name ? { ...s, k: next, k_v4: next } : s)
+    const updated = sites.map(s => s.name === currentSite?.name ? { ...s, kManualOverride: next } : s)
     setSites(updated)
     localStorage.setItem('mbi_sites_v5', JSON.stringify(updated))
-    db.sites_k.put({ name: currentSite.name, k_v4: next, updated: Date.now() }).catch(() => {})
-    setActiveSite({ ...currentSite, k: next, k_v4: next })
+    db.sites_k.put({ name: currentSite.name, k_v4: currentSite?.k_v4 ?? null, kManualOverride: next, updated: Date.now() }).catch(() => {})
+    setActiveSite({ ...currentSite, kManualOverride: next })
   }
   const startPress = (dir) => {
     handleChange(dir)
@@ -249,7 +254,7 @@ export default function Poly4Page({ onNavigate } = {}) {
   function handleApply() {
     const site = currentSite
     if (typeof setActiveSite === 'function' && site) {
-      setActiveSite({ name: site.name, irp: site.irp, k: site.k, k_v4: site.k_v4 ?? null })
+      setActiveSite({ name: site.name, irp: site.irp, k: site.k, k_v4: site.k_v4 ?? null, kMedian: site.kMedian ?? null, kManualOverride: site.kManualOverride ?? null })
       if (!site.live) setSiteRef(site.irp, site.name)
     }
     setApplied(true)
