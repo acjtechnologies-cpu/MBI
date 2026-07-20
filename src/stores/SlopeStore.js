@@ -48,8 +48,8 @@ export const useSlopeStore = create((set, get) => ({
   session: loadSessionFromStorage(), // { [siteName]: { samples: [{date,round,seconds,wind,rho,q,k,source}], kDyn, tp5Frozen, tp25Frozen } }
 
   // Section "live" : calculs metier temps reel (Phase 4 -- deplaces depuis espStore.js)
-  // espStore ne fait plus que transporter les trames brutes et appeler updateLive()
-  live: { q: null, irpx: null, energiePct: null },
+  // espStore ne fait plus que transporter les trames brutes et appeler updateLive()/updateTurb()
+  live: { q: null, irpx: null, energiePct: null, turbBuf: Array(60).fill(0), turbSigma: 0 },
 
   // Calcule Energie/IQA/IRPX a partir des donnees brutes ESP32 (spd, iqa, rhoStation, alt)
   // + du K_site du site actif -- SEULE fonction qui fait ce calcul desormais
@@ -70,7 +70,20 @@ export const useSlopeStore = create((set, get) => ({
     const energiePct = energy !== null ? +(energy * 100).toFixed(1) : null
     const irpx = (energy !== null && iqa > 0) ? +(energy * iqa).toFixed(3) : null
 
-    set({ live: { q: q !== null ? +q.toFixed(1) : null, irpx, energiePct } })
+    set(s => ({ live: { ...s.live, q: q !== null ? +q.toFixed(1) : null, irpx, energiePct } }))
+  },
+
+  // Buffer oscillogramme turbulence (ecart-type glissant sur 60 echantillons).
+  // Deplace depuis espStore.js (Phase 5) : ce calcul est independant de la source des
+  // donnees (WebSocket ESP32 actuel, futur canal Android natif, mode demo, replay de
+  // session) -- espStore ne fait plus qu'appeler cette fonction avec la valeur brute.
+  updateTurb: (turbValue) => {
+    if (turbValue === undefined) return
+    const buf = [...get().live.turbBuf, turbValue]
+    if (buf.length > 60) buf.shift()
+    const mean  = buf.reduce((a, b) => a + b, 0) / buf.length
+    const sigma = Math.sqrt(buf.reduce((a, b) => a + (b - mean) ** 2, 0) / buf.length)
+    set(s => ({ live: { ...s.live, turbBuf: buf, turbSigma: sigma } }))
   },
 
   init: async () => {

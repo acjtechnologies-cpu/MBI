@@ -72,8 +72,8 @@ export const useESPStore = create((set, get) => ({
     BULLE: 0,
   },
 
-  turbBuf: Array(60).fill(0),
-  turbSigma: 0,
+  // turbBuf/turbSigma deplaces vers SlopeStore.live (Phase 5, 20 juillet) -- calcul
+  // desormais independant de la source de donnees. Voir SlopeStore.updateTurb().
   pid: { kp: 1.2, ki: 0.05, kd: 0.30 },
 
   _setStatus: (wsStatus) => set({ wsStatus, connected: wsStatus === 'live' }),
@@ -109,13 +109,10 @@ export const useESPStore = create((set, get) => ({
     }
     _prevBulle = bulleNow
 
-    // Buffer oscillogramme TURB
+    // Buffer oscillogramme TURB -- delegue a SlopeStore (Phase 5), independant de la
+    // source de donnees (voir commentaire sur updateLive ci-dessus)
     if (incoming.TURB !== undefined) {
-      const buf = [...get().turbBuf, incoming.TURB]
-      if (buf.length > 60) buf.shift()
-      const mean  = buf.reduce((a, b) => a + b, 0) / buf.length
-      const sigma = Math.sqrt(buf.reduce((a, b) => a + (b - mean) ** 2, 0) / buf.length)
-      set({ turbBuf: buf, turbSigma: sigma })
+      useSlopeStore.getState().updateTurb(incoming.TURB)
     }
   },
 
@@ -261,6 +258,7 @@ export const useESPStore = create((set, get) => ({
     get().wsStop()
     get().stopDemo()
     set({ connected: false, wsStatus: 'off', lastUpdate: null, error: null, demo: false,
-          sdActive: false, turbBuf: Array(60).fill(0), turbSigma: 0 })
+          sdActive: false })
+    useSlopeStore.setState(s => ({ live: { ...s.live, turbBuf: Array(60).fill(0), turbSigma: 0 } }))
   },
 }))
