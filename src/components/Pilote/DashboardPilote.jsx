@@ -221,7 +221,11 @@ export default function DashboardPilote({ onChangePlaneur }) {
   const mAltkg        = getMasseAlt(m0kg, altitude)
   const modelOffset   = model.offset ?? Math.round(((model.masse_ref_8ms || P4_REF_8MS) - P4_REF_8MS) * 1000)
   const offsetVal     = parseFloat(offset) || 0
-  const kPente        = siteKMedian ?? activeSite?.k_v4 ?? activeSite?.k ?? 1.00
+  // kManualOverride vient de Poly4Page.jsx : ajustement manuel du pilote sur K Pente,
+  // propage ici UNIQUEMENT via le clic "Appliquer" (decision explicite du pilote,
+  // pas de synchro automatique en direct) -- prioritaire sur siteKMedian (calcul
+  // objectif du pipeline F3XVault) et sur le legacy k_v4/k.
+  const kPente        = activeSite?.kManualOverride ?? siteKMedian ?? activeSite?.k_v4 ?? activeSite?.k ?? 1.00
   const altCorrection = Math.round((m0kg - mAltkg) * 1000)
   const targetGAuto   = Math.max(model.masseVide, Math.round(mAltkg * kPente * 1000 + modelOffset + offsetVal))
   const targetG       = cfgAppliquee !== null
