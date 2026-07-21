@@ -213,7 +213,13 @@ export const useSlopeStore = create((set, get) => ({
     const url = URL.createObjectURL(blob)
     const a = document.createElement("a")
     a.href = url
-    a.download = "sites.json"
+    // Nom auto-descriptif (date+heure locale) au lieu de "sites.json" toujours identique --
+    // evite l'accumulation de sites (1).json, sites (2).json... sans aucune reference
+    // pour distinguer quel export correspond a quelle session de collecte.
+    const now = new Date()
+    const pad = n => String(n).padStart(2, '0')
+    const stamp = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}`
+    a.download = `sites_${stamp}.json`
     a.click()
     URL.revokeObjectURL(url)
   }
