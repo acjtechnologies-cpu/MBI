@@ -301,7 +301,21 @@ export default function LiveView({ onBack } = {}) {
   const [rounds, setRounds]     = useState(() => { try { return JSON.parse(localStorage.getItem('f3xv_rounds') || '{}'); } catch { return {}; } });
   const [standings, setStandings] = useState(() => { try { return JSON.parse(localStorage.getItem('f3xv_standings') || '[]'); } catch { return []; } });
   const [lastRound, setLastRound] = useState(0);
-  const [polling, setPolling]   = useState(false);
+  const [polling, setPolling]   = useState(false)
+
+  // Reinitialise completement l'event courant pour permettre de choisir un autre site
+  // sans devoir vider le cache navigateur. Nettoie state ET localStorage (eventId,
+  // eventName, rounds -- ce dernier sinon des rounds de l'ancien event resteraient
+  // merges avec ceux du nouveau, puisque loadRound() fait un merge {...prev, [rn]: rows}).
+  const resetEvent = () => {
+    setPolling(false)
+    setEventId(null)
+    setEventName('')
+    setRounds({})
+    localStorage.removeItem('f3xv_event_id')
+    localStorage.removeItem('f3xv_event_name')
+    localStorage.removeItem('f3xv_rounds')
+  };
   const [lastUpdate, setLastUpdate] = useState(null);
   const [tab, setTab]           = useState('rounds'); // 'rounds' | 'classement'
   const [error, setError]       = useState('');
@@ -461,7 +475,16 @@ export default function LiveView({ onBack } = {}) {
       {/* Contrôles + tabs */}
       {eventId && (
         <>
-                    <SiteSelector />
+          <div style={{ display:'flex', gap:6, alignItems:'center' }}>
+            <div style={{ flex:1 }}><SiteSelector /></div>
+            <button onClick={resetEvent} style={{
+              background:'#1a1a2e', border:'0.5px solid #1a3a5a', color:'#8b949e',
+              borderRadius:8, padding:'6px 10px', fontSize:11, cursor:'pointer',
+              whiteSpace:'nowrap', WebkitTapHighlightColor:'transparent' }}>
+              ⟲ Changer d'event
+            </button>
+          </div>
+          {eventName && <div style={{ fontSize:11, color:'#8b949e' }}>{eventName}</div>}
 
           <div style={{ display:'flex', gap:6 }}>
             <input style={{...inputStyle, flex:1}} placeholder="Pilote à suivre"
