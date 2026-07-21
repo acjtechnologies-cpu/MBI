@@ -86,7 +86,13 @@ export const useSlopeStore = create((set, get) => ({
     set(s => ({ live: { ...s.live, turbBuf: buf, turbSigma: sigma } }))
   },
 
-  init: async () => {
+  // Non-destructif par defaut (21 juillet) : si sitesRaw est deja charge en memoire
+  // (ex: apres plusieurs closeSession() de collecte F3XVault jamais recopiees/commitees/
+  // poussees), un appel init() ulterieur -- accidentel ou par un remount de composant --
+  // NE DOIT PAS ecraser cette progression avec la version encore deployee sur disque.
+  // Passer force=true pour forcer un vrai rechargement explicite depuis le fichier deploye.
+  init: async (force = false) => {
+    if (get().sitesRaw && !force) return
     // cache-buster : evite le cache HTTP navigateur ET le CDN GitHub Pages
     // qui peuvent servir une vieille copie de sites.json malgre le bump du service worker
     const res = await fetch(`${SITES_URL}?t=${Date.now()}`, { cache: "no-store" })
