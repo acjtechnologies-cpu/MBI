@@ -188,10 +188,21 @@ export const useSlopeStore = create((set, get) => ({
       // reelle, valable qu'un sample soit bootstrap ou non.
       const ks = samples.filter(x => !x.bootstrap).map(x => x.k).filter(v => v != null)
       const qs = samples.map(x => x.q).filter(v => v != null)
+      // rMedian (21 juillet) : signature de site basee sur ratio=t_p5/t_p25 brut, PAS sur
+      // k=ratio_frozen/(q/Q_REF). Contrairement a k (domine par un artefact 1/vent^2 du fait
+      // du calcul via q -- demontre empiriquement sur Puy de Manse : k*vent^2 quasi constant,
+      // amplitude K sur 7 sites = 1.69), ratio est quasi invariant au vent (correlation
+      // vent/ratio = -0.33 sur 51 samples Puy de Manse, amplitude inter-site mesuree = 0.037
+      // seulement sur 6 sites) -- signal beaucoup plus proche d'une vraie propriete de terrain.
+      // Aucune reference figee necessaire : TOUS les samples comptent des la 1ere session,
+      // pas de notion de bootstrap pour rMedian. kMedian reste inchange, dedie au calcul
+      // d'Energie live sur Station (formule q/Q_REF*K) -- rMedian sert uniquement au ballast.
+      const ratios = samples.map(x => x.ratio).filter(v => v != null)
       return {
         ...s,
         energy: {
           kMedian: median(ks),
+          rMedian: median(ratios),
           qMedian: median(qs),
           qP25: percentile(qs, 25),
           qP75: percentile(qs, 75),

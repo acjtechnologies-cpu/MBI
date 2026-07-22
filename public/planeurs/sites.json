@@ -477,7 +477,8 @@
             "bootstrap": false
           }
         ],
-        "updated": "2026-07-21T15:55:38.075Z"
+        "updated": "2026-07-21T15:55:38.075Z",
+        "rMedian": 0.9189656526431554
       }
     },
     {
@@ -1188,7 +1189,8 @@
             "bootstrap": false
           }
         ],
-        "updated": "2026-07-21T18:40:31.471Z"
+        "updated": "2026-07-21T18:40:31.471Z",
+        "rMedian": 0.9331619537275064
       }
     },
     {
@@ -1393,7 +1395,8 @@
             "bootstrap": false
           }
         ],
-        "updated": "2026-07-21T14:38:09.430Z"
+        "updated": "2026-07-21T14:38:09.430Z",
+        "rMedian": 0.9429569472133458
       },
       "latitude": 44.616667,
       "longitude": 4.633333
@@ -1984,7 +1987,8 @@
             "bootstrap": false
           }
         ],
-        "updated": "2026-07-21T18:11:40.589Z"
+        "updated": "2026-07-21T18:11:40.589Z",
+        "rMedian": 0.9130953463547964
       }
     },
     {
@@ -2307,7 +2311,8 @@
             "bootstrap": false
           }
         ],
-        "updated": "2026-07-21T16:39:31.284Z"
+        "updated": "2026-07-21T16:39:31.284Z",
+        "rMedian": 0.9377607279802678
       },
       "latitude": 44.616667,
       "longitude": 4.633333,
@@ -2594,7 +2599,8 @@
             "bootstrap": false
           }
         ],
-        "updated": "2026-07-21T16:45:33.295Z"
+        "updated": "2026-07-21T16:45:33.295Z",
+        "rMedian": 0.9132531775475222
       },
       "note": "Site F3F, pas la ville de Brive"
     },
@@ -3437,7 +3443,8 @@
             "bootstrap": false
           }
         ],
-        "updated": "2026-07-21T14:36:15.084Z"
+        "updated": "2026-07-21T14:36:15.084Z",
+        "rMedian": 0.9055927342256214
       },
       "note": "Concours au col de Manse"
     },
