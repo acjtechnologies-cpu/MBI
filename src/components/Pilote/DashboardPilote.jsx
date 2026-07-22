@@ -177,6 +177,12 @@ export default function DashboardPilote({ onChangePlaneur }) {
   const altitudeManuelle = useAppStore(s => parseFloat(s.altitude) || 0)
   const siteAltitude  = useSlopeStore(s => s.sitesRaw?.sites?.find(x => x.name === activeSite?.name)?.altitude ?? 0)
   const siteKMedian   = useSlopeStore(s => s.sitesRaw?.sites?.find(x => x.name === activeSite?.name)?.energy?.kMedian ?? null)
+  // FIX RAPIDE TEMPORAIRE (22 juillet) : meme raisonnement que Poly4Page -- kMedian
+  // domine par un artefact 1/vent^2, remplace par rMedian normalise. R_REF provisoire,
+  // a raffiner avec la fonction de transfert empirique ΔM=f(rMedian).
+  const siteRMedian   = useSlopeStore(s => s.sitesRaw?.sites?.find(x => x.name === activeSite?.name)?.energy?.rMedian ?? null)
+  const R_REF = 0.919
+  const siteRNormalized = siteRMedian != null ? siteRMedian / R_REF : null
   const altitude      = siteAltitude > 0 ? siteAltitude : altitudeManuelle
   const espIrpx     = useSlopeStore(s => s.live.irpx)
   useEffect(() => { useSlopeStore.getState().init() }, [])
@@ -225,7 +231,7 @@ export default function DashboardPilote({ onChangePlaneur }) {
   // propage ici UNIQUEMENT via le clic "Appliquer" (decision explicite du pilote,
   // pas de synchro automatique en direct) -- prioritaire sur siteKMedian (calcul
   // objectif du pipeline F3XVault) et sur le legacy k_v4/k.
-  const kPente        = activeSite?.kManualOverride ?? siteKMedian ?? activeSite?.k_v4 ?? activeSite?.k ?? 1.00
+  const kPente        = activeSite?.kManualOverride ?? siteRNormalized ?? activeSite?.k_v4 ?? activeSite?.k ?? 1.00
   const altCorrection = Math.round((m0kg - mAltkg) * 1000)
   const targetGAuto   = Math.max(model.masseVide, Math.round(mAltkg * kPente * 1000 + modelOffset + offsetVal))
   const targetG       = cfgAppliquee !== null

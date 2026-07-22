@@ -104,7 +104,15 @@ export default function Poly4Page({ onNavigate } = {}) {
   // ── Dérivés ───────────────────────────────────────────────────────────────
   const allSites = sites
   const currentSite = allSites[siteIdx] ?? allSites[Math.min(6, allSites.length - 1)]
-  const kPente      = currentSite?.kManualOverride ?? currentSite?.kMedian ?? currentSite?.k_v4 ?? currentSite?.k ?? 1.00
+  // FIX RAPIDE TEMPORAIRE (22 juillet) : kMedian s'est revele domine par un artefact
+  // 1/vent^2 (demontre empiriquement sur Puy de Manse + Col du Glandon), remplace ici
+  // par rMedian normalise. R_REF = mediane des rMedian des 7 sites reels collectes ce
+  // jour (~0.919, proche de Saint Ferriol) -- valeur provisoire, A RAFFINER une fois
+  // les points empiriques masse/vent/site terrain rassembles (fonction de transfert
+  // ΔM=f(rMedian) a calibrer). kMedian reste inchange par ailleurs (Energie live Station).
+  const R_REF = 0.919
+  const rNormalized = currentSite?.rMedian != null ? currentSite.rMedian / R_REF : null
+  const kPente      = currentSite?.kManualOverride ?? rNormalized ?? currentSite?.k_v4 ?? currentSite?.k ?? 1.00
   const altitude    = (currentSite?.altitude != null && currentSite.altitude > 0)
     ? currentSite.altitude
     : altitudeManuelle
@@ -132,7 +140,7 @@ export default function Poly4Page({ onNavigate } = {}) {
   // cloture Chrono dans la meme session d'app) -- plus besoin de refetch manuel.
   useEffect(() => {
     if (!slopeSitesRaw?.sites?.length) return
-    const fetched = slopeSitesRaw.sites.map(s => ({ name: s.name, irp: s.irp, k_v4: s.k_v4 ?? null, k: deriveK(s.irp, s.k_v4), kMedian: s.energy?.kMedian ?? null, altitude: s.altitude ?? null }))
+    const fetched = slopeSitesRaw.sites.map(s => ({ name: s.name, irp: s.irp, k_v4: s.k_v4 ?? null, k: deriveK(s.irp, s.k_v4), kMedian: s.energy?.kMedian ?? null, rMedian: s.energy?.rMedian ?? null, altitude: s.altitude ?? null }))
     // Applique les overrides terrain depuis Dexie
     db.sites_k.toArray().then(rows => {
       const merged = fetched.map(s => {
@@ -244,7 +252,7 @@ export default function Poly4Page({ onNavigate } = {}) {
   // une future session F3XVault qui recalculerait kMedian. Persiste en Dexie (db.sites_k)
   // pour survivre a un refresh de sites.json ou un reload de l'app.
   const adjustK = (dir) => {
-    const cur = currentSite?.kManualOverride ?? currentSite?.kMedian ?? currentSite?.k_v4 ?? currentSite?.k ?? 1.0
+    const cur = currentSite?.kManualOverride ?? rNormalized ?? currentSite?.k_v4 ?? currentSite?.k ?? 1.0
     const next = Math.round(Math.max(0.7, Math.min(1.3, cur + dir * 0.005)) * 1000) / 1000
     const updated = sites.map(s => s.name === currentSite?.name ? { ...s, kManualOverride: next } : s)
     setSites(updated)
@@ -264,7 +272,7 @@ export default function Poly4Page({ onNavigate } = {}) {
   function handleApply() {
     const site = currentSite
     if (typeof setActiveSite === 'function' && site) {
-      setActiveSite({ name: site.name, irp: site.irp, k: site.k, k_v4: site.k_v4 ?? null, kMedian: site.kMedian ?? null, kManualOverride: site.kManualOverride ?? null })
+      setActiveSite({ name: site.name, irp: site.irp, k: site.k, k_v4: site.k_v4 ?? null, kMedian: site.kMedian ?? null, rMedian: site.rMedian ?? null, kManualOverride: site.kManualOverride ?? null })
       if (!site.live) setSiteRef(site.irp, site.name)
     }
     setApplied(true)
