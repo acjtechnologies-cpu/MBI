@@ -511,7 +511,7 @@ useEffect(() => {
                   {activeSite?.name || 'Aucune'}
                 </div>
                 <div style={{ fontSize:9, color:'#4a5568', marginTop:2 }}>
-                  K {kPente.toFixed(3)}
+                  {siteRMedian != null ? `Stabilité ${(siteRMedian * 100).toFixed(1)}%` : 'Stabilité —'}
                 </div>
               </div>
               <div style={{ textAlign:'center', flex:1 }}>

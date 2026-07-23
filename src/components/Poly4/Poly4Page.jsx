@@ -306,7 +306,7 @@ padding: '10px', overflowY: 'auto', boxSizing: 'border-box',
             {currentSite?.name ?? '—'}
           </div>
           <div style={{ fontSize: '0.65rem', color: '#4a5568' }}>
-            K {kPente.toFixed(3)}
+            {currentSite?.rMedian != null ? `Stabilité ${(currentSite.rMedian * 100).toFixed(1)}%` : 'Stabilité —'}
             {applied && <span style={{ color: '#39d353', marginLeft: 8 }}>✓ ACTIVÉ</span>}
           </div>
         </div>
