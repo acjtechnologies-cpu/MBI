@@ -3460,6 +3460,22 @@
         "updated": null
       },
       "note": "Plateau de Caussols, site FFAM"
+    },
+    {
+      "name": "Col de la Croix-Morand",
+      "altitude": 1401,
+      "energy": {
+        "kMedian": null,
+        "rMedian": null,
+        "qMedian": null,
+        "qP25": null,
+        "qP75": null,
+        "samples": [],
+        "updated": null
+      },
+      "latitude": 45.597036,
+      "longitude": 2.850474,
+      "note": "Chambon-sur-Lac, Puy-de-Dôme"
     }
   ],
   "ref_v4": "Escueillens",
