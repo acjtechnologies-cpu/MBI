@@ -140,7 +140,7 @@ export default function Poly4Page({ onNavigate } = {}) {
   // cloture Chrono dans la meme session d'app) -- plus besoin de refetch manuel.
   useEffect(() => {
     if (!slopeSitesRaw?.sites?.length) return
-    const fetched = slopeSitesRaw.sites.map(s => ({ name: s.name, irp: s.irp, k_v4: s.k_v4 ?? null, k: deriveK(s.irp, s.k_v4), kMedian: s.energy?.kMedian ?? null, rMedian: s.energy?.rMedian ?? null, altitude: s.altitude ?? null }))
+    const fetched = slopeSitesRaw.sites.map(s => ({ name: s.name, irp: s.irp, k_v4: s.k_v4 ?? null, k: deriveK(s.irp, s.k_v4), kMedian: s.energy?.kMedian ?? null, rMedian: s.energy?.rMedian ?? null, altitude: s.altitude ?? null, latitude: s.latitude ?? null, longitude: s.longitude ?? null }))
     // Applique les overrides terrain depuis Dexie
     db.sites_k.toArray().then(rows => {
       const merged = fetched.map(s => {
@@ -302,8 +302,20 @@ padding: '10px', overflowY: 'auto', boxSizing: 'border-box',
           <div style={{ fontSize: '0.62rem', color: '#8b949e', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 2 }}>
             Pente Active
           </div>
-          <div style={{ fontSize: '1.3rem', fontWeight: 'bold', color: applied ? '#39d353' : '#58a6ff', textTransform: 'uppercase', transition: 'color 0.3s' }}>
+          <div style={{ fontSize: '1.3rem', fontWeight: 'bold', color: applied ? '#39d353' : '#58a6ff', textTransform: 'uppercase', transition: 'color 0.3s', display:'flex', alignItems:'center', gap:8 }}>
             {currentSite?.name ?? '—'}
+            {currentSite?.latitude != null && currentSite?.longitude != null && (
+              <a
+                href={`https://www.google.com/maps?q=${currentSite.latitude},${currentSite.longitude}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={e => e.stopPropagation()}
+                style={{ fontSize:'0.85rem', textDecoration:'none', opacity:0.85 }}
+                title="Voir sur la carte"
+              >
+                📍
+              </a>
+            )}
           </div>
           <div style={{ fontSize: '0.65rem', color: '#4a5568' }}>
             {currentSite?.rMedian != null ? `Stabilité ${(currentSite.rMedian * 100).toFixed(1)}%` : 'Stabilité —'}
