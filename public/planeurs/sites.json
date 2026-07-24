@@ -300,7 +300,9 @@
           }
         ],
         "updated": "2026-07-23T17:49:39.147Z"
-      }
+      },
+      "latitude": 43.114233,
+      "longitude": 1.999064
     },
     {
       "name": "Rognac",
@@ -322,7 +324,9 @@
         "qP75": null,
         "samples": [],
         "updated": null
-      }
+      },
+      "latitude": 43.4833,
+      "longitude": 5.25
     },
     {
       "name": "Font d'Urles",
@@ -344,7 +348,9 @@
         "qP75": null,
         "samples": [],
         "updated": null
-      }
+      },
+      "latitude": 44.898567,
+      "longitude": 5.30982
     },
     {
       "name": "Saint Ferriol",
@@ -753,7 +759,9 @@
         ],
         "updated": "2026-07-21T15:55:38.075Z",
         "rMedian": 0.9189656526431554
-      }
+      },
+      "latitude": 42.90942,
+      "longitude": 2.21656
     },
     {
       "name": "Col du Glandon",
@@ -1465,7 +1473,9 @@
         ],
         "updated": "2026-07-21T18:40:31.471Z",
         "rMedian": 0.9331619537275064
-      }
+      },
+      "latitude": 45.240278,
+      "longitude": 6.175278
     },
     {
       "name": "Col des Faisses",
@@ -1487,7 +1497,9 @@
         "qP75": null,
         "samples": [],
         "updated": null
-      }
+      },
+      "latitude": 44.7788,
+      "longitude": 5.8925
     },
     {
       "name": "Sceautres",
@@ -1672,8 +1684,8 @@
         "updated": "2026-07-21T14:38:09.430Z",
         "rMedian": 0.9429569472133458
       },
-      "latitude": 44.616667,
-      "longitude": 4.633333
+      "latitude": 44.615755,
+      "longitude": 4.573966
     },
     {
       "name": "Route des Crêtes",
@@ -1695,7 +1707,9 @@
         "qP75": null,
         "samples": [],
         "updated": null
-      }
+      },
+      "latitude": 47.984306,
+      "longitude": 6.982194
     },
     {
       "name": "Séderon",
@@ -1709,7 +1723,7 @@
       "ref_v4": "Escueillens",
       "k": 1.034,
       "irp_formula": "T_P5/T_P25 x10",
-      "altitude": 1050,
+      "altitude": 1220,
       "energy": {
         "kMedian": 1.992354514752762,
         "qMedian": 20.923604221227926,
@@ -2263,7 +2277,9 @@
         ],
         "updated": "2026-07-21T18:11:40.589Z",
         "rMedian": 0.9130953463547964
-      }
+      },
+      "latitude": 44.2281,
+      "longitude": 5.4965
     },
     {
       "name": "Serra de Busa",
@@ -2285,7 +2301,9 @@
         "qP75": null,
         "samples": [],
         "updated": null
-      }
+      },
+      "latitude": 42.09698,
+      "longitude": 1.6552
     },
     {
       "name": "TOA",
@@ -2877,19 +2895,6 @@
         "rMedian": 0.9132531775475222
       },
       "note": "Site F3F, pas la ville de Brive"
-    },
-    {
-      "name": "Panat",
-      "altitude": 870,
-      "energy": {
-        "kMedian": null,
-        "qMedian": null,
-        "qP25": null,
-        "qP75": null,
-        "samples": [],
-        "updated": null
-      },
-      "note": "Plateau de Panat, pres de Rodez"
     },
     {
       "name": "Puy de Manse",
@@ -3720,7 +3725,9 @@
         "updated": "2026-07-21T14:36:15.084Z",
         "rMedian": 0.9055927342256214
       },
-      "note": "Concours au col de Manse"
+      "note": "Concours au col de Manse",
+      "latitude": 44.6145,
+      "longitude": 6.1558
     },
     {
       "name": "Caussols",
@@ -4007,7 +4014,9 @@
         ],
         "updated": "2026-07-23T18:22:42.531Z"
       },
-      "note": "Plateau de Caussols, site FFAM"
+      "note": "Plateau de Caussols, site FFAM",
+      "latitude": 43.7513408,
+      "longitude": 6.9244167
     },
     {
       "name": "Col de la Croix-Morand",
@@ -4024,6 +4033,102 @@
       "latitude": 45.597036,
       "longitude": 2.850474,
       "note": "Chambon-sur-Lac, Puy-de-Dôme"
+    },
+    {
+      "name": "Panat - versant N/O",
+      "altitude": 421,
+      "energy": {
+        "kMedian": null,
+        "rMedian": null,
+        "qMedian": null,
+        "qP25": null,
+        "qP75": null,
+        "samples": [],
+        "updated": null
+      },
+      "latitude": 44.430694,
+      "longitude": 2.427167,
+      "note": "Plateau de Panat, pres de Rodez -- pente N/O"
+    },
+    {
+      "name": "Panat - versant S/E",
+      "altitude": 425,
+      "energy": {
+        "kMedian": null,
+        "rMedian": null,
+        "qMedian": null,
+        "qP25": null,
+        "qP75": null,
+        "samples": [],
+        "updated": null
+      },
+      "latitude": 44.4283,
+      "longitude": 2.4295,
+      "note": "Plateau de Panat, pres de Rodez -- pente S/E"
+    },
+    {
+      "name": "Brive - Monvalent (N/O)",
+      "altitude": 224,
+      "energy": {
+        "kMedian": null,
+        "rMedian": null,
+        "qMedian": null,
+        "qP25": null,
+        "qP75": null,
+        "samples": [],
+        "updated": null
+      },
+      "latitude": 44.8953,
+      "longitude": 1.6478,
+      "note": "Une des 2 pentes Brive (organisateur oriente selon vent du jour) -- N/O"
+    },
+    {
+      "name": "Brive - Pinsac (S/E)",
+      "altitude": 209,
+      "energy": {
+        "kMedian": null,
+        "rMedian": null,
+        "qMedian": null,
+        "qP25": null,
+        "qP75": null,
+        "samples": [],
+        "updated": null
+      },
+      "latitude": 44.86072220007045,
+      "longitude": 1.523388900016396,
+      "note": "Une des 2 pentes Brive (organisateur oriente selon vent du jour) -- S/E"
+    },
+    {
+      "name": "Laurac",
+      "altitude": 330,
+      "energy": {
+        "kMedian": null,
+        "rMedian": null,
+        "qMedian": null,
+        "qP25": null,
+        "qP75": null,
+        "samples": [],
+        "updated": null
+      },
+      "latitude": 43.225,
+      "longitude": 1.9667,
+      "note": "Site historique F3F"
+    },
+    {
+      "name": "Cantabria Punta Ballota",
+      "altitude": 60,
+      "energy": {
+        "kMedian": null,
+        "rMedian": null,
+        "qMedian": null,
+        "qP25": null,
+        "qP75": null,
+        "samples": [],
+        "updated": null
+      },
+      "latitude": 43.4353,
+      "longitude": -4.0812,
+      "note": "Falaise maritime (50-70m), Espagne -- World Cup F3F 2026"
     }
   ],
   "ref_v4": "Escueillens",
