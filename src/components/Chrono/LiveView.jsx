@@ -364,6 +364,10 @@ export default function LiveView({ onBack } = {}) {
           const t_p5  = rows[Math.max(0, Math.floor(0.05 * n))]?.seconds;
           const t_p25 = rows[Math.floor(0.25 * n)]?.seconds;
           const windAvg = rows.reduce((sum, r) => sum + r.wind, 0) / n;
+          // windDirAvg (24 juillet) : deja un ecart signe zero-cale perpendiculaire a la
+          // pente cote F3XVault (confirme via round card "-9deg"), pas un cap absolu --
+          // aucune reference site necessaire, simple moyenne comme pour wind
+          const windDirAvg = rows.reduce((sum, r) => sum + (r.windDir ?? 0), 0) / n;
 
           if (t_p5 > 0 && t_p25 > 0 && windAvg > 0) {
             const site = seStore.getSite(activeSiteName);
@@ -376,6 +380,7 @@ export default function LiveView({ onBack } = {}) {
               t_p5,
               t_p25,
               wind: windAvg,
+              windDir: windDirAvg,
               rho,
               q_ref: Q_REF_ESC,
               source: 'f3xvault',

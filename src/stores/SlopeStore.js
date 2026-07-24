@@ -133,7 +133,7 @@ export const useSlopeStore = create((set, get) => ({
   //                 sera supprime une fois la migration terminee sur tous les sites
   //   k continue d'etre derive EXCLUSIVEMENT de tp5Frozen/tp25Frozen (figes a startSession),
   //   jamais de ratio — ratio ne sert qu'a l'inspection/debug d'un round isole
-  addSample: (name, { date, round, t_p5, t_p25, wind, rho, q_ref, source, agg, schema = 2 }) => {
+  addSample: (name, { date, round, t_p5, t_p25, wind, windDir, rho, q_ref, source, agg, schema = 2 }) => {
     const { session } = get()
     const sess = session[name]
     if (!sess) return // startSession() doit etre appele avant
@@ -158,7 +158,7 @@ export const useSlopeStore = create((set, get) => ({
       date, round,
       seconds: t_p5, // legacy alias, lecture seule
       t_p5, t_p25, ratio,
-      wind, rho: rhoVal, q, k, source,
+      wind, windDir: windDir ?? null, rho: rhoVal, q, k, source,
       bootstrap: isBootstrap,
     }
 
