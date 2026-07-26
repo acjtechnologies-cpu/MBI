@@ -139,7 +139,13 @@ export const useSlopeStore = create((set, get) => ({
     if (!sess) return // startSession() doit etre appele avant
 
     const rhoVal = rho ?? 1.225
-    const q = 0.5 * rhoVal * wind * wind
+    // q/k necessitent une vraie mesure de vent (division par q dans le calcul de k) --
+    // sur les sites ou F3XVault n'alimente aucun vent/direction (ex: Col de Tende,
+    // donnees saisies manuellement sans station), wind vaut 0/undefined : q et k
+    // restent null plutot que de produire 0 ou une division par zero. ratio reste
+    // TOUJOURS calculable, independant du vent (26 juillet)
+    const hasWind = wind != null && wind > 0
+    const q = hasWind ? 0.5 * rhoVal * wind * wind : null
     const ratio = (t_p5 != null && t_p25 != null) ? t_p5 / t_p25 : null
 
     // bootstrap = vrai si aucune reference figee n'existait au moment de CE sample
@@ -148,9 +154,12 @@ export const useSlopeStore = create((set, get) => ({
     // (kMedian/qMedian/...) meme apres fusion avec de futures sessions non-bootstrap.
     const isBootstrap = sess.tp5Frozen == null || sess.tp25Frozen == null
 
-    let k = 1  // bootstrap: pas d'historique -> K neutre par defaut
-    if (!isBootstrap && q_ref) {
-      k = (sess.tp5Frozen / sess.tp25Frozen) / (q / q_ref)
+    let k = null
+    if (hasWind) {
+      k = 1  // bootstrap: pas d'historique -> K neutre par defaut
+      if (!isBootstrap && q_ref) {
+        k = (sess.tp5Frozen / sess.tp25Frozen) / (q / q_ref)
+      }
     }
 
     const sample = {
@@ -158,7 +167,7 @@ export const useSlopeStore = create((set, get) => ({
       date, round,
       seconds: t_p5, // legacy alias, lecture seule
       t_p5, t_p25, ratio,
-      wind, windDir: windDir ?? null, rho: rhoVal, q, k, source,
+      wind: hasWind ? wind : null, windDir: windDir ?? null, rho: rhoVal, q, k, source,
       bootstrap: isBootstrap,
     }
 

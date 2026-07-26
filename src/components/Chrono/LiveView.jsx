@@ -369,7 +369,12 @@ export default function LiveView({ onBack } = {}) {
           // aucune reference site necessaire, simple moyenne comme pour wind
           const windDirAvg = rows.reduce((sum, r) => sum + (r.windDir ?? 0), 0) / n;
 
-          if (t_p5 > 0 && t_p25 > 0 && windAvg > 0) {
+          // 26 juillet : windAvg n'est plus obligatoire pour logger un sample -- certains
+          // sites (ex Col de Tende) n'ont aucune donnee vent sur F3XVault (saisie
+          // manuelle sans station), mais ratio=t_p5/t_p25 reste calculable independamment
+          // du vent. q/k deviendront simplement null cote SlopeStore dans ce cas
+          // (voir addSample), rMedian restera exploitable meme sans kMedian.
+          if (t_p5 > 0 && t_p25 > 0) {
             const site = seStore.getSite(activeSiteName);
             const rho = site && site.altitude != null
               ? 1.225 * Math.exp(-site.altitude / 8500)
