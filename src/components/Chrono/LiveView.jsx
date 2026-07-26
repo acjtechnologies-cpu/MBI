@@ -62,7 +62,9 @@ async function getRound(login, password, event_id, round_number) {
     pilot: `${r.First_Name ?? ''} ${r.Last_Name ?? ''}`.trim(),
     seconds: parseFloat(r.seconds || '0'),
     wind: parseFloat(r.wind_speed_avg || '0'),
-    windDir: parseFloat(r.wind_dir_avg || '0'),
+    // null explicite si F3XVault ne fournit pas wind_dir_avg (ex: Col de Tende) --
+    // evite de confondre "pas de donnee" avec "direction = 0 pile" (26 juillet)
+    windDir: (r.wind_dir_avg !== undefined && r.wind_dir_avg !== '') ? parseFloat(r.wind_dir_avg) : null,
   })).filter(r => r.seconds > 0).sort((a, b) => a.seconds - b.seconds);
 }
 
@@ -367,7 +369,8 @@ export default function LiveView({ onBack } = {}) {
           // windDirAvg (24 juillet) : deja un ecart signe zero-cale perpendiculaire a la
           // pente cote F3XVault (confirme via round card "-9deg"), pas un cap absolu --
           // aucune reference site necessaire, simple moyenne comme pour wind
-          const windDirAvg = rows.reduce((sum, r) => sum + (r.windDir ?? 0), 0) / n;
+          const validDirs = rows.map(r => r.windDir).filter(d => d != null);
+          const windDirAvg = validDirs.length > 0 ? validDirs.reduce((sum, d) => sum + d, 0) / validDirs.length : null;
 
           // 26 juillet : windAvg n'est plus obligatoire pour logger un sample -- certains
           // sites (ex Col de Tende) n'ont aucune donnee vent sur F3XVault (saisie
