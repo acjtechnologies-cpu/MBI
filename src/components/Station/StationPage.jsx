@@ -1,6 +1,7 @@
-﻿import { useRef, useEffect } from 'react'
+﻿import { useRef, useEffect, useState } from 'react'
 import { useESPStore, flushBulleVibration } from '../../stores/espStore'
 import { useAppStore } from '../../stores/appStore'
+import { useSlopeStore } from '../../stores/SlopeStore'
 
 // NoSleep -- empeche la mise en veille via interaction tactile
 // Fonctionne en HTTP sur Android Chrome
@@ -128,6 +129,91 @@ function ServoSvg({ angle }) {
   )
 }
 
+// ── Fallback vent Pioupiou/OpenWindMap (21 aout) ──────────────────────────
+// Utilise quand l ESP32 n est pas connecte -- complement site/meteo INDEPENDANT
+// de l ESP32. Ne touche JAMAIS au calcul V de Poly4 (purement informatif ici).
+// API : https://api.pioupiou.fr/v1/live/all -- CORS ouvert, pas de cle,
+// max 1 requete/60s (voir etude du 21/08). station la plus proche <30km.
+function haversineKm(lat1, lon1, lat2, lon2) {
+  const R = 6371
+  const dLat = (lat2 - lat1) * Math.PI / 180
+  const dLon = (lon2 - lon1) * Math.PI / 180
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+}
+
+function PioupiouFallback() {
+  const activeSiteName = useAppStore(s => s.activeSite?.name)
+  // Lecture fraiche depuis SlopeStore (source unique) plutot que depuis activeSite,
+  // qui ne porte pas forcement lat/lon selon d'ou il a ete construit.
+  const site = useSlopeStore(s => s.sitesRaw?.sites?.find(x => x.name === activeSiteName))
+  const siteLat = site?.latitude ?? null
+  const siteLon = site?.longitude ?? null
+
+  const [status, setStatus] = useState('idle') // idle | loading | ok | nostation | nosite | error
+  const [station, setStation] = useState(null)
+
+  useEffect(() => {
+    if (siteLat == null || siteLon == null) { setStatus('nosite'); setStation(null); return }
+    let cancelled = false
+    setStatus('loading')
+    fetch('https://api.pioupiou.fr/v1/live/all')
+      .then(r => r.ok ? r.json() : Promise.reject(new Error('http ' + r.status)))
+      .then(json => {
+        if (cancelled) return
+        const stations = json?.data ?? []
+        let best = null, bestDist = Infinity
+        for (const s of stations) {
+          if (s?.status?.state !== 'on') continue
+          const lat = s?.location?.latitude, lon = s?.location?.longitude
+          if (lat == null || lon == null || (lat === 0 && lon === 0)) continue
+          const dist = haversineKm(siteLat, siteLon, lat, lon)
+          if (dist < bestDist) { bestDist = dist; best = s }
+        }
+        if (!best || bestDist > 30) { setStatus('nostation'); setStation(null); return }
+        setStation({
+          name: best.meta?.name ?? `Station #${best.id}`,
+          distanceKm: bestDist,
+          windSpeed: best.measurements?.wind_speed_avg ?? null,
+          windHeading: best.measurements?.wind_heading ?? null,
+          date: best.measurements?.date ?? null,
+        })
+        setStatus('ok')
+      })
+      .catch(() => { if (!cancelled) setStatus('error') })
+    return () => { cancelled = true }
+  }, [siteLat, siteLon])
+
+  const boxStyle = { marginTop: 14, padding: '10px 12px', borderRadius: 10, background: '#0d1117', border: '1px solid #30363d', fontSize: 11, color: '#8b949e', textAlign: 'left' }
+
+  if (status === 'nosite') {
+    return <div style={boxStyle}>Selectionne un site (Poly4/Pilotage) pour voir le vent Pioupiou le plus proche.</div>
+  }
+  if (status === 'loading' || status === 'idle') {
+    return <div style={boxStyle}>Recherche station Pioupiou/OpenWindMap la plus proche...</div>
+  }
+  if (status === 'error') {
+    return <div style={boxStyle}>Pioupiou/OpenWindMap indisponible pour le moment.</div>
+  }
+  if (status === 'nostation') {
+    return <div style={boxStyle}>Aucune station Pioupiou/OpenWindMap a moins de 30km de ce site.</div>
+  }
+  return (
+    <div style={boxStyle}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+        <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#f0a500', flexShrink: 0 }} />
+        <span style={{ fontWeight: 700, color: '#fff' }}>PIOUPIOU LIVE</span>
+        <span>({station.name} a {station.distanceKm.toFixed(1)} km)</span>
+      </div>
+      <div style={{ fontSize: 20, fontWeight: 900, color: '#fff' }}>
+        {station.windSpeed != null ? `${station.windSpeed.toFixed(1)} m/s` : '—'}
+        {station.windHeading != null && <span style={{ fontSize: 12, color: '#8b949e', marginLeft: 8 }}>{station.windHeading.toFixed(0)}°</span>}
+      </div>
+      <div style={{ fontSize: 9, marginTop: 4, opacity: .7 }}>Donnees OpenWindMap / Pioupiou.org</div>
+    </div>
+  )
+}
+
 export default function StationPage() {
   const setAltitude = useAppStore(s => s.setAltitude)
   const { wsStatus, connected, data: d, turbBuf, turbSigma, demo, pid,
@@ -187,6 +273,7 @@ export default function StationPage() {
             puis appuyez sur CONNECT<br/>
             ou activez le mode DEMO
           </div>
+          <PioupiouFallback />
         </div>
       )}
 
