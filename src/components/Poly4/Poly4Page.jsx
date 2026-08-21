@@ -48,7 +48,7 @@ const FALLBACK_SITES = [
 import { useIrpStore } from '../../stores/irpStore'
 import { db } from '../Chrono/ChronoPage'
 import { useESPStore } from '../../stores/espStore'
-import { useSlopeStore } from '../../stores/SlopeStore'
+import { useSlopeStore, rScalePosition } from '../../stores/SlopeStore'
 
 const V_RANGE = Array.from({ length: 226 }, (_, i) => 4.0 + i * 0.05)
 
@@ -330,7 +330,7 @@ padding: '10px', overflowY: 'auto', boxSizing: 'border-box',
             {masseFinale.toFixed(3)} kg
           </div>
           <div style={{ fontSize: '0.65rem', color: '#4a5568' }}>
-            ρ {rho.toFixed(3)} · {altitude}m · off {(offsetKg*1000).toFixed(0)}g
+            ρ {rho.toFixed(3)} · {altitude}m · R {currentSite?.rMedian != null ? `${rScalePosition(currentSite.rMedian)}%` : '—'}
           </div>
         </div>
       </div>

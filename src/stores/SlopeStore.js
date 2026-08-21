@@ -1,8 +1,27 @@
-﻿import { create } from "zustand"
+import { create } from "zustand"
 import { useAppStore } from "./appStore"
 
 const SITES_URL = `${import.meta.env.BASE_URL}planeurs/sites.json`
 export const Q_REF_ESC = 44.751  // Pa, recalcule 10 juillet 2026 avec altitude IGN Escueillens=421m (etait 44.441 sur 480m)
+
+// Echelle de reference du ratio T_P5/T_P25 (27 juillet 2026) -- signature de stabilite
+// aerodynamique du site, validee independante du vent (voir rMedian). PROVISOIRE, revisable
+// si un round encore plus extreme apparait au fil des futures collectes.
+// RMIN : ecart relatif maximum ~17% ((t_p25-t_p5)/t_p25) au-dela duquel un round est
+//        considere hors-signal (trop disperse pour representer la stabilite du site).
+// RMAX : ecart relatif minimum ~2%, reference = Col de Tende 2026 round 3
+//        (t_p5=36.11, t_p25=36.78, ratio=0.9818) -- le round le plus resserre observe
+//        a ce jour, en dessous duquel un plateau serait anormalement resserre.
+export const RMIN = 0.830
+export const RMAX = 0.982
+
+// Position d'un rMedian de site sur l'echelle RMIN-RMAX, normalisee 0-100%.
+// Retourne null si r est absent (site jamais collecte).
+export function rScalePosition(r) {
+  if (r == null) return null
+  const pct = ((r - RMIN) / (RMAX - RMIN)) * 100
+  return Math.max(0, Math.min(100, +pct.toFixed(1)))
+}
 
 function median(arr) {
   if (!arr.length) return null
