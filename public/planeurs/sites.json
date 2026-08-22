@@ -15,7 +15,7 @@
       "ref_v4": "Escueillens",
       "confidence": "HIGH",
       "manches": 263,
-      "note": "Reference V4 — terrain pilote Jo",
+      "note": "Reference du projet (Q_REF_ESC, K=1 par definition). Alias RC-Slopes 'Hounoux Escueillens' (E/ESE, vent d'Autan, pas d'AIP). ATTENTION : les concours F3XVault annonces 'Escueillens' melangent parfois cette pente et Saint Ferriol S-O (organisateur oriente selon le vent du jour, rendements aerodynamiques proches) -- F3XVault ne distingue pas les deux. Tri manuel deja fait par Jo quand possible sur les samples existants, repartition actuelle conservee telle quelle. https://www.rcslopes.com/index.php?p=521",
       "note_v4": "K=1.000 reference absolue",
       "irp_formula": "T_P5/T_P25 x10",
       "altitude": 421,
@@ -301,8 +301,10 @@
         ],
         "updated": "2026-07-23T17:49:39.147Z"
       },
-      "latitude": 43.114233,
-      "longitude": 1.999064
+      "latitude": 43.1139,
+      "longitude": 1.999142,
+      "rcSlopesId": 521,
+      "aip": null
     },
     {
       "name": "Rognac",
