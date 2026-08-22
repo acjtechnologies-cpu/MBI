@@ -4638,7 +4638,7 @@
     },
     {
       "name": "Brive - Monvalent (N/O)",
-      "altitude": 224,
+      "altitude": 330,
       "energy": {
         "kMedian": null,
         "rMedian": null,
@@ -4648,9 +4648,11 @@
         "samples": [],
         "updated": null
       },
-      "latitude": 44.8953,
-      "longitude": 1.6478,
-      "note": "Une des 2 pentes Brive (organisateur oriente selon vent du jour) -- N/O"
+      "latitude": 44.8956,
+      "longitude": 1.647091,
+      "note": "N/NNE/NE/NW/NNW -- vent ideal N 0 deg -- cirque/falaise -- RC-Slopes 'Cirque de Montvalent' -- https://www.rcslopes.com/index.php?p=4",
+      "rcSlopesId": 4,
+      "aip": 9088
     },
     {
       "name": "Brive - Pinsac (S/E)",
