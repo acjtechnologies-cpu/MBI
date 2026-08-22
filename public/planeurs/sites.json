@@ -359,7 +359,7 @@
       "irp": 230,
       "confidence": "HIGH",
       "manches": 30,
-      "note": "CDF+CDM mediane",
+      "note": "WNW/NW/NNW -- vent ideal NW 315 deg -- RC-Slopes 'Quillan St Ferriol'. Les concours F3XVault annonces 'Escueillens' melangent parfois cette pente avec Hounoux Escueillens (organisateur oriente selon le vent du jour) -- voir note sur l'entree Escueillens. Tri manuel deja fait par Jo quand possible. https://www.rcslopes.com/index.php?p=13",
       "irp_p25": 7.588,
       "k_v4": 0.988,
       "n_rounds": 128,
@@ -367,7 +367,7 @@
       "k": 0.988,
       "note_v4": "Ajuste terrain pilote Jo — moins irregulier que calcul F3XVault (0.913)",
       "irp_formula": "T_P5/T_P25 x10",
-      "altitude": 446,
+      "altitude": 500,
       "energy": {
         "kMedian": 0.5372216908598851,
         "qMedian": 61.84031515733733,
@@ -762,8 +762,10 @@
         "updated": "2026-07-21T15:55:38.075Z",
         "rMedian": 0.9189656526431554
       },
-      "latitude": 42.90942,
-      "longitude": 2.21656
+      "latitude": 42.909,
+      "longitude": 2.216386,
+      "rcSlopesId": 13,
+      "aip": 9623
     },
     {
       "name": "Col du Glandon",
