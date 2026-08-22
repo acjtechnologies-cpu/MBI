@@ -174,7 +174,11 @@ function PioupiouFallback() {
         setStation({
           name: best.meta?.name ?? `Station #${best.id}`,
           distanceKm: bestDist,
-          windSpeed: best.measurements?.wind_speed_avg ?? null,
+          // Pioupiou wind_speed_avg est documente en km/h (developers.pioupiou.fr/api/live/),
+          // PAS en m/s comme suppose lors de l'etude initiale du 21/08 -- bug decouvert le
+          // 22/08 par comparaison manuelle avec OpenWindMap. Conversion en m/s pour rester
+          // coherent avec le reste de l'app (Poly4/K_site travaillent tous en m/s).
+          windSpeed: best.measurements?.wind_speed_avg != null ? best.measurements.wind_speed_avg / 3.6 : null,
           windHeading: best.measurements?.wind_heading ?? null,
           date: best.measurements?.date ?? null,
         })
@@ -198,10 +202,13 @@ function PioupiouFallback() {
   if (status === 'nostation') {
     return <div style={boxStyle}>Aucune station Pioupiou/OpenWindMap a moins de 30km de ce site.</div>
   }
+  const ageMin = station.date ? (Date.now() - new Date(station.date).getTime()) / 60000 : null
+  const isStale = ageMin != null && ageMin > 20
+
   return (
     <div style={boxStyle}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-        <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#f0a500', flexShrink: 0 }} />
+        <span style={{ width: 8, height: 8, borderRadius: '50%', background: isStale ? '#f85149' : '#f0a500', flexShrink: 0 }} />
         <span style={{ fontWeight: 700, color: '#fff' }}>PIOUPIOU LIVE</span>
         <span>({station.name} a {station.distanceKm.toFixed(1)} km)</span>
       </div>
@@ -209,7 +216,11 @@ function PioupiouFallback() {
         {station.windSpeed != null ? `${station.windSpeed.toFixed(1)} m/s` : '—'}
         {station.windHeading != null && <span style={{ fontSize: 12, color: '#8b949e', marginLeft: 8 }}>{station.windHeading.toFixed(0)}°</span>}
       </div>
-      <div style={{ fontSize: 9, marginTop: 4, opacity: .7 }}>Donnees OpenWindMap / Pioupiou.org</div>
+      {isStale && (
+        <div style={{ fontSize: 10, color: '#f85149', marginTop: 4 }}>
+          ⚠️ Donnee non recente ({Math.round(ageMin)} min)
+        </div>
+      )}      <div style={{ fontSize: 9, marginTop: 4, opacity: .7 }}>Donnees OpenWindMap / Pioupiou.org</div>
     </div>
   )
 }
