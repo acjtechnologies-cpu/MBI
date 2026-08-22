@@ -4654,7 +4654,7 @@
     },
     {
       "name": "Brive - Pinsac (S/E)",
-      "altitude": 209,
+      "altitude": 250,
       "energy": {
         "kMedian": null,
         "rMedian": null,
@@ -4664,9 +4664,11 @@
         "samples": [],
         "updated": null
       },
-      "latitude": 44.86072220007045,
-      "longitude": 1.523388900016396,
-      "note": "Une des 2 pentes Brive (organisateur oriente selon vent du jour) -- S/E"
+      "latitude": 44.8602,
+      "longitude": 1.52322,
+      "note": "SE/SSE/S -- vent ideal SSE 157 deg -- falaise causse -- RC-Slopes 'Brives Pinsac' -- https://www.rcslopes.com/index.php?p=46",
+      "rcSlopesId": 46,
+      "aip": 9073
     },
     {
       "name": "Laurac",
