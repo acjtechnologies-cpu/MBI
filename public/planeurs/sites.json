@@ -1901,18 +1901,18 @@
       "longitude": 6.982194
     },
     {
-      "name": "Sédéron S-O",
+      "name": "Séderon",
       "irp": 175,
       "confidence": "HIGH",
       "manches": 20,
-      "note": "SSW/SW/WSW/W -- vent ideal SW 225 deg -- plage 6-18 m/s -- alias 'Col de Macuegne - Site de la lavande' (col routier 1068m, pente de vol 1130m juste au-dessus) -- acces D542 avant col, chemin a droite -- https://www.rcslopes.com/index.php?p=9572",
+      "note": "20 manches",
       "irp_p25": 9.102,
       "k_v4": 1.034,
       "n_rounds": 57,
       "ref_v4": "Escueillens",
       "k": 1.034,
       "irp_formula": "T_P5/T_P25 x10",
-      "altitude": 1130,
+      "altitude": 1220,
       "energy": {
         "kMedian": 1.992354514752762,
         "qMedian": 20.923604221227926,
@@ -2467,10 +2467,8 @@
         "updated": "2026-07-21T18:11:40.589Z",
         "rMedian": 0.9130953463547964
       },
-      "latitude": 44.1909,
-      "longitude": 5.499072,
-      "rcSlopesId": 419,
-      "aip": 9572
+      "latitude": 44.2281,
+      "longitude": 5.4965
     },
     {
       "name": "Serra de Busa",
@@ -4451,7 +4449,7 @@
     },
     {
       "name": "Caussols",
-      "altitude": 1120,
+      "altitude": 1268,
       "energy": {
         "kMedian": null,
         "rMedian": 0.8907178783721993,
@@ -4734,9 +4732,11 @@
         ],
         "updated": "2026-07-23T18:22:42.531Z"
       },
-      "note": "Plateau de Caussols, site FFAM",
-      "latitude": 43.7513408,
-      "longitude": 6.9244167
+      "note": "SSE/S/SSW -- vent ideal S 180 deg -- plateau calcaire, Plateau de Calern (parking observatoire Cote d'Azur) -- https://www.rcslopes.com/index.php?p=9660",
+      "latitude": 43.7516,
+      "longitude": 6.92777,
+      "rcSlopesId": 256,
+      "aip": 9660
     },
     {
       "name": "Col de la Croix-Morand",
@@ -5186,23 +5186,6 @@
       "latitude": 43.4353,
       "longitude": -4.0812,
       "note": "Falaise maritime (50-70m), Espagne -- World Cup F3F 2026"
-    },
-    {
-      "name": "Montagne De Bergiès",
-      "altitude": 1360,
-      "latitude": 44.2038,
-      "longitude": 5.509611,
-      "rcSlopesId": 343,
-      "note": "N/NNE/NE/NW/NNW -- pas d'AIP",
-      "energy": {
-        "kMedian": null,
-        "rMedian": null,
-        "qMedian": null,
-        "qP25": null,
-        "qP75": null,
-        "samples": [],
-        "updated": null
-      }
     }
   ],
   "ref_v4": "Escueillens",
