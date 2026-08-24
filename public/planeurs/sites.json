@@ -4606,7 +4606,7 @@
     },
     {
       "name": "Panat - versant N/O",
-      "altitude": 421,
+      "altitude": 640,
       "energy": {
         "kMedian": null,
         "rMedian": null,
@@ -4616,13 +4616,15 @@
         "samples": [],
         "updated": null
       },
-      "latitude": 44.430694,
-      "longitude": 2.427167,
-      "note": "Plateau de Panat, pres de Rodez -- pente N/O"
+      "latitude": 44.4324,
+      "longitude": 2.43362,
+      "note": "WNW/NW/NNW -- vent ideal NW 315 deg -- causse -- RC-Slopes 'Panat Rodez' (pente principale) -- https://www.rcslopes.com/index.php?p=55",
+      "rcSlopesId": 55,
+      "aip": 9077
     },
     {
       "name": "Panat - versant S/E",
-      "altitude": 425,
+      "altitude": 600,
       "energy": {
         "kMedian": null,
         "rMedian": null,
@@ -4632,9 +4634,9 @@
         "samples": [],
         "updated": null
       },
-      "latitude": 44.4283,
-      "longitude": 2.4295,
-      "note": "Plateau de Panat, pres de Rodez -- pente S/E"
+      "latitude": 44.432,
+      "longitude": 2.3775,
+      "note": "SE (135 deg) -- pente differenciee, coordonnees corrigees par Jo"
     },
     {
       "name": "Brive - Monvalent (N/O)",
