@@ -5269,6 +5269,23 @@
         "samples": [],
         "updated": null
       }
+    },
+    {
+      "name": "Cuchía",
+      "altitude": 45,
+      "latitude": 43.4432,
+      "longitude": -4.02125,
+      "rcSlopesId": 635,
+      "note": "W/WNW -- vent ideal W 270 deg -- falaise mer, Cantabrie, Espagne -- Championnat du Monde FAI F3F 2026",
+      "energy": {
+        "kMedian": null,
+        "rMedian": null,
+        "qMedian": null,
+        "qP25": null,
+        "qP75": null,
+        "samples": [],
+        "updated": null
+      }
     }
   ],
   "ref_v4": "Escueillens",
