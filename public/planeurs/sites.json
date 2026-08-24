@@ -5253,6 +5253,22 @@
         "samples": [],
         "updated": null
       }
+    },
+    {
+      "name": "Comillas",
+      "altitude": 40,
+      "latitude": 43.392042,
+      "longitude": -4.271508,
+      "note": "Falaise maritime, Cantabrie, Espagne (localite 'Slops Comillas', pres de Punta del Miradoiro) -- Championnat du Monde FAI F3F 2026 en cours",
+      "energy": {
+        "kMedian": null,
+        "rMedian": null,
+        "qMedian": null,
+        "qP25": null,
+        "qP75": null,
+        "samples": [],
+        "updated": null
+      }
     }
   ],
   "ref_v4": "Escueillens",
