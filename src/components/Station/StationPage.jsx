@@ -225,6 +225,106 @@ function PioupiouFallback() {
   )
 }
 
+// ── Prevision J+1 Open-Meteo / AROME HD (24 aout) ─────────────────────────
+// TOUJOURS visible (contrairement a PioupiouFallback qui ne s'affiche que
+// sans ESP32) -- usage different : planification en amont, utile meme avec
+// une vraie station branchee. API gratuite, sans cle, CORS ouvert.
+function AromeForecast() {
+  const activeSiteName = useAppStore(s => s.activeSite?.name)
+  const site = useSlopeStore(s => s.sitesRaw?.sites?.find(x => x.name === activeSiteName))
+  const siteLat = site?.latitude ?? null
+  const siteLon = site?.longitude ?? null
+
+  // orientation ideale du site si connue (RC-Slopes vent_ideal "SW 225°" ou orientation_deg[])
+  const siteOrientDeg = (() => {
+    if (site?.vent_ideal) {
+      const m = /(\d+)\s*°/.exec(site.vent_ideal)
+      if (m) return parseFloat(m[1])
+    }
+    if (Array.isArray(site?.orientation_deg) && site.orientation_deg.length) {
+      return site.orientation_deg.reduce((a, b) => a + b, 0) / site.orientation_deg.length
+    }
+    return null
+  })()
+
+  const [status, setStatus] = useState('idle') // idle | loading | ok | nosite | error
+  const [forecast, setForecast] = useState(null)
+
+  useEffect(() => {
+    if (siteLat == null || siteLon == null) { setStatus('nosite'); setForecast(null); return }
+    let cancelled = false
+    setStatus('loading')
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${siteLat}&longitude=${siteLon}` +
+      `&hourly=wind_speed_10m,wind_direction_10m,temperature_2m,surface_pressure` +
+      `&models=meteofrance_arome_hd&windspeed_unit=ms&forecast_days=2`
+    fetch(url)
+      .then(r => r.ok ? r.json() : Promise.reject(new Error('http ' + r.status)))
+      .then(json => {
+        if (cancelled) return
+        const times = json?.hourly?.time ?? []
+        const tomorrow = new Date()
+        tomorrow.setDate(tomorrow.getDate() + 1)
+        const dayStr = tomorrow.toISOString().slice(0, 10)
+        let idx = times.indexOf(`${dayStr}T14:00`)
+        if (idx === -1) idx = times.findIndex(t => t.startsWith(dayStr))
+        if (idx === -1) { setStatus('error'); return }
+        setForecast({
+          time: times[idx],
+          windSpeed: json.hourly.wind_speed_10m?.[idx] ?? null,
+          windDir: json.hourly.wind_direction_10m?.[idx] ?? null,
+          temp: json.hourly.temperature_2m?.[idx] ?? null,
+          pressure: json.hourly.surface_pressure?.[idx] ?? null,
+        })
+        setStatus('ok')
+      })
+      .catch(() => { if (!cancelled) setStatus('error') })
+    return () => { cancelled = true }
+  }, [siteLat, siteLon])
+
+  const boxStyle = { marginTop: 6, padding: '10px 12px', borderRadius: 10, background: '#0d1117', border: '1px solid #30363d', fontSize: 11, color: '#8b949e', textAlign: 'left', flexShrink: 0 }
+
+  if (status === 'nosite') return <div style={boxStyle}>Selectionne un site pour la prevision AROME HD.</div>
+  if (status === 'loading' || status === 'idle') return <div style={boxStyle}>Chargement prevision AROME HD...</div>
+  if (status === 'error') return <div style={boxStyle}>Prevision AROME HD indisponible.</div>
+
+  let deltaInfo = null
+  if (siteOrientDeg != null && forecast.windDir != null && forecast.windSpeed != null) {
+    let delta = Math.abs(forecast.windDir - siteOrientDeg)
+    if (delta > 180) delta = 360 - delta
+    const compNormale = delta <= 90 ? forecast.windSpeed * Math.cos(delta * Math.PI / 180) : 0
+    deltaInfo = { delta, compNormale }
+  }
+
+  const dateLabel = new Date(forecast.time).toLocaleString('fr-FR', { weekday: 'short', hour: '2-digit', minute: '2-digit' })
+
+  return (
+    <div style={boxStyle}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+        <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#58a6ff', flexShrink: 0 }} />
+        <span style={{ fontWeight: 700, color: '#fff' }}>PREVISION AROME HD</span>
+        <span>({dateLabel})</span>
+      </div>
+      <div style={{ fontSize: 20, fontWeight: 900, color: '#fff' }}>
+        {forecast.windSpeed != null ? `${forecast.windSpeed.toFixed(1)} m/s` : '—'}
+        {forecast.windDir != null && <span style={{ fontSize: 12, color: '#8b949e', marginLeft: 8 }}>{forecast.windDir.toFixed(0)}°</span>}
+      </div>
+      {deltaInfo && (
+        <div style={{ fontSize: 10, marginTop: 4 }}>
+          Ecart pente : {deltaInfo.delta.toFixed(0)}° -- composante normale {deltaInfo.compNormale.toFixed(1)} m/s
+        </div>
+      )}
+      {(forecast.temp != null || forecast.pressure != null) && (
+        <div style={{ fontSize: 9, marginTop: 4, opacity: .7 }}>
+          {forecast.temp != null ? `${forecast.temp.toFixed(1)}°C` : ''}
+          {forecast.temp != null && forecast.pressure != null ? ' · ' : ''}
+          {forecast.pressure != null ? `${forecast.pressure.toFixed(0)} hPa` : ''}
+        </div>
+      )}
+      <div style={{ fontSize: 9, marginTop: 4, opacity: .6 }}>Meteo-France AROME HD via Open-Meteo.com</div>
+    </div>
+  )
+}
+
 export default function StationPage() {
   const setAltitude = useAppStore(s => s.setAltitude)
   const { wsStatus, connected, data: d, turbBuf, turbSigma, demo, pid,
@@ -274,6 +374,8 @@ export default function StationPage() {
         }
         <button onClick={wsStop} style={{ background:'#b91c1c', border:'none', borderRadius:6, color:'#fff', padding:'4px 8px', fontSize:10, fontWeight:800, cursor:'pointer' }}>STOP</button>
       </div>
+
+      <AromeForecast />
 
       {!hasData && (
         <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:10, padding:'40px 20px', color:'#8b949e', textAlign:'center', flex:1 }}>
