@@ -256,18 +256,24 @@ function AromeForecast() {
     setStatus('loading')
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${siteLat}&longitude=${siteLon}` +
       `&hourly=wind_speed_10m,wind_direction_10m,temperature_2m,surface_pressure` +
-      `&models=meteofrance_arome_hd&windspeed_unit=ms&forecast_days=2`
+      `&models=meteofrance_arome_france_hd&windspeed_unit=ms&forecast_days=2&timezone=auto`
     fetch(url)
       .then(r => r.ok ? r.json() : Promise.reject(new Error('http ' + r.status)))
       .then(json => {
         if (cancelled) return
         const times = json?.hourly?.time ?? []
-        const tomorrow = new Date()
-        tomorrow.setDate(tomorrow.getDate() + 1)
-        const dayStr = tomorrow.toISOString().slice(0, 10)
-        let idx = times.indexOf(`${dayStr}T14:00`)
-        if (idx === -1) idx = times.findIndex(t => t.startsWith(dayStr))
-        if (idx === -1) { setStatus('error'); return }
+        if (!times.length) { setStatus('error'); return }
+        // timezone=auto -> chaines locales sans offset ("2026-08-27T14:00"), interpretees
+        // par JS comme heure locale du navigateur -- fiable tant que le navigateur et le
+        // site sont dans le meme fuseau (cas normal pour un pilote sur son propre site).
+        // Recherche de l'heure la plus proche de +24h plutot qu'une comparaison de chaine
+        // exacte, plus robuste face aux decalages jour/heure UTC vs local (22 aout).
+        const target = Date.now() + 24 * 3600 * 1000
+        let idx = 0, bestDiff = Infinity
+        times.forEach((t, i) => {
+          const diff = Math.abs(new Date(t).getTime() - target)
+          if (diff < bestDiff) { bestDiff = diff; idx = i }
+        })
         setForecast({
           time: times[idx],
           windSpeed: json.hourly.wind_speed_10m?.[idx] ?? null,
