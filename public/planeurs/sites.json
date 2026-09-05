@@ -576,7 +576,16 @@
       "latitude": 43.1139,
       "longitude": 1.999142,
       "rcSlopesId": 521,
-      "aip": null
+      "aip": null,
+      "orientation_txt": [
+        "E",
+        "ESE"
+      ],
+      "orientation_deg": [
+        90,
+        112
+      ],
+      "vent_ideal": "E 90° Autan"
     },
     {
       "name": "Rognac",
@@ -1051,7 +1060,18 @@
       "latitude": 42.909,
       "longitude": 2.216386,
       "rcSlopesId": 13,
-      "aip": 9623
+      "aip": 9623,
+      "orientation_txt": [
+        "WNW",
+        "NW",
+        "NNW"
+      ],
+      "orientation_deg": [
+        292,
+        315,
+        337
+      ],
+      "vent_ideal": "NW 315°"
     },
     {
       "name": "Col du Glandon",
@@ -2998,7 +3018,20 @@
       "latitude": 44.1909,
       "longitude": 5.499072,
       "rcSlopesId": 419,
-      "aip": 9572
+      "aip": 9572,
+      "orientation_txt": [
+        "SSW",
+        "SW",
+        "WSW",
+        "W"
+      ],
+      "orientation_deg": [
+        202,
+        225,
+        247,
+        270
+      ],
+      "vent_ideal": "SW 225°"
     },
     {
       "name": "Serra de Busa",
@@ -5266,7 +5299,17 @@
       "latitude": 43.7516,
       "longitude": 6.92777,
       "rcSlopesId": 256,
-      "aip": 9660
+      "aip": 9660,
+      "orientation_txt": [
+        "SSE",
+        "S",
+        "SSW"
+      ],
+      "orientation_deg": [
+        157,
+        180,
+        202
+      ]
     },
     {
       "name": "Col de la Croix-Morand",
@@ -5739,7 +5782,18 @@
       "longitude": 2.43362,
       "note": "WNW/NW/NNW -- vent ideal NW 315 deg -- causse -- RC-Slopes 'Panat Rodez' (pente principale) -- https://www.rcslopes.com/index.php?p=55",
       "rcSlopesId": 55,
-      "aip": 9077
+      "aip": 9077,
+      "orientation_txt": [
+        "WNW",
+        "NW",
+        "NNW"
+      ],
+      "orientation_deg": [
+        292,
+        315,
+        337
+      ],
+      "vent_ideal": "NW 315°"
     },
     {
       "name": "Panat - versant S/E",
@@ -5773,7 +5827,22 @@
       "longitude": 1.647091,
       "note": "N/NNE/NE/NW/NNW -- vent ideal N 0 deg -- cirque/falaise -- RC-Slopes 'Cirque de Montvalent' -- https://www.rcslopes.com/index.php?p=4",
       "rcSlopesId": 4,
-      "aip": 9088
+      "aip": 9088,
+      "orientation_txt": [
+        "N",
+        "NNE",
+        "NE",
+        "NW",
+        "NNW"
+      ],
+      "orientation_deg": [
+        0,
+        22,
+        45,
+        315,
+        337
+      ],
+      "vent_ideal": "N 0°"
     },
     {
       "name": "Brive - Pinsac (S/E)",
@@ -5791,7 +5860,18 @@
       "longitude": 1.52322,
       "note": "SE/SSE/S -- vent ideal SSE 157 deg -- falaise causse -- RC-Slopes 'Brives Pinsac' -- https://www.rcslopes.com/index.php?p=46",
       "rcSlopesId": 46,
-      "aip": 9073
+      "aip": 9073,
+      "orientation_txt": [
+        "SE",
+        "SSE",
+        "S"
+      ],
+      "orientation_deg": [
+        135,
+        157,
+        180
+      ],
+      "vent_ideal": "SSE 157°"
     },
     {
       "name": "Laurac",
@@ -6318,7 +6398,17 @@
           }
         ],
         "updated": "2026-07-27T11:19:00.000Z"
-      }
+      },
+      "orientation_txt": [
+        "N",
+        "NNE",
+        "NE"
+      ],
+      "orientation_deg": [
+        0,
+        22,
+        45
+      ]
     },
     {
       "name": "Col de Tende",
@@ -6336,7 +6426,13 @@
         "qP75": null,
         "samples": [],
         "updated": null
-      }
+      },
+      "orientation_txt": [
+        "S"
+      ],
+      "orientation_deg": [
+        180
+      ]
     },
     {
       "name": "Col de Tende Sud",
@@ -6354,7 +6450,15 @@
         "qP75": null,
         "samples": [],
         "updated": null
-      }
+      },
+      "orientation_txt": [
+        "S",
+        "SSW"
+      ],
+      "orientation_deg": [
+        180,
+        202
+      ]
     },
     {
       "name": "Montagne De Bergiès",
@@ -6371,7 +6475,21 @@
         "qP75": null,
         "samples": [],
         "updated": null
-      }
+      },
+      "orientation_txt": [
+        "N",
+        "NNE",
+        "NE",
+        "NW",
+        "NNW"
+      ],
+      "orientation_deg": [
+        0,
+        22,
+        45,
+        315,
+        337
+      ]
     },
     {
       "name": "Comillas",
@@ -6404,7 +6522,16 @@
         "qP75": null,
         "samples": [],
         "updated": null
-      }
+      },
+      "orientation_txt": [
+        "W",
+        "WNW"
+      ],
+      "orientation_deg": [
+        270,
+        292
+      ],
+      "vent_ideal": "W 270°"
     }
   ],
   "ref_v4": "Escueillens",
