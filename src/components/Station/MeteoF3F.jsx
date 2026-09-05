@@ -91,7 +91,15 @@ function WindRose({ siteName, siteOrientDeg, arome, pioupiou, esp, deltaEsp }) {
     const a2 = polar(siteOrientDeg + 45, ROSE_R)
     return `M ${ROSE_CX} ${ROSE_CY} L ${a1.x} ${a1.y} A ${ROSE_R} ${ROSE_R} 0 0 1 ${a2.x} ${a2.y} Z`
   })()
-  const penteMark = siteOrientDeg != null ? polar(siteOrientDeg, ROSE_R + 14) : null
+  // Bande resserree +/-10 deg autour de la direction ideale precise -- plus saturee
+  // que le secteur efficace 45 deg, remplace le triangle repere (qui chevauchait
+  // les labels du cadran)
+  const idealBandPath = (() => {
+    if (siteOrientDeg == null) return null
+    const a1 = polar(siteOrientDeg - 10, ROSE_R)
+    const a2 = polar(siteOrientDeg + 10, ROSE_R)
+    return `M ${ROSE_CX} ${ROSE_CY} L ${a1.x} ${a1.y} A ${ROSE_R} ${ROSE_R} 0 0 1 ${a2.x} ${a2.y} Z`
+  })()
   const primary = primaryReading(esp, arome)
 
   return (
@@ -103,6 +111,7 @@ function WindRose({ siteName, siteOrientDeg, arome, pioupiou, esp, deltaEsp }) {
       )}
       <svg viewBox="0 0 280 280" width="100%" style={{ maxWidth: 300, display: 'block', margin: '0 auto' }}>
         {sectorPath && <path d={sectorPath} fill="rgba(88,166,255,0.16)" stroke="none" />}
+        {idealBandPath && <path d={idealBandPath} fill="rgba(88,166,255,0.42)" stroke="none" />}
         <circle cx={ROSE_CX} cy={ROSE_CY} r={ROSE_R} fill="none" stroke="#1e2530" strokeWidth={1.5} />
         <circle cx={ROSE_CX} cy={ROSE_CY} r={ROSE_R * 0.66} fill="none" stroke="#1e2530" strokeWidth={1} />
         <circle cx={ROSE_CX} cy={ROSE_CY} r={ROSE_R * 0.33} fill="none" stroke="#1e2530" strokeWidth={1} />
@@ -117,10 +126,6 @@ function WindRose({ siteName, siteOrientDeg, arome, pioupiou, esp, deltaEsp }) {
             </text>
           )
         })}
-        {penteMark && (
-          <polygon points={`${penteMark.x},${penteMark.y - 5} ${penteMark.x - 5},${penteMark.y + 5} ${penteMark.x + 5},${penteMark.y + 5}`}
-            fill="#8b949e" transform={`rotate(${siteOrientDeg}, ${penteMark.x}, ${penteMark.y})`} />
-        )}
         <RoseArrow angleDeg={arome?.windDir} speed={arome?.windSpeed} color="#58a6ff" />
         <RoseArrow angleDeg={pioupiou?.windHeading} speed={pioupiou?.windSpeed} color="#f0a500" />
         {esp?.hasData && <RoseArrow angleDeg={esp.angleAbs} speed={esp.speed} color="#3fb950" />}
@@ -168,7 +173,7 @@ function WindRose({ siteName, siteOrientDeg, arome, pioupiou, esp, deltaEsp }) {
           </div>
         )}
         {siteOrientDeg != null && (
-          <div style={{ fontSize: 9, color: '#444', textAlign: 'center', marginTop: 2 }}>Secteur efficace pente ±45°</div>
+          <div style={{ fontSize: 9, color: '#444', textAlign: 'center', marginTop: 2 }}>Secteur efficace ±45° · zone idéale ±10°</div>
         )}
       </div>
     </div>
