@@ -1,4 +1,4 @@
-﻿const CACHE = 'f3f-pit-v66';
+﻿const CACHE = 'f3f-pit-v67';
 const ASSETS = [
   '/MBI/',
   '/MBI/index.html',

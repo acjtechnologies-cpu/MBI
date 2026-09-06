@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useAppStore } from '../../stores/appStore'
 import { useSlopeStore } from '../../stores/SlopeStore'
 import { useESPStore } from '../../stores/espStore'
@@ -127,7 +127,7 @@ function WindRose({ siteName, siteOrientDeg, arome, pioupiou, esp, deltaEsp }) {
           )
         })}
         <RoseArrow angleDeg={arome?.windDir} speed={arome?.windSpeed} color="#58a6ff" />
-        <RoseArrow angleDeg={pioupiou?.windHeading} speed={pioupiou?.windSpeed} color="#f0a500" />
+        {!pioupiou?.stale && <RoseArrow angleDeg={pioupiou?.windHeading} speed={pioupiou?.windSpeed} color="#f0a500" />}
         {esp?.hasData && <RoseArrow angleDeg={esp.angleAbs} speed={esp.speed} color="#3fb950" />}
 
         <circle cx={ROSE_CX} cy={ROSE_CY} r={54} fill="#0d1117" stroke="#30363d" strokeWidth={1.5} />
@@ -166,10 +166,28 @@ function WindRose({ siteName, siteOrientDeg, arome, pioupiou, esp, deltaEsp }) {
           </div>
         )}
         {pioupiou?.windSpeed != null && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 8px', background: '#0d1117', borderRadius: 6, fontSize: 12 }}>
-            <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#f0a500', flexShrink: 0 }} />
-            <span style={{ color: '#fff', fontWeight: 700, flex: 1 }}>Pioupiou</span>
-            <span style={{ color: '#8b949e' }}>{pioupiou.windSpeed.toFixed(1)} m/s · {pioupiou.windHeading?.toFixed(0)}°</span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 2, padding: '5px 8px', background: '#0d1117', borderRadius: 6, fontSize: 12,
+            border: pioupiou.stale ? '1px solid #f85149' : 'none' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: pioupiou.stale ? '#f85149' : '#f0a500', flexShrink: 0 }} />
+              <span style={{ color: '#fff', fontWeight: 700, flex: 1 }}>
+                {pioupiou.stale ? 'Pioupiou HS' : 'Pioupiou'} {pioupiou.stationName ? `— ${pioupiou.stationName}` : ''}
+              </span>
+              {pioupiou.stale ? (
+                <span style={{ color: '#f85149' }}>figé depuis {Math.round(pioupiou.ageMin)} min</span>
+              ) : (
+                <span style={{ color: '#8b949e' }}>
+                  {pioupiou.windSpeed.toFixed(1)} m/s · {pioupiou.windHeading?.toFixed(0)}°
+                  {pioupiou.excludedCount > 0 ? ` (${pioupiou.excludedCount} écartée${pioupiou.excludedCount > 1 ? 's' : ''})` : ''}
+                </span>
+              )}
+            </div>
+            {pioupiou.owmUrl && (
+              <a href={pioupiou.owmUrl} target="_blank" rel="noopener noreferrer"
+                style={{ color: '#58a6ff', fontSize: 10, textDecoration: 'underline', alignSelf: 'flex-end' }}>
+                Vérifier sur OpenWindMap ↗
+              </a>
+            )}
           </div>
         )}
         {siteOrientDeg != null && (
@@ -264,32 +282,94 @@ export default function MeteoF3F() {
   }, [siteLat, siteLon, dayOffset])
 
   // Pioupiou live — uniquement pertinent si le jour affiché est aujourd'hui
+  // Detection panne/gel (5-6 sept) : ni vitesse=0 ni direction=0 ne sont
+  // anormales en soi (calme reel / vent du nord reel). Le seul signal fiable
+  // est temporel : un capteur vivant varie (meme legerement) d'un releve a
+  // l'autre, un capteur bloque renvoie EXACTEMENT la meme valeur. On garde
+  // donc un historique glissant par balise (dedup par measurements.date) et
+  // on ne declare "gelee" qu'apres FREEZE_MIN_SAMPLES releves DISTINCTS avec
+  // vitesse ET direction rigoureusement identiques. Consequence acceptee :
+  // la detection prend le temps que la balise fasse plusieurs releves
+  // (~20-30 min selon son intervalle d'emission, ~10 min chez Pioupiou) --
+  // pas instantane, c'est le prix d'une detection fiable plutot qu'un
+  // faux-positif sur un vrai calme ou un vrai vent stable.
+  // Une balise confirmee gelee est exclue et on bascule sur la suivante par
+  // proximite, en conservant AROME comme filet de secours (moins reactif
+  // dans le temps mais jamais "en panne").
+  const PIOUPIOU_STALE_MIN = 30
+  const FREEZE_MIN_SAMPLES = 3
+  const pioupiouHistoryRef = useRef({}) // { [stationId]: [{date, speed, heading}] }
+  const pioupiouFrozenRef = useRef(new Set())
+
   useEffect(() => {
     if (dayOffset !== 0 || siteLat == null || siteLon == null) { setPioupiou(null); return }
+    // Nouveau site : l'historique/les exclusions d'un autre site n'ont pas lieu d'etre
+    pioupiouHistoryRef.current = {}
+    pioupiouFrozenRef.current = new Set()
     let cancelled = false
-    fetch('https://api.pioupiou.fr/v1/live/all')
-      .then(r => r.ok ? r.json() : Promise.reject(new Error('http ' + r.status)))
-      .then(json => {
-        if (cancelled) return
-        const stations = json?.data ?? []
-        let best = null, bestDist = Infinity
-        for (const s of stations) {
-          if (s?.status?.state !== 'on') continue
-          const lat = s?.location?.latitude, lon = s?.location?.longitude
-          if (lat == null || lon == null || (lat === 0 && lon === 0)) continue
-          const dist = haversineKm(siteLat, siteLon, lat, lon)
-          if (dist < bestDist) { bestDist = dist; best = s }
-        }
-        if (!best || bestDist > 30) { setPioupiou(null); return }
-        setPioupiou({
-          // wind_speed_avg Pioupiou en km/h (bug unité déjà corrigé ailleurs dans l'app) -> /3.6
-          windSpeed: best.measurements?.wind_speed_avg != null ? best.measurements.wind_speed_avg / 3.6 : null,
-          windHeading: best.measurements?.wind_heading ?? null,
-          distanceKm: bestDist,
-        })
+
+    const evaluate = (stations) => {
+      const now = Date.now()
+      const candidates = []
+      for (const s of stations) {
+        if (s?.status?.state !== 'on') continue
+        if (pioupiouFrozenRef.current.has(s.id)) continue
+        const lat = s?.location?.latitude, lon = s?.location?.longitude
+        if (lat == null || lon == null || (lat === 0 && lon === 0)) continue
+        const dist = haversineKm(siteLat, siteLon, lat, lon)
+        if (dist > 30) continue
+        const measDate = s?.measurements?.date ? new Date(s.measurements.date).getTime() : null
+        const ageMin = measDate != null ? (now - measDate) / 60000 : Infinity
+        candidates.push({ s, dist, ageMin })
+      }
+      if (!candidates.length) { setPioupiou(null); return }
+      candidates.sort((a, b) => a.dist - b.dist)
+      const chosen = candidates[0]
+      const id = chosen.s.id
+      const speed = chosen.s.measurements?.wind_speed_avg ?? null
+      const heading = chosen.s.measurements?.wind_heading ?? null
+      const dateKey = chosen.s.measurements?.date ?? null
+
+      const hist = pioupiouHistoryRef.current[id] ?? []
+      if (!hist.length || hist[hist.length - 1].date !== dateKey) {
+        const updated = [...hist, { date: dateKey, speed, heading }].slice(-5)
+        pioupiouHistoryRef.current[id] = updated
+      }
+      const h = pioupiouHistoryRef.current[id]
+      const frozen = h.length >= FREEZE_MIN_SAMPLES
+        && h.every(x => x.speed === h[0].speed)
+        && h.every(x => x.heading === h[0].heading)
+
+      if (frozen) {
+        pioupiouFrozenRef.current.add(id)
+        evaluate(stations) // re-tente avec cette balise exclue
+        return
+      }
+
+      setPioupiou({
+        // wind_speed_avg Pioupiou en km/h (bug unité déjà corrigé ailleurs dans l'app) -> /3.6
+        windSpeed: speed != null ? speed / 3.6 : null,
+        windHeading: heading,
+        distanceKm: chosen.dist,
+        ageMin: chosen.ageMin,
+        stale: chosen.ageMin > PIOUPIOU_STALE_MIN,
+        samplesCollected: h.length,
+        stationName: chosen.s.meta?.name ?? null,
+        stationId: id,
+        owmUrl: `https://www.openwindmap.org/pioupiou-${id}`,
+        excludedCount: pioupiouFrozenRef.current.size,
       })
-      .catch(() => { if (!cancelled) setPioupiou(null) })
-    return () => { cancelled = true }
+    }
+
+    const poll = () => {
+      fetch('https://api.pioupiou.fr/v1/live/all')
+        .then(r => r.ok ? r.json() : Promise.reject(new Error('http ' + r.status)))
+        .then(json => { if (!cancelled) evaluate(json?.data ?? []) })
+        .catch(() => { if (!cancelled) setPioupiou(null) })
+    }
+    poll()
+    const iv = setInterval(poll, 3 * 60 * 1000) // re-sonde toutes les 3 min
+    return () => { cancelled = true; clearInterval(iv) }
   }, [dayOffset, siteLat, siteLon])
 
   const boxStyle = { padding: '10px 12px', borderRadius: 10, background: '#0d1117', border: '1px solid #30363d', fontSize: 11, color: '#8b949e' }
@@ -361,8 +441,8 @@ export default function MeteoF3F() {
                 )}
                 <div style={{ fontSize: 9, fontWeight: 800, color: st.color, marginTop: 3 }}>{st.label}</div>
                 {isCurrent && pioupiou?.windSpeed != null && (
-                  <div style={{ fontSize: 8, color: '#f0a500', marginTop: 3, fontWeight: 700 }}>
-                    PIOUPIOU {pioupiou.windSpeed.toFixed(1)}
+                  <div style={{ fontSize: 8, color: pioupiou.stale ? '#f85149' : '#f0a500', marginTop: 3, fontWeight: 700 }}>
+                    {pioupiou.stale ? 'PIOUPIOU HS' : `PIOUPIOU ${pioupiou.windSpeed.toFixed(1)}`}
                   </div>
                 )}
               </div>
