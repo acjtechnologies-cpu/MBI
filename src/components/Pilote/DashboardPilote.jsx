@@ -153,7 +153,7 @@ const CSS = `
 .mb-overlay-box{width:100%;max-width:420px;background:#0d1117;border-radius:16px 16px 0 0;border:1px solid #30363d;padding:16px;max-height:85vh;overflow-y:auto}
 `
 
-export default function DashboardPilote({ onChangePlaneur }) {
+export default function DashboardPilote({ onChangePlaneur, onSubPageChange }) {
   // -”€ Stores -”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-”€-
   const {
     params, offset, activeSite,
@@ -195,6 +195,7 @@ export default function DashboardPilote({ onChangePlaneur }) {
   const [selectedParam, setSelectedParam] = useState('vent')
   const [kgManuel,      setKgManuel]      = useState(null)
   const [tab,           setTab]           = useState('calc')
+  useEffect(() => { onSubPageChange?.(tab) }, [tab]) // remonte 'calc'/'matrix' à App.jsx pour l'overlay d'aide
   const [showBrowser,  setShowBrowser]   = useState(false)
   const importModel    = useModelStore(s => s.importModel)
   const setActiveModel = useModelStore(s => s.setActiveModel)

@@ -207,6 +207,7 @@ export default function MatriceInteractive({ targetGAuto, onAppliquer, onBack, o
           return (
             <div key={i}
               className={`mb-rb${ci === i ? ' sel' : ''}`}
+              data-no-help="true"
               style={{ position: 'relative', borderBottom: isBest ? '2px solid #58a6ff' : undefined }}
               onClick={() => setCi(i)}
             >
@@ -239,6 +240,7 @@ export default function MatriceInteractive({ targetGAuto, onAppliquer, onBack, o
               <div className="mb-m-row">
                 <div
                   ref={setZoneRef(soute.id, 'G')}
+                  data-no-help="true"
                   className={`mb-m-side mb-m-side-l${shakeKey === `${soute.id}-G` ? ' shake' : ''}`}
                   style={{
                     border:     `1.5px solid ${isArmed && drag.targetSide === 'G' ? '#3fb950' : col.border}`,
@@ -254,6 +256,7 @@ export default function MatriceInteractive({ targetGAuto, onAppliquer, onBack, o
                 </div>
                 <div
                   ref={setZoneRef(soute.id, 'D')}
+                  data-no-help="true"
                   className={`mb-m-side${shakeKey === `${soute.id}-D` ? ' shake' : ''}`}
                   style={{
                     border:     `1.5px solid ${isArmed && drag.targetSide === 'D' ? '#3fb950' : col.border}`,

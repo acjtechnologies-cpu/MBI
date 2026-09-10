@@ -7,6 +7,7 @@ import Poly4Component from './components/Poly4/Poly4Page'
 import StationPage    from './components/Station/StationPage'
 import ChronoPage     from './components/Chrono/ChronoPage'
 import WelcomePage    from './pages/WelcomePage'
+import HelpOverlay     from './components/HelpOverlay/HelpOverlay' // ajuste le chemin si besoin
 
 const TABS = [
   { id: 'pilote',  label: 'Pilotage', icon: '🎯' },
@@ -20,12 +21,17 @@ function App() {
   const [activeTab, setActiveTab] = useState('pilote')
   const [gliderChosen, setGliderChosen] = useState(false)
   const [editOnOpen, setEditOnOpen] = useState(false)
+  const [pilotSubTab, setPilotSubTab] = useState('calc') // 'calc' | 'matrix', remonté depuis DashboardPilote
   const m = useModelStore(s => s.models[s.activeModelId])
   if (!gliderChosen) return <WelcomePage onSelect={(tab, edit) => { setGliderChosen(true); if (tab) setActiveTab(tab); setEditOnOpen(!!edit) }} />
 
+  // Page affichée pour l'overlay d'aide : cas particulier Matrice
+  // (sous-écran dans Pilotage, pas un onglet à part)
+  const helpPage = activeTab === 'pilote' && pilotSubTab === 'matrix' ? 'matrice' : activeTab
+
   const renderPage = () => {
     switch (activeTab) {
- case 'pilote':  return <DashboardPilote onChangePlaneur={() => setGliderChosen(false)} />
+ case 'pilote':  return <DashboardPilote onChangePlaneur={() => setGliderChosen(false)} onSubPageChange={setPilotSubTab} />
       case 'soute':   return <ModelManager initialEdit={editOnOpen} onEditDone={() => setEditOnOpen(false)} onChangePlaneur={() => setGliderChosen(false)} />
       case 'poly4':   return <Poly4Component onNavigate={setActiveTab} />
       case 'station': return <StationPage />
@@ -62,6 +68,8 @@ function App() {
       <div style={{ flex: 1, overflow: 'hidden' }}>
         {renderPage()}
       </div>
+
+      <HelpOverlay activePage={helpPage} />
 
     </div>
   )
