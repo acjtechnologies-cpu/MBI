@@ -199,6 +199,11 @@ export default function WelcomePage({ onSelect }) {
         <div style={{position:'absolute',top:85,right:24,width:66,height:22,background:'rgba(255,255,255,0.62)',borderRadius:20}} />
         <div style={{position:'absolute',top:73,right:38,width:36,height:26,background:'rgba(255,255,255,0.62)',borderRadius:'50%'}} />
 
+        {/* Indice discret : comment ouvrir l'aide contextuelle (une fois dans l'app) */}
+        <div style={{position:'absolute',top:10,left:0,right:0,textAlign:'center',zIndex:1,fontSize:9,color:'rgba(255,255,255,0.55)',letterSpacing:0.5}}>
+          🛈 AIDE — appui long sur la page
+        </div>
+
         {/* Hero */}
         <div style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',position:'relative',zIndex:1}}>
           <div style={{fontFamily:'monospace',fontSize:54,fontWeight:500,color:'#fff',letterSpacing:10,lineHeight:1,textShadow:'0 2px 24px rgba(0,0,0,0.25)'}}>F3F</div>
