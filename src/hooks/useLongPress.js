@@ -1,4 +1,4 @@
-import { useRef, useCallback } from 'react';
+import { useRef, useEffect } from 'react';
 
 // Sélecteurs considérés "interactifs" : un appui long dessus ne doit
 // JAMAIS déclencher l'overlay (ne pas gêner le geste normal).
@@ -10,53 +10,63 @@ const DEFAULT_IGNORE_SELECTOR =
 
 /**
  * Détecte un appui long (défaut 500ms) sur une zone neutre de l'écran.
- * Retourne des handlers à spread sur l'élément conteneur :
- *   const handlers = useLongPress(() => setVisible(true));
- *   <div {...handlers}>...</div>
+ * IMPORTANT : n'installe AUCUN calque visuel par-dessus l'app — écoute
+ * directement sur window, en lecture seule (jamais de preventDefault
+ * sauf sur contextmenu APRÈS déclenchement). Les clics/touches normaux
+ * traversent donc sans aucune interférence vers les boutons, sliders,
+ * flèches existants.
+ *
+ * Usage : appelle le hook, aucun handler à spreader nulle part.
+ *   useLongPress(() => setVisible(true), { enabled: !visible })
  */
 export function useLongPress(
   onLongPress,
-  { threshold = 500, ignoreSelector = DEFAULT_IGNORE_SELECTOR } = {}
+  { threshold = 500, ignoreSelector = DEFAULT_IGNORE_SELECTOR, enabled = true } = {}
 ) {
   const timerRef = useRef(null);
   const firedRef = useRef(false);
 
-  const clear = useCallback(() => {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
-    }
-  }, []);
+  useEffect(() => {
+    if (!enabled) return undefined;
 
-  const start = useCallback(
-    (e) => {
-      if (e.target.closest(ignoreSelector)) return; // zone interactive → on ignore
+    const clear = () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+
+    const start = (e) => {
+      if (e.target.closest?.(ignoreSelector)) return; // zone interactive → on ignore
       firedRef.current = false;
       timerRef.current = setTimeout(() => {
         firedRef.current = true;
         // Coupe la sélection de texte / menu contextuel natif du navigateur
-        // (c'est CE comportement natif qui déclenche la vibration système
-        // sur Android/Chrome — pas notre code). window.getSelection permet
-        // d'annuler une sélection que le navigateur aurait déjà amorcée.
+        // (source probable de la vibration système sur Android/Chrome)
         window.getSelection?.()?.removeAllRanges?.();
         onLongPress(e);
       }, threshold);
-    },
-    [onLongPress, threshold, ignoreSelector]
-  );
+    };
 
-  const cancel = useCallback(() => {
-    clear();
-  }, [clear]);
+    const cancel = () => clear();
 
-  return {
-    onPointerDown: start,
-    onPointerUp: cancel,
-    onPointerLeave: cancel,
-    onPointerCancel: cancel,
-    onContextMenu: (e) => {
-      // évite le menu contextuel mobile ("copier/partager") si l'overlay s'est déclenché
+    const onContextMenu = (e) => {
       if (firedRef.current) e.preventDefault();
-    },
-  };
+    };
+
+    // passive: true → on ne bloque JAMAIS le comportement natif (scroll,
+    // drag, etc.), on observe seulement.
+    window.addEventListener('pointerdown', start, { passive: true });
+    window.addEventListener('pointerup', cancel, { passive: true });
+    window.addEventListener('pointercancel', cancel, { passive: true });
+    window.addEventListener('contextmenu', onContextMenu);
+
+    return () => {
+      clear();
+      window.removeEventListener('pointerdown', start);
+      window.removeEventListener('pointerup', cancel);
+      window.removeEventListener('pointercancel', cancel);
+      window.removeEventListener('contextmenu', onContextMenu);
+    };
+  }, [onLongPress, threshold, ignoreSelector, enabled]);
 }
