@@ -403,6 +403,11 @@ useEffect(() => {
         {tab === 'calc' && (
           <div className="mb-calc">
 
+            {/* Indice discret : comment ouvrir l'aide contextuelle */}
+            <div style={{ textAlign: 'center', fontSize: 9, color: '#4a5568', letterSpacing: 0.5, padding: '2px 0 4px', flexShrink: 0 }}>
+              🛈 AIDE — appui long sur la page
+            </div>
+
             {/* Vent */}
             <div className={`mb-vent${selectedParam === 'vent' ? ' active' : ''}`} onClick={() => selectParam('vent')}>
               <div className="mb-vent-val">{vent.toFixed(1)}</div>
