@@ -184,6 +184,12 @@ export default function MatriceInteractive({ targetGAuto, onAppliquer, onBack, o
 
   return (
     <div className="mb-matrix" style={{ position: 'relative' }}>
+      {/* Indice discret : sur cet écran dense, seul le bandeau du haut est
+          une zone neutre fiable pour l'appui long (le reste est du drag
+          soute / boutons matériaux / sélecteur config, volontairement exclu) */}
+      <div style={{ textAlign: 'center', fontSize: 9, color: '#4a5568', letterSpacing: 0.5, padding: '2px 0 4px' }}>
+        🛈 AIDE — appui long ici (bandeau du haut)
+      </div>
       <div className="mb-m-hdr">
         <div>
           <div style={{ fontSize: 13, fontWeight: 800 }}>🎯 {model.nom} — Matrice Prédicteur</div>
