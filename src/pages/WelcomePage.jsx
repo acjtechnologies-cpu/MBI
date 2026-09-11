@@ -190,7 +190,7 @@ export default function WelcomePage({ onSelect }) {
       <div style={{
         position: 'fixed', inset: 0,
         background: 'linear-gradient(170deg, #4a9fd4 0%, #87CEEB 25%, #9dd4e8 50%, #6aaa60 78%, #4a8a40 100%)',
-        display: 'flex', flexDirection: 'column',
+        display: 'flex', flexDirection: 'column', overflowY: 'auto',
         fontFamily: 'sans-serif', userSelect: 'none',
       }}>
         <div style={{position:'absolute',bottom:0,left:0,right:0,height:'58%',background:'linear-gradient(to top,rgba(0,0,0,0.75) 0%,transparent 100%)',pointerEvents:'none'}} />
@@ -205,19 +205,37 @@ export default function WelcomePage({ onSelect }) {
         </div>
 
         {/* Hero */}
-        <div style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',position:'relative',zIndex:1}}>
+        <div style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',position:'relative',zIndex:1,padding:'0 20px'}}>
           <div style={{fontFamily:'monospace',fontSize:54,fontWeight:500,color:'#fff',letterSpacing:10,lineHeight:1,textShadow:'0 2px 24px rgba(0,0,0,0.25)'}}>F3F</div>
           <div style={{fontFamily:'monospace',fontSize:32,fontWeight:500,color:'#fff',letterSpacing:6,marginTop:-6,textShadow:'0 2px 24px rgba(0,0,0,0.25)'}}>PIT</div>
-          <div style={{fontSize:11,color:'rgba(255,255,255,0.82)',letterSpacing:3,marginTop:5}}>BALLAST · MÉTÉO · CHRONO · IQA</div>
+          <div style={{fontSize:11,color:'rgba(255,255,255,0.82)',letterSpacing:1,marginTop:6,textAlign:'center'}}>Ton stand technique, avant que le run ne commence.</div>
           <div style={{marginTop:14,background:'rgba(255,255,255,0.18)',border:'1px solid rgba(255,255,255,0.32)',borderRadius:20,padding:'5px 14px',display:'flex',alignItems:'center',gap:7}}>
             <div style={{width:7,height:7,borderRadius:'50%',background:'#6eff88'}} />
             <span style={{color:'rgba(255,255,255,0.88)',fontSize:11,letterSpacing:1}}>F3F-STATION · ESP32 v13</span>
+          </div>
+
+          {/* Liste des modules */}
+          <div style={{marginTop:18,width:'100%',maxWidth:340,background:'rgba(0,0,0,0.22)',border:'1px solid rgba(255,255,255,0.14)',borderRadius:14,padding:'12px 16px',display:'flex',flexDirection:'column',gap:7}}>
+            {[
+              ['PILOTAGE', 'installe ou retire le ballast, en direct'],
+              ['MATRICE', 'simule et sauvegarde tes configs de lests'],
+              ['SOUTE', 'prépare la fiche technique de ton planeur'],
+              ['POLY4', 'calcule ta charge selon le vent du moment'],
+              ['STATION', 'lis les conditions de la pente'],
+              ['CHRONO', 'suis le concours et ajuste ta stratégie'],
+            ].map(([title, desc]) => (
+              <div key={title} style={{fontSize:10.5,lineHeight:1.4}}>
+                <span style={{color:'#7ac0ff',fontWeight:700,letterSpacing:0.5}}>{title}</span>
+                <span style={{color:'rgba(255,255,255,0.62)'}}> — {desc}</span>
+              </div>
+            ))}
           </div>
         </div>
 
         {/* Cards */}
         <div style={{position:'relative',zIndex:1,padding:'0 14px 28px'}}>
           <div style={{color:'rgba(255,255,255,0.55)',fontSize:10,letterSpacing:2.5,marginBottom:10,paddingLeft:2}}>MON PLANEUR</div>
+          <div style={{color:'rgba(255,255,255,0.5)',fontSize:10.5,marginBottom:12,paddingLeft:2}}>Crée ton modèle, ou télécharge-en un déjà prêt depuis GitHub.</div>
 
           {Object.values(models).map((g) => (
             <div
