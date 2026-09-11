@@ -29,10 +29,14 @@ export const HELP_CONTENT = {
     title: 'Soute',
     subtitle: 'Atelier & fiche modèle — configuration',
     lines: [
-      'Géométrie de base : masse à vide, CG cible, surface alaire et masse ADN de référence à 8 m/s (choisie par toi pour ce modèle).',
-      "Paramétrage soutes : distance au Bord d'Attaque, position CG (0 = référence), capacité (blocs/côté) et stock de matériaux, par soute.",
-      'Nez Slots : masselottes de nez indépendantes pour affiner le centrage (+Nez gros temps / -Nez petit temps), indépendamment du ballast de soute.',
-      'Gestion : dupliquer, exporter ou supprimer la fiche du modèle actif.',
+      'Fiche complète de ton modèle actif ou en création.',
+      'Masse vide, CG cible / surface.',
+      "Masse ADN à 8 m/s : la masse (ou charge alaire) de référence que tu choisis pour ce modèle, comparée à ta référence (exemple : à 8 m/s je vole à 3100g).",
+      "Liste des soutes (Avant Clé, Centrale Clé, Arrière Aile...) : renseigne pour chacune sa distance depuis le Bord d'Attaque jusqu'à l'axe de la soute — exemple : Distance BA 80mm, position CG -22 (le signe − vers l'avant).",
+      'Sa capacité en nombre de blocs par côté, et son stock de matériaux disponibles (laiton, plomb, tungstène...) — réglages et suppression accessibles.',
+      'En bas, les Nez Slots ajustent ton CG selon les conditions (+Nez pour gros temps, -Nez pour petit temps), indépendamment du ballast de soute.',
+      'PLANEUR pour changer de modèle actif.',
+      'Dupliquer/Exporter/Supprimer pour gérer la fiche du modèle.',
     ],
   },
   poly4: {
