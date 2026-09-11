@@ -43,9 +43,7 @@ export default function HelpOverlay({ activePage }) {
       onClick={close}
       className="fixed inset-0 z-50 flex flex-col justify-center overflow-y-auto p-6"
       style={{
-        background: 'rgba(11, 27, 58, 0.55)', // navy transparent — l'app reste visible en dessous
-        backdropFilter: 'blur(1.5px)',
-        WebkitBackdropFilter: 'blur(1.5px)',
+        background: 'rgba(11, 27, 58, 0.45)', // navy transparent, léger — app bien visible en dessous, PAS de flou
         WebkitTouchCallout: 'none',
         WebkitUserSelect: 'none',
         userSelect: 'none',

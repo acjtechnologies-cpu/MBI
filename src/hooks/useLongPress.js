@@ -56,16 +56,19 @@ export function useLongPress(
 
     // passive: true → on ne bloque JAMAIS le comportement natif (scroll,
     // drag, etc.), on observe seulement.
-    window.addEventListener('pointerdown', start, { passive: true });
-    window.addEventListener('pointerup', cancel, { passive: true });
-    window.addEventListener('pointercancel', cancel, { passive: true });
+    // capture: true → on intercepte AVANT que d'autres composants (ex. le
+    // drag tactile de MatriceInteractive) ne fassent un stopPropagation
+    // qui empêcherait sinon l'événement de nous atteindre en phase bulle.
+    window.addEventListener('pointerdown', start, { passive: true, capture: true });
+    window.addEventListener('pointerup', cancel, { passive: true, capture: true });
+    window.addEventListener('pointercancel', cancel, { passive: true, capture: true });
     window.addEventListener('contextmenu', onContextMenu);
 
     return () => {
       clear();
-      window.removeEventListener('pointerdown', start);
-      window.removeEventListener('pointerup', cancel);
-      window.removeEventListener('pointercancel', cancel);
+      window.removeEventListener('pointerdown', start, { capture: true });
+      window.removeEventListener('pointerup', cancel, { capture: true });
+      window.removeEventListener('pointercancel', cancel, { capture: true });
       window.removeEventListener('contextmenu', onContextMenu);
     };
   }, [onLongPress, threshold, ignoreSelector, enabled]);
