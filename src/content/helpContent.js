@@ -51,9 +51,9 @@ export const HELP_CONTENT = {
     lines: [
       "Top pente : géolocalisation du site, masse de vol recommandée, altitude.",
       "ρ (densité de l'air) : corrige la masse selon l'altitude du site — l'air est moins dense en altitude, donc moins de portance à vitesse égale.",
-      "Stabilité : te dit si tu peux faire confiance à la masse calculée ici — plus le %, plus ce site donne des conditions régulières d'un vol à l'autre.",
+      "Stabilité (le ratio T_P5/T_P25) — la dispersion brute des chronos des meilleurs pilotes sur ce site : plus c'est stable, plus le site donne des conditions homogènes/prévisibles.",
       "R : classe ce site par rapport à tous ceux déjà mesurés (proche de 100% = un des sites les plus réguliers connus).",
-      'Graphique F3F : courbe calibrée (P4 adapt) comparée à des références alternatives (Aéromod, Dense, Léger). Point rouge « Finale » positionné au vent actuel.',
+      'Graphique F3F : courbe calibrée (P4 adapt) comparée à des références alternatives (Historique, Dense, Léger). Point rouge « Finale » positionné au vent choisi.',
       "K PENTE (kManualOverride) : ton propre réglage manuel — si tu sens que la masse calculée ne colle pas à ce site précis, tu ajustes ce coefficient toi-même et il prend le dessus sur le calcul automatique tant qu'il reste actif. Réglages via Vent, Offset et les flèches ▼▲.",
       'Validation : APPLIQUER pour verrouiller la pente active et recalculer.',
     ],

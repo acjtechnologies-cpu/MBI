@@ -16,8 +16,8 @@ function poly4(v) {
   return A4*v**4 + A3*v**3 + A2*v**2 + A1*v + A0
 }
 
-// Courbe Aeromod référence (rose)
-function aeromod(v) {
+// Courbe Historique référence (rose)
+function historique(v) {
   return 0.00012*v**3 - 0.0045*v**2 + 0.18*v + 1.85
 }
 
@@ -163,7 +163,7 @@ export default function Poly4Page({ onNavigate } = {}) {
 
   // ── Courbes ───────────────────────────────────────────────────────────────
   const chartData = useMemo(() => ({
-    aeroRef:  V_RANGE.map(v => aeromod(v)),
+    aeroRef:  V_RANGE.map(v => historique(v)),
     adaptive: V_RANGE.map(v => poly4(v) * rho * kPente + offsetADN),
     dense:    V_RANGE.map(v => poly4(v) * rho * 1.05 * kPente + offsetADN),
     leger:    V_RANGE.map(v => poly4(v) * rho * 0.95 * kPente + offsetADN),
@@ -179,7 +179,7 @@ export default function Poly4Page({ onNavigate } = {}) {
       data: {
         labels: V_RANGE,
         datasets: [
-          { label: 'Aéromod',   data: [], borderColor: '#ff4b91',                  borderWidth: 1.8, pointRadius: 0, tension: 0.1, fill: false, order: 6 },
+          { label: 'Historique', data: [], borderColor: '#ff4b91',                  borderWidth: 1.8, pointRadius: 0, tension: 0.1, fill: false, order: 6 },
           
           { label: 'P4 adapt',  data: [], borderColor: '#4a9eff',                  borderWidth: 3,   pointRadius: 0, tension: 0.3,
             fill: { target: 1, above: 'rgba(74,158,255,0.07)', below: 'rgba(255,75,145,0.07)' }, order: 3 },
@@ -343,7 +343,7 @@ padding: '10px', overflowY: 'auto', boxSizing: 'border-box',
       }}>
         <div style={{ display: 'flex', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
           {[
-            { color: '#ff4b91',                label: 'Aéromod' },
+            { color: '#ff4b91',                label: 'Historique' },
             
             { color: '#4a9eff',                label: 'P4 adapt' },
             { color: '#ffb74d',                label: 'Dense' },
