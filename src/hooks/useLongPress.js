@@ -70,6 +70,13 @@ export function useLongPress(
 
     const onPointerUp = () => clear();
 
+    // Détection DIRECTE du scroll (capture phase, catch depuis n'importe
+    // quel élément scrollable descendant) : plus fiable que pointermove
+    // seul, car le navigateur peut arrêter d'envoyer des pointermove une
+    // fois qu'il a pris en charge un scroll nativement — le minuteur
+    // tournerait alors sans jamais être informé du geste réel.
+    const onScroll = () => clear();
+
     const onContextMenu = (e) => {
       if (firedRef.current) e.preventDefault();
     };
@@ -81,6 +88,7 @@ export function useLongPress(
     window.addEventListener('pointerdown', start, { passive: true, capture: true });
     window.addEventListener('pointermove', move, { passive: true, capture: true });
     window.addEventListener('pointerup', onPointerUp, { passive: true, capture: true });
+    window.addEventListener('scroll', onScroll, { passive: true, capture: true });
     window.addEventListener('contextmenu', onContextMenu);
 
     return () => {
@@ -88,6 +96,7 @@ export function useLongPress(
       window.removeEventListener('pointerdown', start, { capture: true });
       window.removeEventListener('pointermove', move, { capture: true });
       window.removeEventListener('pointerup', onPointerUp, { capture: true });
+      window.removeEventListener('scroll', onScroll, { capture: true });
       window.removeEventListener('contextmenu', onContextMenu);
     };
   }, [onLongPress, threshold, moveTolerance, ignoreSelector, enabled]);
