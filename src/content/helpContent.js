@@ -62,10 +62,14 @@ export const HELP_CONTENT = {
     title: 'Station',
     subtitle: 'Centre météo — télémétrie',
     lines: [
-      'Anémomètre ESP32 : boutons CONNECT / DEMO / STOP.',
-      "Rose des vents tri-source : fusion AROME (prévisions), Pioupiou (balise locale la plus pertinente) et ESP live dès connexion (avec écart Δ à l'orientation de la pente).",
-      "Planning 10h-17h : grille horaire affichant l'état du vent (Faible, Moyenne, Bonne...).",
-      'Mesures live : courbes temporelles, valeurs instantanées, turbulence et suivi IQA.',
+      'Station météo ESP32 : la station météo maison.',
+      'Boutons CONNECT / DEMO / STOP.',
+      'Rose des vents tri-source :',
+      'AROME = prévision officielle Météo France (modèle haute résolution).',
+      'Pioupiou = balise vent communautaire la plus proche de la pente.',
+      "ESP live = la station, dès qu'elle est connectée — avec l'écart Δ (la différence entre la direction du vent et l'orientation de la pente : plus Δ est petit, plus le vent arrive de face sur la pente).",
+      "Planning 10h-17h : grille horaire, état du vent (Vol non autorisé / Faible / Moyenne / Bonne).",
+      'Plus bas, le flux temps réel de la station ESP : courbes temporelles, valeurs instantanées, turbulence et suivi IQA.',
     ],
   },
   chrono: {
