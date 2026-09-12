@@ -23,11 +23,12 @@ export const HELP_CONTENT = {
     title: 'Matrice',
     subtitle: 'Optimisation ballast — simulateur',
     lines: [
-      'Prédicteur IQA : compare la masse visée selon la météo à la masse réelle obtenue par la config actuelle.',
-      "Bibliothèque : jusqu'à 20 configurations numérotées, sauvegardées par toi pour un même planeur (* marque la config réellement montée).",
-      'Slider tactile : le doigt déplace un bloc par soute, avec feedback masse/CG en temps réel. Choix des matériaux (laiton, plomb, tungstène).',
-      "Centrage : visualisation en temps réel via l'« Alignement Cible Météo » et la barre d'écart CG.",
-      "Actions : +Config pour enregistrer | APPLIQUER IDÉALE pour charger la config prédite.",
+      'Cible IQA : la masse visée compte tenu des conditions du moment (vent, air), comparée à la masse réelle obtenue avec la config actuelle sur le planeur.',
+      "Bibliothèque : jusqu'à 20 configurations numérotées, sauvegardées par toi pour un même planeur (l'astérisque marque la config réellement montée dessus).",
+      'Slider tactile : le doigt déplace un bloc par soute, avec feedback masse/CG en temps réel. Choix multi matériaux (laiton, plomb, tungstène).',
+      "Alignement Cible Météo : indique si ta config actuelle colle bien aux conditions du moment, avec une visualisation du CG en dessous.",
+      '+Config pour enregistrer une nouvelle configuration.',
+      'APPLIQUER pour charger directement la config prédite comme idéale.',
     ],
   },
   soute: {
